@@ -14,6 +14,15 @@ const severityByRisk: Record<RiskLevel, string[]> = {
   High: ["Elevated risk", "Review suggested", "Manual review required"],
 };
 
+const signalTitles = [
+  "Possible Image Manipulation",
+  "Date Consistency",
+  "Unusual Price Point",
+  "Payment Method",
+];
+
+const confidencePercent = ["78%", "62%", "58%", "35%"];
+
 export function RedFlagsList({
   flags,
   status = "complete",
@@ -48,8 +57,9 @@ export function RedFlagsList({
         ) : null}
 
         {!isPending &&
-          flags.map((flag, index) => {
+          flags.slice(0, 4).map((flag, index) => {
             const severity = severityByRisk[riskLevel][index] ?? severityByRisk[riskLevel][0];
+            const title = signalTitles[index] ?? flag.label;
 
             return (
               <article
@@ -62,7 +72,7 @@ export function RedFlagsList({
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-white">{flag.label}</p>
+                    <p className="text-sm font-semibold text-white">{title}</p>
                       <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 font-mono text-[10px] font-bold text-[var(--cg-text-muted)]">
                         SIG-{String(index + 1).padStart(2, "0")}
                       </span>
@@ -72,7 +82,7 @@ export function RedFlagsList({
                     <dl className="mt-3 grid gap-2 sm:grid-cols-3">
                       {[
                         { label: "Severity", value: severity },
-                        { label: "Confidence", value: flag.confidence },
+                        { label: "Confidence", value: confidencePercent[index] ?? flag.confidence },
                         { label: "Evidence source", value: evidenceLabel },
                       ].map((item) => (
                         <div className="rounded-lg border border-white/10 bg-white/[0.025] px-2.5 py-2" key={item.label}>

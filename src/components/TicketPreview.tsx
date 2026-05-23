@@ -1,16 +1,12 @@
 import {
-  Camera,
-  ClipboardList,
-  Clock3,
+  BadgeDollarSign,
+  CalendarDays,
   FileCheck2,
-  FileText,
   MessageCircle,
-  NotebookPen,
   PackageCheck,
   ShoppingBag,
   UserRound,
 } from "lucide-react";
-import { formatFileSize } from "@/lib/file-format";
 import type { AnalysisStatus, CaseRecord, MockAnalysisReport } from "@/lib/claim-data";
 
 type TicketPreviewProps = {
@@ -21,116 +17,56 @@ type TicketPreviewProps = {
 };
 
 export function TicketPreview({ selectedFile, status, report, caseRecord }: TicketPreviewProps) {
-  const fileSize = selectedFile ? formatFileSize(selectedFile.size) : "No file selected";
-  const fileType = selectedFile
-    ? selectedFile.type === "application/pdf"
-      ? "PDF document"
-      : selectedFile.type.startsWith("image/")
-        ? "Image upload"
-        : selectedFile.type || "Unknown"
-    : "Awaiting upload";
-  const statusLabel = caseRecord
-    ? "Investigation record"
-    : status === "complete"
-      ? "Report ready"
-      : status === "analyzing"
-        ? "Analyzing"
-        : status === "uploaded"
-          ? "Evidence selected"
-          : "Open intake";
-  const caseId = caseRecord?.id ?? "New local case";
-  const customer = caseRecord?.customer ?? "Maya R.";
-  const product = caseRecord?.item ?? "iSpring RCC7AK filter system";
+  const customer = caseRecord?.customer ?? "New customer";
   const channel = caseRecord?.channel ?? "Local upload";
   const customerNote =
     caseRecord?.ticket.customerNote ??
-    "The under-sink filter housing started leaking after installation. I attached evidence for warranty review.";
-  const uploadedFile = caseRecord?.ticket.uploadedFile ?? selectedFile?.name ?? "No file selected";
-  const uploadedFileDetails = caseRecord?.ticket.fileDetails ?? (selectedFile ? `${fileType} | ${fileSize}` : fileType);
-  const sla = caseRecord?.ticket.sla ?? "Review by 4:00 PM";
-  const requestedAction = caseRecord?.ticket.requestedAction ?? "Warranty replacement review";
-  const orderNumber = caseRecord?.ticket.orderNumber ?? "Pending order match";
+    "The customer submitted claim evidence for warranty review. Verify purchase details before deciding next steps.";
+  const orderNumber = caseRecord?.ticket.orderNumber ?? "Pending match";
   const claimReason = caseRecord?.ticket.claimReason ?? "Warranty evidence review";
-  const purchaseChannel = caseRecord?.ticket.purchaseChannel ?? channel;
-  const supportRepNotes =
-    caseRecord?.ticket.supportRepNotes ??
-    "Review uploaded evidence, verify purchase details, and use support-safe wording before responding.";
+  const submitted = caseRecord?.submittedAt ?? (selectedFile ? "Just now" : "Awaiting upload");
+  const evidence = caseRecord?.evidence ?? (selectedFile ? report.evidenceLabel : "No attachment selected");
+  const customerSince = caseRecord ? "Jan 12, 2024" : "Pending profile";
+  const lifetimeValue = caseRecord ? "$1,248.72" : "Pending";
 
   return (
-    <section className="cg-command-panel rounded-[1.15rem] p-4 sm:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--cg-cyan)]">{caseId}</p>
-          <h2 className="mt-1 text-xl font-semibold text-white">Support ticket record</h2>
-        </div>
-        <span className="cg-security-badge rounded-lg px-3 py-1 text-xs font-semibold">{statusLabel}</span>
-      </div>
-
-      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="cg-ticket-paper rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#142133] text-[var(--cg-cyan)]">
-              <MessageCircle className="size-5" aria-hidden="true" />
-            </span>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm font-bold text-[var(--cg-text-paper)]">Customer message</p>
-                <span className="rounded-md border border-[rgba(20,33,51,0.14)] bg-white/64 px-2 py-0.5 text-xs font-bold text-[#526175]">
-                  {channel}
-                </span>
-              </div>
-              <p className="mt-2 text-sm leading-6 text-[#344155]">{customerNote}</p>
+    <section className="grid gap-4 md:grid-cols-2">
+      <article className="cg-command-panel rounded-[1.15rem] p-4">
+        <h2 className="text-base font-semibold uppercase tracking-wide text-white">Case context</h2>
+        <dl className="mt-4 space-y-3 text-sm">
+          {[
+            { label: "Customer", value: customer, icon: UserRound },
+            { label: "Claim reason", value: claimReason, icon: PackageCheck },
+            { label: "Channel", value: channel, icon: FileCheck2 },
+            { label: "Order / RMA", value: orderNumber, icon: ShoppingBag },
+            { label: "Customer since", value: customerSince, icon: CalendarDays },
+            { label: "Lifetime value", value: lifetimeValue, icon: BadgeDollarSign },
+          ].map((item) => (
+            <div className="grid grid-cols-[1fr_auto] gap-3" key={item.label}>
+              <dt className="flex items-center gap-2 text-[var(--cg-text-muted)]">
+                <item.icon className="size-4" aria-hidden="true" />
+                {item.label}
+              </dt>
+              <dd className="max-w-[220px] truncate text-right font-medium text-[var(--cg-text-soft)]">{item.value}</dd>
             </div>
-          </div>
+          ))}
+        </dl>
+      </article>
+
+      <article className="cg-command-panel rounded-[1.15rem] p-4">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-base font-semibold uppercase tracking-wide text-white">Customer message</h2>
+          <MessageCircle className="size-5 text-[var(--cg-cyan)]" aria-hidden="true" />
         </div>
-
-        <aside className="rounded-xl border border-[var(--cg-border)] bg-[#06101f]/58 p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-white">
-            <NotebookPen className="size-4 text-[var(--cg-green)]" aria-hidden="true" />
-            Support rep notes
-          </div>
-          <p className="mt-2 text-sm leading-6 text-[var(--cg-text-muted)]">{supportRepNotes}</p>
-        </aside>
-      </div>
-
-      <dl className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: "Customer", value: customer, icon: UserRound },
-          { label: "Order number", value: orderNumber, icon: ClipboardList },
-          { label: "Product", value: product, icon: ShoppingBag },
-          { label: "Claim reason", value: claimReason, icon: PackageCheck },
-          { label: "Purchase channel", value: purchaseChannel, icon: FileCheck2 },
-          {
-            label: "Evidence",
-            value: caseRecord || selectedFile ? report.evidenceLabel : "Awaiting upload",
-            icon: FileText,
-          },
-          { label: "Uploaded attachments", value: uploadedFile, icon: Camera },
-          { label: "File details", value: uploadedFileDetails, icon: FileText },
-          {
-            label: "Review result",
-            value:
-              caseRecord || status === "complete"
-                ? `${report.score}/100 | ${report.riskLevel} risk`
-                : status === "analyzing"
-                  ? "Mock analysis running"
-                  : status === "uploaded"
-                    ? "Ready to analyze"
-                    : "Pending evidence",
-            icon: FileCheck2,
-          },
-          { label: "SLA", value: sla, icon: Clock3 },
-          { label: "Requested action", value: requestedAction, icon: FileCheck2 },
-        ].map((item) => (
-          <div className="rounded-xl border border-[var(--cg-border)] bg-[#06101f]/58 p-3" key={item.label}>
-            <dt className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--cg-text-muted)]">
-              <item.icon className="size-3.5 text-[var(--cg-cyan)]" aria-hidden="true" />
-              {item.label}
-            </dt>
-            <dd className="mt-1 break-words text-sm font-semibold text-[var(--cg-text)]">{item.value}</dd>
-          </div>
-        ))}
-      </dl>
+        <div className="mt-4 rounded-xl border border-white/10 bg-[#06101f]/58 p-4">
+          <p className="text-sm leading-6 text-[var(--cg-text-soft)]">&quot;{customerNote}&quot;</p>
+        </div>
+        <div className="mt-4 flex flex-wrap justify-between gap-3 text-xs text-[var(--cg-text-muted)]">
+          <span>Submitted {submitted}</span>
+          <span>{evidence}</span>
+          <span>{status === "analyzing" ? "Analysis running" : "Support-safe review"}</span>
+        </div>
+      </article>
     </section>
   );
 }

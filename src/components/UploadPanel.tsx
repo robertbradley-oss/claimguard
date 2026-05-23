@@ -152,11 +152,11 @@ export function UploadPanel({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cg-cyan)]">
-            Evidence workstation
+            Evidence
           </p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Evidence under review</h2>
+          <h2 className="mt-2 text-xl font-semibold text-white">Evidence under review</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--cg-text-muted)]">
-            Inspect submitted claim evidence and run local mock checks for document consistency, evidence quality, and support-safe next steps.
+            Inspect the submitted receipt, screenshot, PDF, or product photo in the scan frame.
           </p>
         </div>
         <span className="cg-security-badge rounded-full px-3 py-1 text-xs font-semibold">
@@ -212,7 +212,33 @@ export function UploadPanel({
               ))}
             </div>
 
-            <div className="p-5 sm:p-6">
+            <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-[88px_minmax(0,1fr)]">
+              <div className="grid content-start gap-3">
+                {[viewerFileName, caseRecord?.ticket.uploadedFile ?? "damage-photo.jpg", "Add files"].map((item, index) => (
+                  <button
+                    className={`min-h-24 rounded-lg border p-2 text-xs transition ${
+                      index === 0
+                        ? "border-[var(--cg-blue)] bg-[rgba(24,183,255,0.16)] text-white"
+                        : index === 2
+                          ? "border-dashed border-white/18 bg-transparent text-[var(--cg-text-muted)] hover:border-[var(--cg-border-strong)]"
+                          : "border-white/10 bg-white/[0.04] text-[var(--cg-text-muted)] hover:border-white/20"
+                    }`}
+                    type="button"
+                    key={`${item}-${index}`}
+                  >
+                    {index === 2 ? (
+                      <span className="grid h-full place-items-center">+<br />Add files</span>
+                    ) : (
+                      <span className="block">
+                        <span className="mx-auto mb-2 block h-14 rounded bg-[#d9ded6]/80" />
+                        <span className="line-clamp-2 break-words">{index === 0 ? "Primary" : "Photo"}</span>
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <div>
               {hasEvidence ? (
                 <div className="mx-auto max-w-lg">
                   <div
@@ -301,6 +327,15 @@ export function UploadPanel({
                   </span>
                 </button>
               )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-3 text-xs">
+              <span className="inline-flex items-center gap-2 rounded-lg border border-[rgba(74,222,128,0.28)] bg-[rgba(74,222,128,0.1)] px-3 py-2 font-semibold text-[var(--cg-green)]">
+                <Fingerprint className="size-4" aria-hidden="true" />
+                Document detected: {report.evidenceLabel}
+              </span>
+              <span className="font-mono text-[var(--cg-text-muted)]">{hashValue}</span>
             </div>
           </div>
         </div>

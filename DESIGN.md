@@ -6,6 +6,7 @@ ClaimGuard should look like a fraud-risk evidence review command center for supp
 
 - Evidence first: every screen should communicate claim evidence, document review, and support decisioning.
 - Evidence viewer first: uploaded receipts, screenshots, PDFs, and product photos should feel like inspected artifacts, not generic attachments.
+- Keep the primary screen minimal: left navigation, calm case header, dominant central evidence viewer, compact right risk/signals stack, lower case context, and a small recent-case queue.
 - Dark operational shell: use deep navy and charcoal as the base, with bright but controlled blue and verification green accents.
 - Dense but readable: support reps should scan scores, tickets, evidence, review signals, and safe wording quickly.
 - Professional, not cyberpunk: forensic textures, grid lines, receipt-paper surfaces, and scanline accents are acceptable when subtle.
@@ -90,11 +91,10 @@ ClaimGuard should look like a fraud-risk evidence review command center for supp
 ## Component Direction
 
 - Dashboard layout: dark shell with subtle grid/scanline texture, investigation record header, dominant evidence viewer, case queue, and review report.
-- Sidebar: compact security console navigation with logo, status, and active review rail.
+- Sidebar: compact grouped navigation for Investigation, Intelligence, Automation, and Settings.
 - Upload panel: evidence workstation with scan-frame viewer, zoom controls, evidence ID, upload timestamp, file metadata, hash-style details, and local mock analysis action.
-- Ticket preview: support-ticket surface with customer message, order number, claim reason, uploaded attachments, purchase channel, support rep notes, SLA, and requested action.
-- Risk score card: serious scoring module with authenticity confidence, signal count, severity distribution, confidence, review state, and recommended support action.
+- Ticket preview: two compact lower panels for Case Context and Customer Message. These should support the evidence viewer, not compete with it.
+- Risk score card: compact risk summary with score, risk level, recommendation, confidence, signal count, evidence quality, and one primary support action.
 - Red flags list: "Detected signals" or "Review signals," not accusations; dense signal rows with severity, confidence, evidence source, and manual review recommendation.
-- Analysis report: evidence summary, suggested support action, customer-safe wording, verification checks, and signal-versus-proof guardrail.
-- Recent cases table: operational queue table with selected/new states and security-style risk badges.
+- Recent cases table: small operational queue with case ID, customer, risk, status, and updated time. Avoid analytics-table density.
 - Empty/loading/error states: dark forensic surfaces that explain the next safe action without sounding accusatory.

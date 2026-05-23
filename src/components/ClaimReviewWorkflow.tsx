@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AnalysisReport } from "@/components/AnalysisReport";
+import { ArrowLeft, CalendarDays, Clock3, Globe2, MoreHorizontal, UserRound } from "lucide-react";
 import { RecentCasesTable } from "@/components/RecentCasesTable";
 import { RedFlagsList } from "@/components/RedFlagsList";
 import { RiskScoreCard } from "@/components/RiskScoreCard";
@@ -44,9 +44,9 @@ function getEvidenceType(file: File | null): EvidenceType {
   return "receipt";
 }
 
-const investigationStatus: Record<RiskLevel, string> = {
+const caseStatus: Record<RiskLevel, string> = {
   Low: "Low Concern",
-  Medium: "Review Suggested",
+  Medium: "Needs Review",
   High: "Manual Review Required",
 };
 
@@ -60,14 +60,14 @@ export function ClaimReviewWorkflow() {
   const report = activeCase?.report ?? mockAnalysisReports[evidenceType];
   const reviewStatus: AnalysisStatus = activeCase ? "complete" : status;
   const visibleCaseId = activeCase?.id ?? (selectedFile ? "CG-LOCAL" : "CG-INTAKE");
-  const visibleChannel = activeCase?.channel ?? "Local upload";
-  const visibleQueue = activeCase?.reviewQueue ?? "Evidence intake";
+  const visibleChannel = activeCase?.channel ?? "Web Form";
   const visibleReviewer = activeCase?.assignedReviewer ?? "Unassigned";
+  const visibleSubmitted = activeCase?.submittedAt ?? "Awaiting upload";
   const visibleUpdated =
     activeCase?.lastUpdated ?? (status === "complete" ? "Just completed" : status === "analyzing" ? "Analyzing now" : "Awaiting evidence");
   const visibleStatus =
     reviewStatus === "complete"
-      ? investigationStatus[report.riskLevel]
+      ? caseStatus[report.riskLevel]
       : status === "uploaded"
         ? "Verification Incomplete"
         : status === "analyzing"
@@ -129,93 +129,100 @@ export function ClaimReviewWorkflow() {
   }
 
   return (
-    <div className="mt-5 grid gap-5">
-      <section className="cg-command-panel rounded-[1.25rem] p-4">
+    <div className="mx-auto grid max-w-[1560px] gap-4">
+      <header className="px-1 py-2">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cg-cyan)]">
-              Investigation record
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <h2 className="font-mono text-2xl font-semibold text-white">{visibleCaseId}</h2>
-              <span className="rounded-lg border border-[var(--cg-border-strong)] bg-[rgba(24,183,255,0.1)] px-3 py-1 text-xs font-bold text-[var(--cg-cyan)]">
+            <button className="inline-flex items-center gap-2 text-sm text-[var(--cg-text-muted)] transition hover:text-white" type="button">
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              Back to Queue
+            </button>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <h1 className="font-mono text-3xl font-semibold text-white">{visibleCaseId}</h1>
+              <span className="rounded-md border border-[rgba(251,191,36,0.45)] bg-[rgba(251,191,36,0.1)] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[var(--cg-amber)]">
                 {visibleStatus}
               </span>
             </div>
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-[var(--cg-text-muted)]">
+              {[
+                { icon: Globe2, value: activeCase?.ticket.purchaseChannel ?? "Web Form" },
+                { icon: CalendarDays, value: visibleSubmitted },
+                { icon: Clock3, value: visibleUpdated },
+                { icon: UserRound, value: visibleChannel },
+              ].map((item) => (
+                <span className="inline-flex items-center gap-2" key={item.value}>
+                  <item.icon className="size-4" aria-hidden="true" />
+                  {item.value}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <dl className="grid gap-2 sm:grid-cols-2 xl:w-[720px] xl:grid-cols-5">
-            {[
-              { label: "Review queue", value: visibleQueue },
-              { label: "Reviewer", value: visibleReviewer },
-              { label: "Channel", value: visibleChannel },
-              { label: "Last updated", value: visibleUpdated },
-              { label: "Evidence type", value: report.evidenceLabel },
-            ].map((item) => (
-              <div className="rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2" key={item.label}>
-                <dt className="text-[10px] font-semibold uppercase tracking-wide text-[var(--cg-text-muted)]">
-                  {item.label}
-                </dt>
-                <dd className="mt-1 text-xs font-semibold text-[var(--cg-text-soft)]">{item.value}</dd>
-              </div>
-            ))}
-          </dl>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="rounded-xl px-3 py-2 text-sm text-[var(--cg-text-muted)]">
+              <p className="text-xs">Assigned to</p>
+              <p className="font-semibold text-white">{visibleReviewer}</p>
+            </div>
+            <button className="rounded-lg border border-[var(--cg-border)] px-4 py-2 text-sm font-semibold text-white transition hover:border-[var(--cg-border-strong)]" type="button">
+              Case actions
+            </button>
+            <button className="grid size-10 place-items-center rounded-lg border border-[var(--cg-border)] text-[var(--cg-text-muted)] transition hover:border-[var(--cg-border-strong)] hover:text-white" type="button" aria-label="More case actions">
+              <MoreHorizontal className="size-5" aria-hidden="true" />
+            </button>
+          </div>
         </div>
-      </section>
+      </header>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.58fr)]">
-      <div className="grid min-w-0 gap-5">
-        <UploadPanel
-          selectedFile={selectedFile}
-          status={status}
-          hasCompletedReport={status === "complete"}
-          evidenceLabel={selectedFile ? report.evidenceLabel : "Selected case evidence"}
-          report={report}
-          caseRecord={activeCase}
-          analysisSteps={mockAnalysisSteps}
-          activeAnalysisStep={activeAnalysisStep}
-          onFileSelect={handleFileSelect}
-          onRunAnalysis={handleRunAnalysis}
-          onReset={handleReset}
-        />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.68fr)]">
+        <div className="grid min-w-0 gap-4">
+          <UploadPanel
+            selectedFile={selectedFile}
+            status={status}
+            hasCompletedReport={status === "complete"}
+            evidenceLabel={selectedFile ? report.evidenceLabel : "Receipt"}
+            report={report}
+            caseRecord={activeCase}
+            analysisSteps={mockAnalysisSteps}
+            activeAnalysisStep={activeAnalysisStep}
+            onFileSelect={handleFileSelect}
+            onRunAnalysis={handleRunAnalysis}
+            onReset={handleReset}
+          />
 
-        <TicketPreview
-          selectedFile={selectedFile}
-          status={reviewStatus}
-          report={report}
-          caseRecord={activeCase}
-        />
+          <TicketPreview
+            selectedFile={selectedFile}
+            status={reviewStatus}
+            report={report}
+            caseRecord={activeCase}
+          />
+        </div>
 
-        <AnalysisReport report={report} status={reviewStatus} />
+        <aside className="grid min-w-0 content-start gap-4">
+          <RiskScoreCard
+            score={report.score}
+            riskLevel={report.riskLevel}
+            status={reviewStatus}
+            reviewLabel={report.reviewLabel}
+            confidenceLevel={report.confidenceLevel}
+            signalCount={report.redFlags.length}
+            suggestedAction={report.suggestedAction}
+          />
+
+          <RedFlagsList
+            flags={report.redFlags}
+            status={reviewStatus}
+            evidenceLabel={report.evidenceLabel}
+            riskLevel={report.riskLevel}
+          />
+        </aside>
       </div>
 
-      <div className="grid min-w-0 content-start gap-5">
-        <RiskScoreCard
-          score={report.score}
-          riskLevel={report.riskLevel}
-          status={reviewStatus}
-          reviewLabel={report.reviewLabel}
-          summary={report.summary}
-          confidenceLevel={report.confidenceLevel}
-          signalCount={report.redFlags.length}
-          suggestedAction={report.suggestedAction}
-        />
-
-        <RedFlagsList
-          flags={report.redFlags}
-          status={reviewStatus}
-          evidenceLabel={report.evidenceLabel}
-          riskLevel={report.riskLevel}
-        />
-
-        <RecentCasesTable
-          cases={recentCases}
-          activeCaseId={activeCaseId}
-          newlyAnalyzedCaseId={!activeCase && status === "complete" ? "new-upload" : undefined}
-          onCaseSelect={handleCaseSelect}
-        />
-      </div>
-      </div>
+      <RecentCasesTable
+        cases={recentCases}
+        activeCaseId={activeCaseId}
+        newlyAnalyzedCaseId={!activeCase && status === "complete" ? "new-upload" : undefined}
+        onCaseSelect={handleCaseSelect}
+      />
     </div>
   );
 }

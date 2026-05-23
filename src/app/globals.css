@@ -195,9 +195,9 @@ input {
 }
 
 .cg-risk-medium {
-  border-color: rgba(53, 217, 255, 0.44);
-  background: rgba(24, 183, 255, 0.12);
-  color: #b7ecff;
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.12);
+  color: #fde68a;
 }
 
 .cg-risk-high {

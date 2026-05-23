@@ -6,7 +6,6 @@ type RiskScoreCardProps = {
   riskLevel: RiskLevel;
   status?: AnalysisStatus;
   reviewLabel?: string;
-  summary?: string;
   confidenceLevel?: AnalysisConfidence;
   signalCount?: number;
   suggestedAction?: string;
@@ -35,7 +34,6 @@ export function RiskScoreCard({
   riskLevel,
   status = "complete",
   reviewLabel = "Manual review recommended",
-  summary = "The mock screening found mixed signals. Treat this as a prioritization cue, not a determination about the customer or the claim.",
   confidenceLevel = "Medium confidence",
   signalCount = 0,
   suggestedAction = "Use the report to guide manual verification before resolving the claim.",
@@ -82,7 +80,7 @@ export function RiskScoreCard({
               riskLevel === "High"
                 ? "bg-[var(--cg-red)]"
                 : riskLevel === "Medium"
-                  ? "bg-[var(--cg-cyan)]"
+                  ? "bg-[var(--cg-amber)]"
                   : "bg-[var(--cg-green)]"
             }`}
             style={{ width: isPending ? "0%" : `${score}%` }}
@@ -113,7 +111,7 @@ export function RiskScoreCard({
         <div className="mt-3 space-y-2">
           {[
             { label: "Low concern", value: distribution.low, color: "bg-[var(--cg-green)]" },
-            { label: "Review suggested", value: distribution.medium, color: "bg-[var(--cg-cyan)]" },
+            { label: "Review suggested", value: distribution.medium, color: "bg-[var(--cg-amber)]" },
             { label: "Manual review", value: distribution.high, color: "bg-[var(--cg-red)]" },
           ].map((item) => (
             <div className="grid grid-cols-[112px_1fr_34px] items-center gap-2 text-xs" key={item.label}>
@@ -137,11 +135,15 @@ export function RiskScoreCard({
             <p className="mt-1 text-sm leading-5 text-[var(--cg-text-soft)]">
               {isPending ? "Attach evidence and run mock analysis to receive support-safe guidance." : suggestedAction}
             </p>
+            <button
+              className="mt-3 rounded-lg bg-[var(--cg-blue)] px-4 py-2 text-sm font-bold text-[#02111f] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cg-cyan)]"
+              type="button"
+            >
+              Mark as Reviewed
+            </button>
           </div>
         </div>
       </div>
-
-      <p className="mt-4 text-sm leading-6 text-[var(--cg-text-muted)]">{isPending ? "Scores appear after review." : summary}</p>
     </section>
   );
 }
