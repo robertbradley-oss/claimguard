@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { AlertCircle, CheckCircle2, FileSearch, Loader2, ShieldCheck } from "lucide-react";
 import type { AnalysisStatus, MockAnalysisReport, RiskLevel } from "@/lib/claim-data";
 
 type AuthenticityResultCardProps = {
@@ -21,11 +21,16 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
   const visibleSignals = report.redFlags.slice(0, 3);
 
   return (
-    <section className="cg-panel rounded-lg p-4 sm:p-5">
+    <section
+      className={`cg-panel relative min-h-[520px] overflow-hidden rounded-xl p-5 sm:p-6 ${
+        isComplete ? "shadow-[0_22px_54px_rgba(8,174,234,0.14)]" : ""
+      }`}
+    >
+      {isComplete ? <div className="absolute inset-x-0 top-0 h-1 cg-brand-gradient" /> : null}
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Authenticity result</p>
-          <h2 className="mt-1 text-lg font-semibold text-[#061426]">Mock review</h2>
+          <h2 className="mt-1 text-xl font-semibold text-[#061426]">Evidence review</h2>
         </div>
         <span
           className={`rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ${
@@ -36,9 +41,9 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
         </span>
       </div>
 
-      <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center">
-        <div className="relative size-28 shrink-0">
-          <svg className="size-28 -rotate-90" viewBox="0 0 104 104" role="img" aria-label="Authenticity score">
+      <div className={`mt-6 flex flex-col gap-5 sm:flex-row sm:items-center ${isComplete ? "sm:gap-6" : ""}`}>
+        <div className={`relative shrink-0 ${isComplete ? "size-36" : "size-28"}`}>
+          <svg className={`${isComplete ? "size-36" : "size-28"} -rotate-90`} viewBox="0 0 104 104" role="img" aria-label="Authenticity score">
             <circle cx="52" cy="52" r="44" fill="none" stroke="#E4F0F7" strokeWidth="10" />
             <circle
               cx="52"
@@ -52,7 +57,9 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold text-[#061426]">{isComplete ? report.score : "--"}</span>
+            <span className={`${isComplete ? "text-5xl" : "text-3xl"} font-bold text-[#061426]`}>
+              {isComplete ? report.score : "--"}
+            </span>
             <span className="text-xs font-medium text-slate-500">/ 100</span>
           </div>
         </div>
@@ -64,15 +71,15 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
             ) : (
               <ShieldCheck className="size-4" aria-hidden="true" />
             )}
-            {isComplete ? report.reviewLabel : isAnalyzing ? "Preparing mock review" : "No review yet"}
+            {isComplete ? report.reviewLabel : isAnalyzing ? "Preparing evidence review" : "No review yet"}
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {isComplete
-              ? report.summary
-              : isAnalyzing
-                ? "Checking visible evidence signals and preparing support-safe guidance."
-                : "Upload claim evidence and run the mock analysis to see an authenticity score."}
-          </p>
+          {isComplete || isAnalyzing ? (
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {isComplete
+                ? report.summary
+                : "Checking visible evidence signals and preparing support-safe guidance."}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -80,8 +87,19 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
         <h3 className="text-sm font-semibold text-[#061426]">Key risk signals</h3>
         <div className="mt-3 space-y-2.5">
           {!isComplete ? (
-            <div className="rounded-lg border border-dashed border-[#D5E8F3] bg-[#F8FCFF] p-4 text-sm leading-6 text-slate-600">
-              Signals will appear here after the mock review completes.
+            <div className="rounded-xl border border-dashed border-[#D5E8F3] bg-[#F8FCFF] p-5 text-sm leading-6 text-slate-600">
+              <div className="flex items-start gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white text-[#08AEEA] ring-1 ring-[#DDECF5]">
+                  <FileSearch className="size-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-semibold text-slate-900">Ready for evidence</p>
+                  <p className="mt-1">
+                    Once you upload a file and run analysis, this card will show the score, risk level,
+                    and the most important review signals.
+                  </p>
+                </div>
+              </div>
             </div>
           ) : null}
 

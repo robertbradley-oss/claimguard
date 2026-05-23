@@ -29,15 +29,16 @@
 }
 
 html {
-  background: #eef7fc;
+  background: #f3f9fc;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 16% 0%, rgba(8, 174, 234, 0.12), transparent 30rem),
-    linear-gradient(180deg, #eef7fc 0%, #f8fbfd 42%, #eef5f9 100%);
+    radial-gradient(circle at 12% 0%, rgba(25, 211, 243, 0.16), transparent 34rem),
+    radial-gradient(circle at 88% 10%, rgba(65, 214, 111, 0.12), transparent 28rem),
+    linear-gradient(180deg, #f4fbff 0%, #fbfdff 46%, #f1f7fb 100%);
   color: var(--foreground);
 }
 
@@ -58,7 +59,7 @@ input {
 .cg-panel {
   border: 1px solid var(--cg-border-soft);
   background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 16px 40px rgba(6, 20, 38, 0.055);
+  box-shadow: 0 22px 54px rgba(6, 20, 38, 0.07);
 }
 
 .cg-soft-panel {

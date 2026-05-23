@@ -99,7 +99,7 @@ export function UploadPanel({
   }
 
   return (
-    <section className="cg-panel rounded-lg p-4">
+    <section className="cg-panel min-h-[520px] rounded-xl p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-[#00A7A5]">Evidence upload</p>
@@ -120,7 +120,7 @@ export function UploadPanel({
       />
 
       <button
-        className={`mt-4 flex cursor-pointer items-center gap-3 rounded-lg border border-dashed px-4 py-4 text-left transition ${
+        className={`mt-5 flex min-h-36 cursor-pointer items-center gap-4 rounded-xl border border-dashed px-5 py-6 text-left transition ${
           isDragging
             ? "border-[#08AEEA] bg-[#F7FBFF]"
             : "border-[#D5E8F3] bg-[#F8FCFF] hover:border-[#8DDAEB] hover:bg-white"
@@ -143,8 +143,8 @@ export function UploadPanel({
         }}
         onDrop={handleDrop}
       >
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-white text-[#08AEEA] ring-1 ring-[#DDECF5]">
-          <UploadCloud className="size-6" aria-hidden="true" />
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-white text-[#08AEEA] ring-1 ring-[#DDECF5]">
+          <UploadCloud className="size-7" aria-hidden="true" />
         </span>
         <span>
           <span className="block text-sm font-semibold text-slate-900">
@@ -157,7 +157,7 @@ export function UploadPanel({
       </button>
 
       {selectedFile && fileMeta ? (
-        <div className="mt-4 rounded-lg border border-[#E4F0F7] bg-[#F8FCFF] p-3">
+        <div className="mt-5 rounded-xl border border-[#E4F0F7] bg-[#F8FCFF] p-4">
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-white text-[#00A7A5] ring-1 ring-[#DDECF5]">
               {selectedFile.type === "application/pdf" ? (
@@ -208,11 +208,11 @@ export function UploadPanel({
       ) : null}
 
       {isAnalyzing ? (
-        <div className="mt-4 rounded-lg border border-[#E4F0F7] bg-white p-3">
+        <div className="mt-5 rounded-xl border border-[#E4F0F7] bg-white p-4">
           <div className="flex items-center gap-3">
             <Loader2 className="size-4 shrink-0 animate-spin text-[#08AEEA]" aria-hidden="true" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-900">Mock review in progress</p>
+              <p className="text-sm font-semibold text-slate-900">Evidence review in progress</p>
               <p className="mt-1 truncate text-xs text-slate-500">{currentStep}</p>
             </div>
           </div>
@@ -222,9 +222,9 @@ export function UploadPanel({
         </div>
       ) : null}
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         <button
-          className="cg-primary-button inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed"
+          className="cg-primary-button inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
           type="button"
           onClick={onRunAnalysis}
           disabled={!canAnalyze}

@@ -90,7 +90,7 @@ export function ClaimReviewWorkflow() {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.85fr)] lg:p-8">
+    <div className="grid w-full max-w-6xl gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(390px,1fr)]">
       <div>
         <UploadPanel
           selectedFile={selectedFile}
