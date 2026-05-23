@@ -29,17 +29,30 @@
 }
 
 html {
-  background: #f3f9fc;
+  background: #f4f9fc;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 12% 0%, rgba(25, 211, 243, 0.16), transparent 34rem),
-    radial-gradient(circle at 88% 10%, rgba(65, 214, 111, 0.12), transparent 28rem),
-    linear-gradient(180deg, #f4fbff 0%, #fbfdff 46%, #f1f7fb 100%);
+    linear-gradient(115deg, rgba(25, 211, 243, 0.13), transparent 28%),
+    linear-gradient(245deg, rgba(65, 214, 111, 0.1), transparent 32%),
+    linear-gradient(180deg, #f6fbff 0%, #fbfdff 44%, #eef6fa 100%);
   color: var(--foreground);
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background-image:
+    linear-gradient(rgba(8, 174, 234, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 20, 38, 0.04) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.52), transparent 70%);
 }
 
 button,
@@ -58,8 +71,12 @@ input {
 
 .cg-panel {
   border: 1px solid var(--cg-border-soft);
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 22px 54px rgba(6, 20, 38, 0.07);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 252, 255, 0.94)),
+    #ffffff;
+  box-shadow:
+    0 28px 70px rgba(6, 20, 38, 0.09),
+    0 1px 0 rgba(255, 255, 255, 0.92) inset;
 }
 
 .cg-soft-panel {
@@ -70,7 +87,9 @@ input {
 .cg-primary-button {
   background-image: linear-gradient(135deg, #08aeea 0%, #00a7a5 54%, #28c966 100%);
   color: #ffffff;
-  box-shadow: 0 12px 24px rgba(8, 174, 234, 0.18);
+  box-shadow:
+    0 14px 28px rgba(8, 174, 234, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.26) inset;
 }
 
 .cg-primary-button:hover:not(:disabled) {

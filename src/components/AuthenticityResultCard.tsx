@@ -7,9 +7,9 @@ type AuthenticityResultCardProps = {
 };
 
 const riskStyles: Record<RiskLevel, string> = {
-  Low: "bg-[#E9FFF0] text-[#0B5F2A] ring-[#41D66F]/40",
-  Medium: "bg-[#F7FBFF] text-[#066B8F] ring-[#19D3F3]/45",
-  High: "bg-[#FFF1F2] text-[#9F1239] ring-[#FECDD3]",
+  Low: "bg-[#ECFFF2] text-[#0B5F2A] ring-[#41D66F]/45 shadow-[0_8px_18px_rgba(65,214,111,0.12)]",
+  Medium: "bg-[#F2FCFF] text-[#066B8F] ring-[#19D3F3]/50 shadow-[0_8px_18px_rgba(8,174,234,0.1)]",
+  High: "bg-[#FFF1F2] text-[#9F1239] ring-[#FECDD3] shadow-[0_8px_18px_rgba(225,29,72,0.08)]",
 };
 
 export function AuthenticityResultCard({ report, status }: AuthenticityResultCardProps) {
@@ -22,7 +22,7 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
 
   return (
     <section
-      className={`cg-panel relative min-h-[520px] overflow-hidden rounded-xl p-5 sm:p-6 ${
+      className={`cg-panel relative min-h-[540px] overflow-hidden rounded-2xl p-5 sm:p-7 ${
         isComplete ? "shadow-[0_22px_54px_rgba(8,174,234,0.14)]" : ""
       }`}
     >
@@ -33,7 +33,7 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
           <h2 className="mt-1 text-xl font-semibold text-[#061426]">Evidence review</h2>
         </div>
         <span
-          className={`rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ${
+          className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${
             isComplete ? riskStyles[report.riskLevel] : "bg-[#F8FCFF] text-slate-500 ring-[#E4F0F7]"
           }`}
         >
@@ -41,23 +41,30 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
         </span>
       </div>
 
-      <div className={`mt-6 flex flex-col gap-5 sm:flex-row sm:items-center ${isComplete ? "sm:gap-6" : ""}`}>
-        <div className={`relative shrink-0 ${isComplete ? "size-36" : "size-28"}`}>
-          <svg className={`${isComplete ? "size-36" : "size-28"} -rotate-90`} viewBox="0 0 104 104" role="img" aria-label="Authenticity score">
+      <div className={`mt-7 flex flex-col gap-5 sm:flex-row sm:items-center ${isComplete ? "sm:gap-7" : ""}`}>
+        <div className={`relative shrink-0 rounded-full bg-white shadow-[0_18px_42px_rgba(8,174,234,0.1)] ring-1 ring-[#E4F0F7] ${isComplete ? "size-40" : "size-32"}`}>
+          <svg className={`${isComplete ? "size-40" : "size-32"} -rotate-90`} viewBox="0 0 104 104" role="img" aria-label="Authenticity score">
+            <defs>
+              <linearGradient id="scoreGradient" x1="16" y1="16" x2="88" y2="88">
+                <stop offset="0%" stopColor="#08AEEA" />
+                <stop offset="58%" stopColor="#00A7A5" />
+                <stop offset="100%" stopColor="#41D66F" />
+              </linearGradient>
+            </defs>
             <circle cx="52" cy="52" r="44" fill="none" stroke="#E4F0F7" strokeWidth="10" />
             <circle
               cx="52"
               cy="52"
               r="44"
               fill="none"
-              stroke={isComplete ? "#08AEEA" : "#E4F0F7"}
+              stroke={isComplete ? "url(#scoreGradient)" : "#E4F0F7"}
               strokeLinecap="round"
               strokeWidth="10"
               strokeDasharray={`${progress} ${circumference - progress}`}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`${isComplete ? "text-5xl" : "text-3xl"} font-bold text-[#061426]`}>
+            <span className={`${isComplete ? "text-5xl" : "text-3xl"} font-semibold text-[#061426]`}>
               {isComplete ? report.score : "--"}
             </span>
             <span className="text-xs font-medium text-slate-500">/ 100</span>
@@ -65,7 +72,7 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
         </div>
 
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[#00A7A5]">
+          <div className="flex items-center gap-2 text-sm font-semibold text-[#008F91]">
             {isAnalyzing ? (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             ) : (
@@ -83,11 +90,11 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
         </div>
       </div>
 
-      <div className="mt-5 border-t border-[#E4F0F7] pt-4">
+      <div className="mt-6 border-t border-[#E4F0F7] pt-5">
         <h3 className="text-sm font-semibold text-[#061426]">Key risk signals</h3>
         <div className="mt-3 space-y-2.5">
           {!isComplete ? (
-            <div className="rounded-xl border border-dashed border-[#D5E8F3] bg-[#F8FCFF] p-5 text-sm leading-6 text-slate-600">
+            <div className="rounded-2xl border border-dashed border-[#D5E8F3] bg-gradient-to-br from-white to-[#F6FCFF] p-5 text-sm leading-6 text-slate-600">
               <div className="flex items-start gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white text-[#08AEEA] ring-1 ring-[#DDECF5]">
                   <FileSearch className="size-5" aria-hidden="true" />
@@ -104,7 +111,7 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
           ) : null}
 
           {isComplete && visibleSignals.length === 0 ? (
-            <div className="flex gap-3 rounded-lg border border-[#E4F0F7] bg-[#F8FCFF] p-3">
+            <div className="flex gap-3 rounded-xl border border-[#E4F0F7] bg-[#F8FCFF] p-3">
               <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-[#41D66F]" aria-hidden="true" />
               <p className="text-sm leading-5 text-slate-700">
                 No high-risk signals were generated in this mock review.
@@ -114,7 +121,7 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
 
           {isComplete
             ? visibleSignals.map((flag) => (
-                <article className="rounded-lg border border-[#E4F0F7] bg-white p-3" key={flag.label}>
+                <article className="rounded-xl border border-[#E4F0F7] bg-white p-3 shadow-[0_10px_24px_rgba(6,20,38,0.035)]" key={flag.label}>
                   <div className="flex items-start gap-3">
                     <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-[#FFF8EA] text-amber-700 ring-1 ring-amber-200">
                       <AlertCircle className="size-4" aria-hidden="true" />
@@ -131,13 +138,13 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
         </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-[#E4F0F7] bg-[#F8FCFF] p-4 text-sm leading-6 text-slate-600">
+      <div className="mt-5 rounded-2xl border border-[#E4F0F7] bg-[#F8FCFF] p-4 text-sm leading-6 text-slate-600">
         <span className="font-semibold text-slate-900">Manual review note:</span> This mock review does
         not confirm authenticity or determine customer intent. Manual policy verification is still
         recommended.
       </div>
 
-      <details className="mt-3 rounded-lg border border-[#E4F0F7] bg-white px-4 py-3">
+      <details className="mt-3 rounded-2xl border border-[#E4F0F7] bg-white px-4 py-3">
         <summary className="cursor-pointer text-sm font-semibold text-[#061426]">Review guidance</summary>
         <div className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
           <p>Use risk signals only as prompts for manual verification.</p>

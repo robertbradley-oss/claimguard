@@ -99,13 +99,13 @@ export function UploadPanel({
   }
 
   return (
-    <section className="cg-panel min-h-[520px] rounded-xl p-5 sm:p-6">
+    <section className="cg-panel min-h-[540px] rounded-2xl p-5 sm:p-7">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#00A7A5]">Evidence upload</p>
-          <h2 className="mt-1 text-lg font-semibold text-[#061426]">Upload claim evidence</h2>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#008F91]">Evidence upload</p>
+          <h2 className="mt-1 text-xl font-semibold text-[#061426]">Upload claim evidence</h2>
         </div>
-        <span className="rounded-md border border-[#E4F0F7] bg-[#F8FCFF] px-2.5 py-1 text-xs font-medium text-slate-600">
+        <span className="rounded-full border border-[#D7EAF4] bg-white/85 px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm">
           Mock analysis
         </span>
       </div>
@@ -120,10 +120,10 @@ export function UploadPanel({
       />
 
       <button
-        className={`mt-5 flex min-h-36 cursor-pointer items-center gap-4 rounded-xl border border-dashed px-5 py-6 text-left transition ${
+        className={`mt-6 flex min-h-44 cursor-pointer items-center gap-4 rounded-2xl border border-dashed px-5 py-7 text-left transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08AEEA]/35 ${
           isDragging
-            ? "border-[#08AEEA] bg-[#F7FBFF]"
-            : "border-[#D5E8F3] bg-[#F8FCFF] hover:border-[#8DDAEB] hover:bg-white"
+            ? "border-[#08AEEA] bg-white shadow-[0_18px_42px_rgba(8,174,234,0.12)]"
+            : "border-[#CFE5F1] bg-gradient-to-br from-white to-[#F5FBFF] hover:border-[#8DDAEB] hover:bg-white hover:shadow-[0_18px_42px_rgba(6,20,38,0.07)]"
         } ${isAnalyzing ? "cursor-not-allowed opacity-70" : ""}`}
         type="button"
         disabled={isAnalyzing}
@@ -143,21 +143,21 @@ export function UploadPanel({
         }}
         onDrop={handleDrop}
       >
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-white text-[#08AEEA] ring-1 ring-[#DDECF5]">
+        <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-white text-[#08AEEA] shadow-[0_10px_24px_rgba(8,174,234,0.1)] ring-1 ring-[#DDECF5]">
           <UploadCloud className="size-7" aria-hidden="true" />
         </span>
         <span>
-          <span className="block text-sm font-semibold text-slate-900">
-            {isDragging ? "Release to attach evidence" : "Drop or choose a receipt, product photo, screenshot, or PDF"}
+          <span className="block text-base font-semibold text-slate-950">
+            {isDragging ? "Release to attach evidence" : "Drop evidence here or browse files"}
           </span>
-          <span className="mt-1 block text-xs text-slate-500">
-            Local mock review only. PNG, JPG, WEBP, or PDF up to 25 MB.
+          <span className="mt-2 block text-sm leading-6 text-slate-500">
+            Receipts, product photos, screenshots, and PDFs. Local mock review only.
           </span>
         </span>
       </button>
 
       {selectedFile && fileMeta ? (
-        <div className="mt-5 rounded-xl border border-[#E4F0F7] bg-[#F8FCFF] p-4">
+        <div className="mt-5 rounded-2xl border border-[#DDECF5] bg-white/86 p-4 shadow-[0_14px_34px_rgba(6,20,38,0.045)]">
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-white text-[#00A7A5] ring-1 ring-[#DDECF5]">
               {selectedFile.type === "application/pdf" ? (
@@ -168,7 +168,7 @@ export function UploadPanel({
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="truncate text-sm font-semibold text-slate-900">{fileMeta.name}</p>
+                <p className="truncate text-sm font-semibold text-slate-950">{fileMeta.name}</p>
                 <span
                   className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                     status === "uploaded"
@@ -185,7 +185,7 @@ export function UploadPanel({
                   { label: "File type", value: fileMeta.type },
                   { label: "File size", value: fileMeta.size },
                 ].map((item) => (
-                  <div className="rounded-md bg-white px-3 py-2 ring-1 ring-[#E4F0F7]" key={item.label}>
+                  <div className="rounded-lg bg-[#F8FCFF] px-3 py-2 ring-1 ring-[#E4F0F7]" key={item.label}>
                     <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                       {item.label}
                     </dt>
@@ -208,7 +208,7 @@ export function UploadPanel({
       ) : null}
 
       {isAnalyzing ? (
-        <div className="mt-5 rounded-xl border border-[#E4F0F7] bg-white p-4">
+        <div className="mt-5 rounded-2xl border border-[#DDECF5] bg-white p-4 shadow-[0_14px_34px_rgba(6,20,38,0.045)]">
           <div className="flex items-center gap-3">
             <Loader2 className="size-4 shrink-0 animate-spin text-[#08AEEA]" aria-hidden="true" />
             <div className="min-w-0 flex-1">
@@ -224,7 +224,7 @@ export function UploadPanel({
 
       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         <button
-          className="cg-primary-button inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
+          className="cg-primary-button inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
           type="button"
           onClick={onRunAnalysis}
           disabled={!canAnalyze}
@@ -237,7 +237,7 @@ export function UploadPanel({
           {actionLabel}
         </button>
 
-        <div className="rounded-md border border-[#E4F0F7] bg-[#F8FCFF] px-3 py-2 text-xs leading-5 text-slate-600 sm:flex-1">
+        <div className="rounded-xl border border-[#E4F0F7] bg-[#F8FCFF] px-3.5 py-2.5 text-xs leading-5 text-slate-600 sm:flex-1">
           {status === "idle"
             ? "Select claim evidence to generate a support-safe mock report."
             : status === "uploaded"
