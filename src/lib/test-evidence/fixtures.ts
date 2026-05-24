@@ -10,6 +10,7 @@ export type SampleEvidenceFixtureId =
   | "lowes-email-order"
   | "ispring-direct-invoice"
   | "adjusted-receipt"
+  | "amazon-print-order-details"
   | "amazon-order-page"
   | "amazon-multi-shipment"
   | "amazon-mobile-actions"
@@ -817,6 +818,98 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
     ],
   },
   {
+    id: "amazon-print-order-details",
+    label: "Amazon print order details",
+    fileName: "amazon-print-order-details.pdf",
+    type: "pdf",
+    description: "Synthetic Amazon print order-details page with print URL/title cue, order details, valid order number, item, payment, and order total.",
+    expectedRisk: "Low",
+    expectedOutcome: "Amazon print/PDF order details should classify separately and retain proof-of-purchase cues.",
+    tuningNotes:
+      "Use this to tune Amazon printable order detail PDFs. It checks the narrow print/order-details source lane without relying on app action rows or invoice-only wording.",
+    loadFile: async () =>
+      createPdfFile(
+        [
+          "Amazon.com - Print Order Details",
+          "https://www.amazon.com/gp/css/summary/print.html/ref=ppx_od_dt_b_invoice",
+          "Order Details",
+          "Order placed: April 22, 2026",
+          "Order #: 123-4567890-1234567",
+          "Items Ordered",
+          "iSpring RCC7AK replacement filter bundle",
+          "Sold by: iSpring Water Systems",
+          "Ship to: Redacted Recipient",
+          "Payment Method: Visa ending in 4242",
+          "Item subtotal: $119.99",
+          "Shipping: $0.00",
+          "Estimated tax: $9.00",
+          "Order Total: $128.99",
+          "Print this page for your records",
+        ],
+        "amazon-print-order-details.pdf",
+        { fontSize: 11, lineHeight: 18, startY: 740 },
+      ),
+    evaluate: (result) => [
+      {
+        label: "Amazon print order details source is classified",
+        status: expectationStatus(
+          result.receipt.sourceClassification.category === "amazon-print-order-details" &&
+            result.receipt.source === "amazon",
+          "Warning",
+        ),
+        detail: `Class ${result.receipt.sourceClassification.label}; legacy source ${result.receipt.source}; cues ${result.receipt.sourceClassification.cues.join(
+          " | ",
+        )}.`,
+        note:
+          "Printable Amazon order-detail PDFs should use the print/order-details source lane before Amazon-specific structure checks run.",
+      },
+      {
+        label: "Amazon print order details keeps proof cues",
+        status: expectationStatus(
+          Boolean(
+            result.receipt.purchaseDate &&
+              result.receipt.total === "128.99" &&
+              result.receipt.paymentMethod &&
+              result.receipt.structure.amazonOrderFormat === "valid" &&
+              result.receipt.structure.amazonSignals?.hasOrderPlacedCue &&
+              result.receipt.structure.amazonSignals.hasItemsOrderedCue &&
+              result.receipt.structure.amazonSignals.hasOrderTotalCue &&
+              result.receipt.structure.amazonSignals.hasPaymentCue,
+          ),
+          "Warning",
+        ),
+        detail: `Date ${result.receipt.purchaseDate ?? "missing"}; total ${result.receipt.total ?? "missing"}; payment ${
+          result.receipt.paymentMethod ? "present" : "missing"
+        }; Amazon signals ${JSON.stringify(result.receipt.structure.amazonSignals ?? {})}.`,
+        note:
+          "Print order details should still extract the common date, order-number, total, payment, and item cues used for manual proof-of-purchase matching.",
+      },
+      {
+        label: "Amazon print order details filters printable context",
+        status: expectationStatus(
+          !result.receipt.parsingDetails.lineItemCandidates.some((candidate) => /print this page|amazon\.com\/gp/i.test(candidate)) &&
+            result.receipt.parsingDetails.rejectedLineItemCandidates.some((candidate) => /print this page/i.test(candidate.text)),
+          "Warning",
+        ),
+        detail: `Accepted: ${result.receipt.parsingDetails.lineItemCandidates.join(" | ") || "none"}; rejected: ${
+          result.receipt.parsingDetails.rejectedLineItemCandidates.map((candidate) => `${candidate.reason}: ${candidate.text}`).join(" | ") ||
+          "none"
+        }.`,
+        note:
+          "Print URLs and printable-page helper text should remain context, not purchased-item evidence.",
+      },
+      {
+        label: "Amazon print order details stays low concern",
+        status: expectationStatus(result.riskLevel !== "High", "Warning"),
+        detail: `Received ${result.riskLevel} at ${result.score}.`,
+        note:
+          result.riskLevel !== "High"
+            ? "Readable print order details are not being treated like a high-concern receipt."
+            : "Inspect whether print-page context or PDF extraction is over-penalizing a readable synthetic order detail.",
+      },
+    ],
+  },
+  {
     id: "amazon-order-page",
     label: "Amazon order page",
     fileName: "amazon-order-page.jpg",
@@ -986,6 +1079,18 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
         "amazon-mobile-actions.jpg",
       ),
     evaluate: (result) => [
+      {
+        label: "Amazon mobile actions source is classified",
+        status: expectationStatus(
+          result.receipt.sourceClassification.category === "amazon-app-screenshot" && result.receipt.source === "amazon",
+          "Warning",
+        ),
+        detail: `Class ${result.receipt.sourceClassification.label}; legacy source ${result.receipt.source}; cues ${result.receipt.sourceClassification.cues.join(
+          " | ",
+        )}.`,
+        note:
+          "Amazon mobile action rows should put this fixture in the app screenshot source lane before app-specific context rows are filtered.",
+      },
       {
         label: "Amazon mobile actions keep product detail",
         status: expectationStatus(
@@ -1400,6 +1505,18 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
         "amazon-invoice-detail.jpg",
       ),
     evaluate: (result) => [
+      {
+        label: "Amazon invoice detail source is classified",
+        status: expectationStatus(
+          result.receipt.sourceClassification.category === "amazon-invoice-detail" && result.receipt.source === "amazon",
+          "Warning",
+        ),
+        detail: `Class ${result.receipt.sourceClassification.label}; legacy source ${result.receipt.source}; cues ${result.receipt.sourceClassification.cues.join(
+          " | ",
+        )}.`,
+        note:
+          "Printable invoice/detail evidence should use the invoice/detail source lane before invoice-specific context cues are reviewed.",
+      },
       {
         label: "Amazon invoice detail cues are detected",
         status: expectationStatus(
