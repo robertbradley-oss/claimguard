@@ -1183,23 +1183,26 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
     label: "Amazon invoice detail",
     fileName: "amazon-invoice-detail.jpg",
     type: "image",
-    description: "Amazon invoice/order-detail style receipt with invoice, sold-by, billing, payment, promotion, and order total cues.",
+    description: "Amazon invoice/order-detail style receipt with invoice date, sold-by, billing, split payment, promotion, and order total cues.",
     expectedRisk: "Low",
     expectedOutcome: "Invoice and promotion wording should appear as order-matching context, not standalone suspicious signals.",
     tuningNotes:
-      "Use this to tune Amazon printable invoices and order-detail receipts. Review whether invoice, sold-by, billing, promotion, payment, and total cues are visible without over-penalizing the receipt.",
+      "Use this to tune Amazon printable invoices and order-detail receipts. Review whether invoice/order date, sold-by, billing, promotion, split payment, and total cues are visible without over-penalizing the receipt.",
     loadFile: () =>
       canvasToFile(
         drawReceiptCanvas([
           "Amazon.com",
           "Invoice # INV-2026-0420",
-          "Invoice date: April 20, 2026",
+          "Invoice Date (UTC)",
+          "Monday, April 20 2026",
           "Order ID: 333-9876543-2109876",
           "Print this page for your records",
           "iSpring RCC7 replacement cartridge",
           "Sold by: iSpring Water Systems",
           "Billing address: Redacted Recipient",
-          "Payment Method: Amazon Store Card ending in 4242",
+          "Payment Instrument",
+          "Credit Card",
+          "ending with 4242",
           "Item subtotal: $54.99",
           "Subscribe & Save promotion: $5.50",
           "Estimated tax: $3.71",
@@ -1237,18 +1240,26 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
           "Printable invoice footer text should be visible as rejected context instead of being counted as purchased-item evidence.",
       },
       {
-        label: "Amazon invoice detail keeps proof cues",
+        label: "Amazon invoice detail extracts visible date and payment",
         status: expectationStatus(
           Boolean(
-            result.receipt.structure.amazonSignals?.hasPaymentCue &&
+            result.receipt.purchaseDate &&
+              /Amazon invoice date label/i.test(result.receipt.parsingDetails.purchaseDateSource ?? "") &&
+              result.receipt.paymentMethod &&
+              /Payment detail after label/i.test(result.receipt.parsingDetails.paymentSource ?? "") &&
+              result.receipt.structure.amazonSignals?.hasPaymentCue &&
               result.receipt.structure.amazonSignals.hasOrderTotalCue &&
               result.receipt.structure.amazonOrderFormat === "valid",
           ),
           "Warning",
         ),
-        detail: `Order format ${result.receipt.structure.amazonOrderFormat}; missing fields: ${result.receipt.missingFields.join(", ") || "none"}.`,
+        detail: `Date ${result.receipt.purchaseDate ?? "none"} from ${
+          result.receipt.parsingDetails.purchaseDateSource ?? "no source"
+        }; payment ${result.receipt.paymentMethod ?? "none"} from ${
+          result.receipt.parsingDetails.paymentSource ?? "no source"
+        }; missing fields: ${result.receipt.missingFields.join(", ") || "none"}.`,
         note:
-          "Readable invoice/order-detail evidence should still expose payment, final total, and a valid Amazon order-number format.",
+          "Readable invoice/order-detail evidence should extract visible invoice/order date and split payment details, not only set broad Amazon cue booleans.",
       },
       {
         label: "Amazon invoice detail does not become automatic high risk",

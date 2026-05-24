@@ -213,8 +213,8 @@ export const analyzerTuningSummary = {
     },
     {
       label: "Amazon invoice/detail cues",
-      value: "invoice/sold-by/billing/promotion",
-      detail: "Printable invoice and order-detail wording is surfaced as purchase-matching context, including Subscribe & Save or promo layouts.",
+      value: "invoice/date/payment/sold-by/billing/promotion",
+      detail: "Printable invoice and order-detail wording is surfaced as purchase-matching context, including split invoice/order date labels, payment-instrument cues, and Subscribe & Save or promo layouts.",
     },
     {
       label: "Inconclusive separation",
