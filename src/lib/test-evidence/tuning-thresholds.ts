@@ -3,7 +3,7 @@ export const analyzerTuningSummary = {
     {
       label: "Quality labels",
       value: "Clear / Usable / Inconclusive / Unreadable",
-      detail: "Combines average confidence, text volume, and low-confidence word rate.",
+      detail: "Combines average confidence, extracted-text coverage, and low-confidence word rate.",
     },
     {
       label: "Review signal",
@@ -12,8 +12,8 @@ export const analyzerTuningSummary = {
     },
     {
       label: "Inconclusive OCR status",
-      value: "< 60% or sparse/unreadable",
-      detail: "Keeps low-confidence OCR in manual-review territory unless an independent suspicious indicator is present.",
+      value: "< 60%, unreadable, or very sparse",
+      detail: "Keeps low-confidence or very sparse OCR in manual-review territory unless an independent suspicious indicator is present.",
     },
     {
       label: "Report check clear",
@@ -42,8 +42,8 @@ export const analyzerTuningSummary = {
     },
     {
       label: "Blocking OCR signal",
-      value: "< 60% avg, unreadable, or inconclusive below 75%",
-      detail: "High-average OCR with token-level uncertainty stays visible as checkpoints without automatically creating an OCR review signal.",
+      value: "< 60% avg, unreadable, inconclusive below 75%, or < 12 words",
+      detail: "High-average OCR with enough coverage and token-level uncertainty stays visible as checkpoints; very sparse OCR becomes evidence-limited.",
     },
     {
       label: "Field reliability adjustment",
@@ -52,8 +52,8 @@ export const analyzerTuningSummary = {
     },
     {
       label: "Sparse OCR",
-      value: "< 3 words or < 12 chars",
-      detail: "Marks OCR as unreadable so missing fields are treated as evidence-quality limits; falls back to text-token count when OCR word metadata is unavailable.",
+      value: "< 3 words unreadable; < 12 inconclusive; < 20 usable",
+      detail: "Prevents high confidence over sparse extracted text from being labeled Clear; falls back to text-token count when OCR word metadata is unavailable.",
     },
   ],
   metadataRisk: [

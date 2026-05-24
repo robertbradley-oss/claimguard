@@ -27,6 +27,13 @@ function normalizeOcrText(text: string) {
     .trim();
 }
 
+const unreadableWordCount = 3;
+const unreadableTextLength = 12;
+const inconclusiveWordCount = 12;
+const inconclusiveTextLength = 60;
+const usableWordCount = 20;
+const usableTextLength = 100;
+
 function buildOcrQuality(params: {
   averageConfidence: number;
   wordCount: number;
@@ -37,22 +44,25 @@ function buildOcrQuality(params: {
   const lowConfidenceRate =
     params.wordCount > 0 ? Number((params.lowConfidenceWordCount / params.wordCount).toFixed(2)) : 0;
   let label: OcrQuality["label"] = "Clear";
+  const unreadableCoverage = params.textLength < unreadableTextLength || params.wordCount < unreadableWordCount;
+  const inconclusiveCoverage = params.textLength < inconclusiveTextLength || params.wordCount < inconclusiveWordCount;
+  const usableCoverage = params.textLength < usableTextLength || params.wordCount < usableWordCount;
 
-  if (params.averageConfidence === 0 || params.textLength < 12 || params.wordCount < 3) {
+  if (params.averageConfidence === 0 || unreadableCoverage) {
     label = "Unreadable";
-  } else if (params.averageConfidence < 45 || lowConfidenceRate >= 0.45) {
+  } else if (params.averageConfidence < 45 || lowConfidenceRate >= 0.45 || inconclusiveCoverage) {
     label = "Inconclusive";
-  } else if (params.averageConfidence < 70 || lowConfidenceRate >= 0.2) {
+  } else if (params.averageConfidence < 70 || lowConfidenceRate >= 0.2 || usableCoverage) {
     label = "Usable";
   }
 
   const summary =
     label === "Clear"
-      ? "OCR text is clear enough for local field parsing."
+      ? "OCR text has enough coverage and confidence for local field parsing."
       : label === "Usable"
-        ? "OCR text is usable, but low-confidence words may affect one or more receipt fields."
+        ? "OCR text is usable, but limited coverage or low-confidence words may affect one or more receipt fields."
         : label === "Inconclusive"
-          ? "OCR text is incomplete or uncertain, so findings should be treated as manual-review guidance."
+          ? "OCR text is sparse, incomplete, or uncertain, so findings should be treated as manual-review guidance."
           : "OCR text is unreadable or too sparse for reliable local analysis.";
 
   return {

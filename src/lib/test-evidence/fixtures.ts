@@ -18,6 +18,7 @@ export type SampleEvidenceFixtureId =
   | "amazon-invoice-detail"
   | "suspicious-edited-receipt"
   | "poor-quality-receipt"
+  | "sparse-high-confidence-pdf"
   | "pdf-receipt";
 
 export type FixtureExpectationResult = {
@@ -1338,6 +1339,52 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
         detail: `${result.receipt.missingFields.length} missing parsed field(s).`,
         note:
           "If this clears as clean with high OCR confidence, strengthen image-quality or missing-field penalties.",
+      },
+    ],
+  },
+  {
+    id: "sparse-high-confidence-pdf",
+    label: "Sparse high-confidence PDF",
+    fileName: "sparse-high-confidence-receipt.pdf",
+    type: "pdf",
+    description: "Synthetic text-layer PDF with high OCR confidence but too little extracted receipt text for clear coverage.",
+    expectedRisk: "Medium",
+    expectedOutcome: "Sparse high-confidence OCR should be evidence-limited, not Clear.",
+    tuningNotes:
+      "Use this to guard real cases where OCR confidence is high over only a few extracted words. Coverage, not confidence alone, should decide whether OCR is Clear.",
+    loadFile: async () =>
+      createPdfFile(
+        [
+          "AMAZON ORDER SUMMARY",
+          "TOTAL PAID $53.49",
+          "PAYMENT VISA ENDING 1111",
+        ],
+        "sparse-high-confidence-receipt.pdf",
+      ),
+    evaluate: (result) => [
+      {
+        label: "Sparse high-confidence OCR is not Clear",
+        status: expectationStatus(
+          result.ocr.engine === "pdfjs-text" &&
+            result.ocr.averageConfidence >= 90 &&
+            result.ocr.quality.wordCount < 12 &&
+            result.ocr.quality.label !== "Clear",
+        ),
+        detail: `${result.ocr.engine}; ${result.ocr.averageConfidence}% OCR; ${result.ocr.quality.wordCount} words; quality ${result.ocr.quality.label}.`,
+        note:
+          "A high confidence score across sparse text should not imply the receipt evidence is clearly readable.",
+      },
+      {
+        label: "Sparse OCR produces evidence-limit review status",
+        status: expectationStatus(
+          result.riskLevel === "Medium" &&
+            /unable to assess|manual review|could not be fully verified|inconclusive/i.test(
+              `${result.reviewLabel} ${result.recommendedSupportAction} ${result.customerSafeWording} ${result.evidenceSummary}`,
+            ),
+        ),
+        detail: `Received ${result.riskLevel} / ${result.reviewLabel} at ${result.score}.`,
+        note:
+          "Sparse receipt text should ask for manual review or clearer proof without implying external verification or intentional alteration.",
       },
     ],
   },

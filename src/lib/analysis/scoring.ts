@@ -52,7 +52,7 @@ function hasBlockingOcrQuality(ocr: OcrExtraction) {
   return (
     ocr.quality.label === "Unreadable" ||
     ocr.averageConfidence < 60 ||
-    (ocr.quality.label === "Inconclusive" && ocr.averageConfidence < 75)
+    (ocr.quality.label === "Inconclusive" && (ocr.averageConfidence < 75 || ocr.quality.wordCount < 12))
   );
 }
 
