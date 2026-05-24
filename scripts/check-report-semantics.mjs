@@ -94,6 +94,34 @@ const testEvidenceHarness = fileContents.get("src/components/TestEvidenceHarness
 const safeProductTableNote = "6 product table row(s) detected as item evidence.";
 const redactedProductTableNote = safeProductTableNote.replace(safeCountRedactionPattern, "[REDACTED_ADDRESS]");
 const redactedAddressSample = "123 Main St.".replace(safeCountRedactionPattern, "[REDACTED_ADDRESS]");
+const structurallySafeRedactedJsonSignals = [
+  /privacy-safe-redacted-diagnostic/i,
+  /redacted-structural/i,
+  /rawFieldsOmitted/i,
+  /redactedDiagnosticFor\(activeRealRun/i,
+  /ocr\.text/i,
+  /receipt\.rawText/i,
+  /metadata\.exif/i,
+  /finalReport raw narrative fields/i,
+];
+const redactedDiagnosticBody =
+  testEvidenceHarness.match(/function redactedDiagnosticFor[\s\S]*?function sessionTuningSummaryFor/)?.[0] ?? "";
+const forbiddenRedactedDiagnosticPatterns = [
+  /analysisResult\s*:/,
+  /finalReport\s*:/,
+  /text:\s*result\.ocr\.text/,
+  /lowConfidenceRegions\s*:\s*result\.ocr\.lowConfidenceRegions/,
+  /rawText\s*:\s*result\.receipt\.rawText/,
+  /name:\s*run\.file\.name/,
+  /fileName\s*:\s*result\.metadata\.fileName/,
+  /lastModifiedIso\s*:\s*result\.metadata\.lastModifiedIso/,
+  /exif\s*:\s*result\.metadata\.exif/,
+  /lineItemCandidates\s*:\s*result\.receipt\.parsingDetails\.lineItemCandidates/,
+  /rejectedLineItemCandidates\s*:\s*result\.receipt\.parsingDetails\.rejectedLineItemCandidates/,
+  /paymentCandidates\s*:\s*result\.receipt\.parsingDetails\.paymentCandidates/,
+  /contextCandidates\s*:\s*result\.receipt\.parsingDetails\.contextCandidates/,
+  /value:\s*field\.value/,
+];
 
 if (redactedProductTableNote !== safeProductTableNote) {
   failures.push("Privacy redaction check failed: product table row counts must remain visible in tuning observations.");
@@ -105,6 +133,26 @@ if (!redactedAddressSample.includes("[REDACTED_ADDRESS]")) {
 
 if (testEvidenceHarness.includes("\\s+[A-Za-z0-9 .'-]+(?:street|st")) {
   failures.push("Privacy redaction check failed: street-address pattern is broad enough to mask safe product-table count text.");
+}
+
+for (const pattern of structurallySafeRedactedJsonSignals) {
+  if (!pattern.test(testEvidenceHarness)) {
+    failures.push(`Privacy redacted JSON check failed: missing ${pattern}`);
+  }
+}
+
+if (!redactedDiagnosticBody) {
+  failures.push("Privacy redacted JSON check failed: redactedDiagnosticFor body was not found.");
+}
+
+for (const pattern of forbiddenRedactedDiagnosticPatterns) {
+  if (pattern.test(redactedDiagnosticBody)) {
+    failures.push(`Privacy redacted JSON check failed: raw/private-bearing field is still exported by redactedDiagnosticFor: ${pattern}`);
+  }
+}
+
+if (testEvidenceHarness.includes("redacted ? redactSensitiveValue(payload) : payload")) {
+  failures.push("Privacy redacted JSON check failed: redacted copy still appears to share the full payload with regex masking.");
 }
 
 if (failures.length > 0) {

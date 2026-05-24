@@ -128,11 +128,11 @@ The real-receipt session table compares uploaded files side by side by receipt c
 Real receipt copying has two modes:
 
 - `Copy tuning observation` is the preferred sharing format for threshold and reliability-score review. It includes file category, receipt class, manual QA notes, risk, Evidence Reliability Score, verification status, external verification status, internal structure confidence, OCR quality, parsed-field presence, score-rule impact, review signal titles/categories, and recommendation summary. It excludes raw OCR text, original file names, and parsed private values by default.
-- `Copy redacted JSON` masks obvious emails, phone numbers, full Amazon-style order IDs, long numeric order IDs, payment last-four values, street-address patterns, and file names before copying.
+- `Copy redacted JSON` is a diagnostic export with a structurally safe shape. It omits raw OCR text, low-confidence token text, raw receipt text, parsed candidate text values, context-row values, field values, raw final-report narrative fields, original file names, last-modified timestamps, and EXIF-like metadata by default. It keeps aggregate diagnostics such as receipt class, source category/confidence/cues, Evidence Reliability Score, verification status, external verification status, internal structure confidence, OCR quality/confidence/word counts, parsed-field presence booleans, candidate counts, missing field names, score breakdown categories, review signal title/category/severity/confidence, and presence/count-only source-specific summaries.
 - `Copy full JSON` is disabled until the privacy checklist confirms the source receipt was anonymized, OCR text was reviewed, and the full JSON payload was privacy-reviewed.
 - `Copy session tuning summary` exports the same privacy-safe observation shape for all completed real receipt runs in the current browser-memory session.
 
-Use `Copy redacted JSON` when debugging parser internals requires more structure than a tuning observation provides. Use `Copy full JSON` only for local/private debugging after manual privacy review. The redactor is a safety net for tuning discussions, not a guarantee. Review copied JSON before sharing it outside the local QA session.
+Use `Copy redacted JSON` only when debugging parser internals requires more structure than a tuning observation provides. Use `Copy full JSON` only for local/private debugging after manual privacy review. The redacted diagnostic shape is safer than regex masking alone, but reviewers should still inspect copied payloads before sharing them outside the local QA session.
 
 Before testing, redact or remove:
 

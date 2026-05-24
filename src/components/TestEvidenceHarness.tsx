@@ -417,6 +417,178 @@ function tuningObservationFor(run: RealReceiptRun, index: number) {
   return redactSensitiveValue(observation);
 }
 
+function redactedDiagnosticFor(run: RealReceiptRun, index: number) {
+  if (!run.result) {
+    return undefined;
+  }
+
+  const result = run.result;
+
+  const diagnostic = {
+    exportType: "privacy-safe-redacted-diagnostic",
+    privacyPosture:
+      "Diagnostic export with raw private-bearing structures omitted. Prefer Copy tuning observation or Copy session tuning summary for sharing.",
+    source: "temporary-real-receipt-qa",
+    privacyMode: "redacted-structural",
+    sessionItem: index + 1,
+    rawFieldsOmitted: [
+      "file.name",
+      "metadata.fileName",
+      "metadata.lastModifiedIso",
+      "metadata.exif",
+      "ocr.text",
+      "ocr.lowConfidenceRegions.text",
+      "ocr.uncertaintyNotes.samples",
+      "receipt.rawText",
+      "receipt.merchantName",
+      "receipt.orderNumber",
+      "receipt.purchaseDate",
+      "receipt.total",
+      "receipt.paymentMethod",
+      "receipt.parsingDetails line/payment/context candidate text values",
+      "receipt.fieldReliability.value",
+      "finalReport raw narrative fields",
+    ],
+    file: {
+      category: fileCategoryFor(run.file, result),
+      mimeType: run.file.type || "unknown",
+    },
+    privacyReview: {
+      checklist: run.status === "complete" ? "Redacted diagnostic shape used" : "Analysis incomplete",
+      detectedSensitivePatternCount: sensitiveFindingCount(result),
+    },
+    manualQa: {
+      ...manualQaSummaryFor(run.notes),
+      reviewerNotePresent: Boolean(run.notes.thresholdAdjustment.trim()),
+    },
+    analyzerResult: {
+      evidenceType: result.evidenceType,
+      evidenceLabel: result.evidenceLabel,
+      actualRisk: result.riskLevel,
+      evidenceReliabilityScore: result.score,
+      scoreLabel: result.scoreLabel,
+      verificationStatus: result.verificationStatus.status,
+      externalVerification: result.externalVerification,
+      internalStructureConfidence: result.internalStructureConfidence,
+      scoreMeaning: result.scoreMeaning,
+      confidenceLevel: result.confidenceLevel,
+      reviewLabel: result.reviewLabel,
+      ocr: {
+        engine: result.ocr.engine,
+        pages: result.ocr.pages,
+        qualityLabel: result.ocr.quality.label,
+        averageConfidence: result.ocr.averageConfidence,
+        wordCount: result.ocr.quality.wordCount,
+        lowConfidenceWordCount: result.ocr.quality.lowConfidenceWordCount,
+        lowConfidenceRatePercent: Math.round(result.ocr.quality.lowConfidenceRate * 100),
+        uncertaintyNoteSummary: result.ocr.uncertaintyNotes.map((note) => ({
+          label: note.label,
+          severity: note.severity,
+          sampleCount: note.samples.length,
+        })),
+      },
+      receipt: {
+        class: receiptClassFor(result),
+        source: {
+          category: result.receipt.sourceClassification.category,
+          confidence: result.receipt.sourceClassification.confidence,
+          cues: result.receipt.sourceClassification.cues,
+          legacyScoringSource: result.receipt.source,
+        },
+        parsedFieldPresence: parsedFieldPresenceSummary(result),
+        sourceSpecificSummary: sourceSpecificSummaryFor(result),
+        fieldReliability: result.receipt.fieldReliability.map((field) => ({
+          field: field.field,
+          confidence: field.confidence,
+          status: field.status,
+        })),
+        structure: {
+          hasMerchantPlatform: result.receipt.structure.hasMerchantPlatform,
+          hasOrderNumber: result.receipt.structure.hasOrderNumber,
+          hasPurchaseDate: result.receipt.structure.hasPurchaseDate,
+          hasTotal: result.receipt.structure.hasTotal,
+          hasPaymentMethod: result.receipt.structure.hasPaymentMethod,
+          hasLineItems: result.receipt.structure.hasLineItems,
+          hasSubtotal: result.receipt.structure.hasSubtotal,
+          hasTax: result.receipt.structure.hasTax,
+          hasShippingIndicator: result.receipt.structure.hasShippingIndicator,
+          currencyAmountCount: result.receipt.structure.currencyAmountCount,
+          amazonOrderFormat: result.receipt.structure.amazonOrderFormat,
+          amazonSignals: result.receipt.structure.amazonSignals
+            ? {
+                hasOrderPlacedCue: result.receipt.structure.amazonSignals.hasOrderPlacedCue,
+                hasItemsOrderedCue: result.receipt.structure.amazonSignals.hasItemsOrderedCue,
+                hasOrderSummaryCue: result.receipt.structure.amazonSignals.hasOrderSummaryCue,
+                hasOrderTotalCue: result.receipt.structure.amazonSignals.hasOrderTotalCue,
+                hasShipToOrDeliveryCue: result.receipt.structure.amazonSignals.hasShipToOrDeliveryCue,
+                hasArrivalOrShipmentCue: result.receipt.structure.amazonSignals.hasArrivalOrShipmentCue,
+                hasPaymentCue: result.receipt.structure.amazonSignals.hasPaymentCue,
+                hasMultiShipmentCue: result.receipt.structure.amazonSignals.hasMultiShipmentCue,
+                hasInvoiceCue: result.receipt.structure.amazonSignals.hasInvoiceCue,
+                hasSoldByCue: result.receipt.structure.amazonSignals.hasSoldByCue,
+                hasBillingCue: result.receipt.structure.amazonSignals.hasBillingCue,
+                hasPromotionCue: result.receipt.structure.amazonSignals.hasPromotionCue,
+                hasOrderNumberIssue: Boolean(result.receipt.structure.amazonSignals.orderNumberIssue),
+              }
+            : undefined,
+        },
+      },
+      metadata: {
+        mimeType: result.metadata.mimeType,
+        metadataAvailable: result.metadata.metadataAvailable,
+        metadataNoteCount: result.metadata.metadataNotes.length,
+        contextStatus: result.metadata.context.status,
+        image: result.metadata.image
+          ? {
+              width: result.metadata.image.width,
+              height: result.metadata.image.height,
+              megapixels: result.metadata.image.megapixels,
+            }
+          : undefined,
+        pdf: result.metadata.pdf,
+      },
+      imageQuality: {
+        qualityLevel: result.imageHeuristics.qualityLevel,
+        compressionLevel: result.imageHeuristics.compressionLevel,
+        formattingAlignment: result.imageHeuristics.formattingAlignment,
+        evidenceQualityIndicatorCount: result.imageHeuristics.evidenceQualityIndicators.length,
+        sourceContextIndicatorCount: result.imageHeuristics.sourceContextIndicators.length,
+        potentialEditingIndicatorCount: result.imageHeuristics.potentialEditingIndicators.length,
+      },
+      scoreBreakdown: {
+        formula: result.scoreBreakdown.formula,
+        interpretation: result.scoreBreakdown.interpretation,
+        categories: scoreRuleSummary(result),
+        riskBands: result.scoreBreakdown.riskBands,
+        signalPenalties: result.scoreBreakdown.signalPenalties.map((penalty) => ({
+          title: penalty.title,
+          severity: penalty.severity,
+          penalty: penalty.penalty,
+        })),
+      },
+      reviewSignals: result.signals.map((signal) => ({
+        title: signal.title,
+        category: signal.evidenceSource,
+        severity: signal.severity,
+        confidence: signal.confidence,
+      })),
+      findingGroups: result.findingGroups.map((group) => ({
+        category: group.category,
+        status: group.status,
+        detailLabels: group.details.map((detail) => detail.label),
+        relatedSignalIds: group.relatedSignalIds,
+      })),
+      recommendationSummary: {
+        supportAction: result.recommendedSupportAction,
+        customerSafeWording: result.customerSafeWording,
+        evidenceSummary: result.evidenceSummary,
+      },
+    },
+  };
+
+  return redactSensitiveValue(diagnostic);
+}
+
 function sessionTuningSummaryFor(runs: RealReceiptRun[]) {
   const completedRuns = runs.filter((run) => Boolean(run.result));
 
@@ -1005,7 +1177,7 @@ function RealReceiptQaSection({
 
       <div className="mt-4 rounded-lg border border-[rgba(251,191,36,0.35)] bg-[rgba(251,191,36,0.08)] p-3 text-sm leading-6 text-amber-100">
         Redact customer name, address, email, phone number, payment details, and sensitive full order identifiers before testing.
-        Use tuning observations for sharing by default. Redacted JSON masks obvious sensitive values as a fallback.
+        Use tuning observations for sharing by default. Redacted JSON is a diagnostic export with raw OCR and private-bearing structures omitted.
         Full JSON copying is enabled only after the privacy checklist is complete.
       </div>
 
@@ -1198,7 +1370,7 @@ function RealReceiptQaSection({
                     className="inline-flex items-center gap-2 rounded-lg border border-[var(--cg-border)] px-3 py-2 text-sm font-semibold text-white transition hover:border-[var(--cg-border-strong)]"
                     type="button"
                     onClick={() => onCopyJson(true)}
-                    title="Copy a redacted JSON payload with obvious sensitive values masked"
+                    title="Copy a diagnostic JSON shape with raw OCR and private-bearing parsed structures omitted"
                   >
                     {copiedMode === "redacted" ? <ClipboardCheck className="size-4" aria-hidden="true" /> : <Clipboard className="size-4" aria-hidden="true" />}
                     {copiedMode === "redacted" ? "Copied redacted JSON" : "Copy redacted JSON"}
@@ -1220,8 +1392,8 @@ function RealReceiptQaSection({
             <div className="mt-4 rounded-lg border border-[rgba(53,217,255,0.3)] bg-[rgba(53,217,255,0.07)] p-3 text-sm leading-6 text-cyan-100">
               `Copy tuning observation` is the preferred sharing format for threshold and reliability-score review. It avoids raw OCR text,
               original file names, parsed private values, full order IDs, payment last-four values, names, addresses, emails, phone numbers,
-              and tracking numbers by default. `Copy redacted JSON` masks obvious sensitive values before copying. Review copied JSON
-              before sharing because redaction is a safety net, not a guarantee.
+              and tracking numbers by default. `Copy redacted JSON` is for diagnostics and omits raw OCR text, raw parsed candidate text,
+              EXIF-like metadata, file names, and raw final-report fields by default.
             </div>
 
             <div className="mt-4 grid gap-2 rounded-lg border border-[rgba(251,191,36,0.28)] bg-[rgba(251,191,36,0.06)] p-3">
@@ -1532,28 +1704,29 @@ export function TestEvidenceHarness() {
       return;
     }
 
-    const payload = {
-      source: "temporary-real-receipt-qa",
-      privacyMode: redacted ? "redacted" : "full-privacy-reviewed",
-      privacyReminder: redacted
-        ? "Redacted JSON masks obvious sensitive values, but reviewers should still inspect copied payloads before sharing."
-        : "Real receipt QA is browser-local only. Do not commit customer evidence. Confirm copied JSON does not contain private customer data before sharing.",
-      privacyChecklist,
-      detectedSensitivePatternCount: sensitiveFindingCount(activeRealRun.result),
-      file: {
-        name: activeRealRun.file.name,
-        type: activeRealRun.file.type,
-        size: activeRealRun.file.size,
-        lastModified: activeRealRun.file.lastModified,
-      },
-      manualQaNotes: activeRealRun.notes,
-      scoreRuleSummary: scoreRuleSummary(activeRealRun.result),
-      analysisResult: activeRealRun.result,
-      finalReport: mapLocalAnalysisToReport(activeRealRun.result),
-    };
-    const copyPayload = redacted ? redactSensitiveValue(payload) : payload;
+    const activeIndex = realRuns.findIndex((run) => run.id === activeRealRun.id);
+    const payload = redacted
+      ? redactedDiagnosticFor(activeRealRun, activeIndex >= 0 ? activeIndex : 0)
+      : {
+          source: "temporary-real-receipt-qa",
+          privacyMode: "full-privacy-reviewed",
+          privacyReminder:
+            "Real receipt QA is browser-local only. Do not commit customer evidence. Confirm copied JSON does not contain private customer data before sharing.",
+          privacyChecklist,
+          detectedSensitivePatternCount: sensitiveFindingCount(activeRealRun.result),
+          file: {
+            name: activeRealRun.file.name,
+            type: activeRealRun.file.type,
+            size: activeRealRun.file.size,
+            lastModified: activeRealRun.file.lastModified,
+          },
+          manualQaNotes: activeRealRun.notes,
+          scoreRuleSummary: scoreRuleSummary(activeRealRun.result),
+          analysisResult: activeRealRun.result,
+          finalReport: mapLocalAnalysisToReport(activeRealRun.result),
+        };
 
-    await copyTextToClipboard(JSON.stringify(copyPayload, null, 2));
+    await copyTextToClipboard(JSON.stringify(payload, null, 2));
     setCopiedRealMode(redacted ? "redacted" : "full");
     window.setTimeout(() => setCopiedRealMode(null), 1600);
   }
