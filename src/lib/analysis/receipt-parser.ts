@@ -37,8 +37,9 @@ function findFirstMatch(text: string, patterns: RegExp[]) {
   return undefined;
 }
 
-function normalizeOrderNumber(orderNumber?: string) {
-  const cleaned = orderNumber
+function normalizeOrderNumber(orderNumber?: string, sourceCategory?: ReceiptSourceCategory) {
+  const sourceCleaned = isHomeDepotSource(sourceCategory) ? orderNumber?.replace(/^\s*#+\s*/, "") : orderNumber;
+  const cleaned = sourceCleaned
     ?.replace(/[=\u2013\u2014]/g, "-")
     .replace(/\s*-\s*/g, "-")
     .replace(/[^\dA-Z\s-].*$/i, "")
@@ -65,7 +66,7 @@ function normalizeOrderNumber(orderNumber?: string) {
 }
 
 function orderIdentifierLooksUsable(value?: string, sourceCategory?: ReceiptSourceCategory) {
-  const normalized = normalizeOrderNumber(value);
+  const normalized = normalizeOrderNumber(value, sourceCategory);
 
   if (!normalized || !/\d/.test(normalized)) {
     return false;
@@ -79,11 +80,20 @@ function orderIdentifierLooksUsable(value?: string, sourceCategory?: ReceiptSour
     return false;
   }
 
+  if (
+    isHomeDepotSource(sourceCategory) &&
+    /\b(store|location|pickup|delivery|fulfillment|payment|subtotal|tax|total|refund|return|items?|qty|quantity|ready|scheduled|processing|complete|completed|cancelled|canceled|shipped|delivered|address)\b/i.test(
+      normalized,
+    )
+  ) {
+    return false;
+  }
+
   return isHomeDepotSource(sourceCategory) ? normalized.length >= 5 : normalized.length >= 4;
 }
 
 function orderIdentifierFromValue(value?: string, sourceCategory?: ReceiptSourceCategory) {
-  return orderIdentifierLooksUsable(value, sourceCategory) ? normalizeOrderNumber(value) : undefined;
+  return orderIdentifierLooksUsable(value, sourceCategory) ? normalizeOrderNumber(value, sourceCategory) : undefined;
 }
 
 function getOrderNumber(lines: string[], text: string, sourceCategory?: ReceiptSourceCategory) {
@@ -391,6 +401,10 @@ function amountMatchesFor(line: string) {
   return [...line.matchAll(/(?:\b(?:USD|CAD)\s*)?\$?\s*(\d[\d,]*[.]\d{2})/gi)];
 }
 
+function standaloneAmountLineMatch(line?: string) {
+  return line?.match(/^\s*(?:USD|CAD)?\s*\$?\s*(\d[\d,]*[.]\d{2})\s*$/i);
+}
+
 function hasAmount(line: string) {
   return amountMatchesFor(line).length > 0;
 }
@@ -417,6 +431,44 @@ function hasProductLikeText(text: string) {
   return /[a-z]{3,}/i.test(text) && text.length >= 6;
 }
 
+function getHomeDepotAdjacentTotalAmount(lines: string[], lineIndex: number, sourceCategory?: ReceiptSourceCategory) {
+  const line = lines[lineIndex];
+
+  if (
+    !isHomeDepotSource(sourceCategory) ||
+    amountPriorityFor(line, sourceCategory) < 88 ||
+    !/\b(order\s*total|pickup\s*(?:order\s*)?total|delivery\s*(?:order\s*)?total|refund\s*total|total\s*paid|amount\s*paid|payment\s*total|total\s*charged|amount\s*charged|total)\b/i.test(
+      line,
+    )
+  ) {
+    return undefined;
+  }
+
+  for (let offset = 1; offset <= 4; offset += 1) {
+    const candidateLine = lines[lineIndex + offset];
+
+    if (!candidateLine) {
+      return undefined;
+    }
+
+    const amountMatch = standaloneAmountLineMatch(candidateLine);
+
+    if (amountMatch?.[1]) {
+      return amountMatch[1];
+    }
+
+    if (/^\s*(?:USD|CAD)\s*$/i.test(candidateLine)) {
+      continue;
+    }
+
+    if (hasAmount(candidateLine) || fieldLabelPattern.test(candidateLine)) {
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
+
 function getAmountCandidates(lines: string[], sourceCategory?: ReceiptSourceCategory) {
   return lines.flatMap((line, lineIndex) => {
     const matches = amountMatchesFor(line);
@@ -432,7 +484,8 @@ function getAmountCandidates(lines: string[], sourceCategory?: ReceiptSourceCate
       matchIndex,
     }));
     const nextLine = lines[lineIndex + 1];
-    const nextLineAmount = nextLine?.match(/^\s*(?:USD|CAD)?\s*\$?\s*(\d[\d,]*[.]\d{2})\s*$/i);
+    const nextLineAmount = standaloneAmountLineMatch(nextLine);
+    const homeDepotTotalAmount = nextLineAmount?.[1] ? undefined : getHomeDepotAdjacentTotalAmount(lines, lineIndex, sourceCategory);
     const shouldPairNextLine =
       !matches.length &&
       nextLineAmount?.[1] &&
@@ -441,7 +494,9 @@ function getAmountCandidates(lines: string[], sourceCategory?: ReceiptSourceCate
         line,
       );
 
-    if (!shouldPairNextLine) {
+    const shouldPairHomeDepotTotal = !matches.length && Boolean(homeDepotTotalAmount);
+
+    if (!shouldPairNextLine && !shouldPairHomeDepotTotal) {
       return lineCandidates;
     }
 
@@ -449,7 +504,7 @@ function getAmountCandidates(lines: string[], sourceCategory?: ReceiptSourceCate
       ...lineCandidates,
       {
         label: cleanAmountLabel(line) || "Adjacent amount label",
-        value: normalizeAmount(nextLineAmount[1]) ?? nextLineAmount[1],
+        value: normalizeAmount(nextLineAmount?.[1] ?? homeDepotTotalAmount) ?? nextLineAmount?.[1] ?? homeDepotTotalAmount ?? "",
         priority,
         category,
         lineIndex,
@@ -508,7 +563,10 @@ function paymentKindFor(line: string, sourceCategory?: ReceiptSourceCategory): R
     return "card";
   }
 
-  if (isHomeDepotSource(sourceCategory) && /\b(?:card|credit|debit|visa|mastercard|amex|american express|discover)\b/i.test(line)) {
+  if (
+    isHomeDepotSource(sourceCategory) &&
+    (/\b(?:card|credit|debit|visa|mastercard|amex|american express|discover)\b/i.test(line) || hasVisiblePaymentLastFour(line))
+  ) {
     return "card";
   }
 
@@ -522,7 +580,7 @@ function paymentKindFor(line: string, sourceCategory?: ReceiptSourceCategory): R
 function hasPaymentCue(line: string, sourceCategory?: ReceiptSourceCategory) {
   if (
     isHomeDepotSource(sourceCategory) &&
-    /\b(payment|payments|payment type|payment method|method of payment|payment information|payment details|paid with|paid by|charged to|charged|tender|tender type|tendered|visa|mastercard|amex|american express|discover|credit|debit|card|paypal|gift card|store credit|commercial card|pro\s*xtra)\b/i.test(
+    /\b(payment|payments|payment type|payment method|method of payment|payment information|payment details|paid with|paid by|charged to|charged|tender|tender type|tendered|visa|mastercard|amex|american express|discover|credit|debit|card|paypal|gift card|store credit|commercial card|pro\s*xtra|ending(?:\s+(?:in|with))?|last\s*(?:four|4)|x{2,}|\*{2,})\b/i.test(
       line,
     )
   ) {
@@ -573,10 +631,11 @@ function getPaymentCandidates(lines: string[], sourceCategory?: ReceiptSourceCat
     const nextLine = lines[lineIndex + 1];
     const nextNextLine = lines[lineIndex + 2];
     const amazonInvoiceOrDetail = isAmazonInvoiceOrDetailSource(sourceCategory);
+    const supportsTwoLinePaymentDetail = amazonInvoiceOrDetail || isHomeDepotSource(sourceCategory);
 
     if (hasPaymentLabel(line, sourceCategory) && nextLine && !hasPaymentLabel(nextLine, sourceCategory) && hasPaymentCue(nextLine, sourceCategory)) {
       const paymentDetailLines =
-        amazonInvoiceOrDetail && nextNextLine && !fieldLabelPattern.test(nextNextLine) && hasPaymentCue(nextNextLine, sourceCategory)
+        supportsTwoLinePaymentDetail && nextNextLine && !fieldLabelPattern.test(nextNextLine) && hasPaymentCue(nextNextLine, sourceCategory)
           ? [nextLine, nextNextLine]
           : [nextLine];
       const value = normalizePaymentMethod(`${line} ${paymentDetailLines.join(" ")}`) ?? `${line} ${paymentDetailLines.join(" ")}`;
@@ -595,7 +654,7 @@ function getPaymentCandidates(lines: string[], sourceCategory?: ReceiptSourceCat
     }
 
     if (
-      amazonInvoiceOrDetail &&
+      supportsTwoLinePaymentDetail &&
       previousPreviousLine &&
       previousLine &&
       hasPaymentLabel(previousPreviousLine, sourceCategory) &&
@@ -1305,8 +1364,15 @@ function buildVendorOrderSummary(params: {
   lineItems: string[];
   amountCategories: Partial<Record<ReceiptAmountCategory, string[]>>;
   paymentCandidates: ReceiptPaymentCandidate[];
+  parsedFields?: {
+    orderNumber?: string;
+    purchaseDate?: string;
+    total?: string;
+    paymentMethod?: string;
+  };
   classification: ReceiptSourceClassification;
 }): ReceiptSourceStructureSummary {
+  const alignWithParsedFields = params.classification.category === "home-depot-order";
   const fields = [
     fieldSummary({
       key: "vendorMarker",
@@ -1318,15 +1384,21 @@ function buildVendorOrderSummary(params: {
     fieldSummary({
       key: "orderOrReceiptId",
       label: "Order or receipt ID cue present",
-      present: /\b(online\s+order|order\s*(?:#|id|number|no\.?|confirmation|details)|receipt\s*(?:#|id|number|no\.?)|transaction\s*(?:#|id|number|no\.?))\b/i.test(params.text),
+      present:
+        /\b(online\s+order|order\s*(?:#|id|number|no\.?|confirmation|details)|receipt\s*(?:#|id|number|no\.?)|transaction\s*(?:#|id|number|no\.?))\b/i.test(
+          params.text,
+        ) ||
+        (alignWithParsedFields && Boolean(params.parsedFields?.orderNumber)),
       presentNote: "Order, receipt, or transaction identifier label detected without exposing the identifier.",
       missingNote: "Order, receipt, or transaction identifier label was not detected.",
     }),
     fieldSummary({
       key: "dateCue",
       label: "Date cue present",
-      present: /\b(date|date ordered|order date|purchase date|purchased|ordered|placed|transaction date|invoice date)\b/i.test(params.text),
-      presentNote: "A purchase/order/date cue was detected.",
+      present:
+        /\b(date|date ordered|order date|purchase date|purchased|ordered|placed|transaction date|invoice date)\b/i.test(params.text) ||
+        (alignWithParsedFields && Boolean(params.parsedFields?.purchaseDate)),
+      presentNote: "A purchase/order/date cue or parsed purchase date was detected.",
       missingNote: "Purchase/order/date cue was not detected.",
     }),
     fieldSummary({
@@ -1340,14 +1412,19 @@ function buildVendorOrderSummary(params: {
     fieldSummary({
       key: "amountStructure",
       label: "Amount structure present",
-      present: Boolean(params.amountCategories.subtotal?.length || params.amountCategories.tax?.length || params.amountCategories.total?.length),
-      presentNote: "Subtotal, tax, or total amount structure detected.",
+      present: Boolean(
+        params.amountCategories.subtotal?.length ||
+          params.amountCategories.tax?.length ||
+          params.amountCategories.total?.length ||
+          (alignWithParsedFields && params.parsedFields?.total),
+      ),
+      presentNote: "Subtotal, tax, total amount structure, or parsed total detected.",
       missingNote: "Subtotal, tax, or total amount structure was not detected.",
     }),
     fieldSummary({
       key: "paymentCue",
       label: "Payment or tender cue present",
-      present: params.paymentCandidates.length > 0,
+      present: params.paymentCandidates.length > 0 || (alignWithParsedFields && Boolean(params.parsedFields?.paymentMethod)),
       count: params.paymentCandidates.length,
       presentNote: `${params.paymentCandidates.length} payment/tender cue(s) detected without exposing payment values.`,
       missingNote: "Payment/tender cue was not detected.",
@@ -1464,6 +1541,12 @@ function buildSourceSpecificSummary(params: {
   lineItems: string[];
   amountCategories: Partial<Record<ReceiptAmountCategory, string[]>>;
   paymentCandidates: ReceiptPaymentCandidate[];
+  parsedFields: {
+    orderNumber?: string;
+    purchaseDate?: string;
+    total?: string;
+    paymentMethod?: string;
+  };
 }) {
   if (params.classification.category === "ispring-direct-invoice") {
     return buildISpringDirectSummary({
@@ -1493,6 +1576,7 @@ function buildSourceSpecificSummary(params: {
       lineItems: params.lineItems,
       amountCategories: params.amountCategories,
       paymentCandidates: params.paymentCandidates,
+      parsedFields: params.parsedFields,
       classification: params.classification,
     });
   }
@@ -1582,6 +1666,12 @@ export function parseReceiptText(rawText: string): ExtractedReceiptInfo {
     lineItems,
     amountCategories,
     paymentCandidates,
+    parsedFields: {
+      orderNumber,
+      purchaseDate,
+      total,
+      paymentMethod,
+    },
   });
   const amountReviewNotes = buildAmountReviewNotes({ amountCategories, text });
   const paymentReviewNotes = buildPaymentReviewNotes(paymentCandidates);

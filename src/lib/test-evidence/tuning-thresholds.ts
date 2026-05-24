@@ -123,8 +123,8 @@ export const analyzerTuningSummary = {
     },
     {
       label: "Home Depot field extraction",
-      value: "online order + pickup/refund total + tender",
-      detail: "Home Depot source-scoped parsing pairs online order labels with adjacent order-token rows, treats pickup/delivery/refund total labels as selectable totals, and recognizes tender/card payment rows without changing broad scoring thresholds.",
+      value: "online order + long total + tender",
+      detail: "Home Depot source-scoped parsing pairs online order labels with adjacent order-token rows, treats pickup/delivery/refund/order total labels as selectable totals across short label gaps, recognizes tender/card payment rows, and keeps source summaries aligned to parsed cues without changing broad scoring thresholds.",
     },
     {
       label: "Generic source diagnostics",

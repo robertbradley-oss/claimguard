@@ -9,6 +9,7 @@ export type SampleEvidenceFixtureId =
   | "generic-split-summary"
   | "home-depot-order"
   | "home-depot-split-order"
+  | "home-depot-long-order-detail"
   | "costco-order"
   | "lowes-email-order"
   | "ispring-direct-invoice"
@@ -694,6 +695,104 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
         }.`,
         note:
           "Home Depot order tokens should not create Amazon order-number validation behavior.",
+      },
+    ],
+  },
+  {
+    id: "home-depot-long-order-detail",
+    label: "Home Depot long order detail",
+    fileName: "home-depot-long-order-detail.pdf",
+    type: "pdf",
+    description: "Synthetic Home Depot order-detail layout with separated order, standalone date, long total, and two-line card cues.",
+    expectedRisk: "Low",
+    expectedOutcome: "Long Home Depot order-detail layouts should keep parsed fields and source summaries aligned without leaking values.",
+    tuningNotes:
+      "Use this to tune Home Depot / Home Depot Canada long order-detail receipts only. The order token and payment digits are partial synthetic values for parser QA.",
+    loadFile: async () =>
+      createPdfFile(
+        [
+          "THE HOME DEPOT",
+          "Order Details",
+          "Online Order #",
+          "#HD9A12XX",
+          "05/16/2026",
+          "Fulfillment",
+          "Store Pickup",
+          "Item",
+          "iSpring whole house filter $149.04",
+          "Qty 1",
+          "Order Total",
+          "CAD",
+          "$149.04",
+          "Payment Details",
+          "Commercial Card",
+          "ending in XXXX",
+          "Pickup instructions",
+          "Thank you for shopping",
+        ],
+        "home-depot-long-order-detail.pdf",
+        { fontSize: 13, lineHeight: 24, startY: 742 },
+      ),
+    evaluate: (result) => [
+      {
+        label: "Home Depot long detail source is classified",
+        status: expectationStatus(
+          result.receipt.sourceClassification.category === "home-depot-order" &&
+            result.receipt.source === "merchant-receipt" &&
+            result.receipt.structure.amazonOrderFormat === "not-applicable",
+          "Warning",
+        ),
+        detail: `Class ${result.receipt.sourceClassification.label}; confidence ${result.receipt.sourceClassification.confidence}%; Amazon format ${result.receipt.structure.amazonOrderFormat}.`,
+        note:
+          "A long Home Depot order-detail receipt should stay in the supported Home Depot lane and skip Amazon-only validation.",
+      },
+      {
+        label: "Home Depot long detail fields are extracted",
+        status: expectationStatus(
+          Boolean(
+            result.receipt.orderNumber === "HD9A12XX" &&
+              result.receipt.purchaseDate === "05/16/2026" &&
+              result.receipt.total === "149.04" &&
+              /Order Total/i.test(result.receipt.parsingDetails.selectedTotalSource ?? "") &&
+              /Payment detail after label/i.test(result.receipt.parsingDetails.paymentSource ?? "") &&
+              /ending in XXXX/i.test(result.receipt.paymentMethod ?? ""),
+          ),
+          "Warning",
+        ),
+        detail: `Order ${result.receipt.orderNumber ?? "missing"}; date ${
+          result.receipt.purchaseDate ?? "missing"
+        } from ${result.receipt.parsingDetails.purchaseDateSource ?? "no source"}; total ${
+          result.receipt.total ?? "missing"
+        } from ${result.receipt.parsingDetails.selectedTotalSource ?? "no source"}; payment ${
+          result.receipt.paymentMethod ? "present" : "missing"
+        } from ${result.receipt.parsingDetails.paymentSource ?? "no source"}.`,
+        note:
+          "Separated order labels, standalone date values, multi-line totals, and card/tender rows should populate local parsed fields for manual matching.",
+      },
+      {
+        label: "Home Depot long detail rejects fulfillment text as order ID",
+        status: expectationStatus(!/\b(pickup|delivery|payment|total|tax|fulfillment|item|qty)\b/i.test(result.receipt.orderNumber ?? ""), "Warning"),
+        detail: `Order field ${result.receipt.orderNumber ?? "missing"}.`,
+        note:
+          "Fulfillment, payment, and total labels should not be promoted into the order-number field when an order token is absent or split.",
+      },
+      {
+        label: "Home Depot long detail summary matches parsed cues safely",
+        status: expectationStatus(
+          Boolean(
+            result.receipt.sourceSpecificSummary?.category === "home-depot-order" &&
+              result.receipt.sourceSpecificSummary.fields.find((field) => field.key === "dateCue")?.present &&
+              result.receipt.sourceSpecificSummary.fields.find((field) => field.key === "amountStructure")?.present &&
+              result.receipt.sourceSpecificSummary.fields.find((field) => field.key === "paymentCue")?.present &&
+              !/HD9A12XX|05\/16\/2026|149\.04|Commercial Card/i.test(JSON.stringify(result.receipt.sourceSpecificSummary)),
+          ),
+          "Warning",
+        ),
+        detail: result.receipt.sourceSpecificSummary
+          ? `${result.receipt.sourceSpecificSummary.confidence}% confidence; ${result.receipt.sourceSpecificSummary.fieldsPresent}/${result.receipt.sourceSpecificSummary.fieldsExpected} fields.`
+          : "No source summary.",
+        note:
+          "Home Depot summaries should mark parsed date, amount, and payment cues as present while remaining presence/count-only.",
       },
     ],
   },
