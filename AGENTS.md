@@ -1,54 +1,439 @@
-# ClaimGuard Agent Guide
+# ClaimGuard Multi-Agent Guide
 
-This file tells future Codex agents how to work on ClaimGuard.
+This file tells future Codex agents how to route and execute ClaimGuard work.
 
-## Project Purpose
+For quick routing examples, read `ROUTING.md`. For current priorities, read `NEXT_STEPS.md`. For prior autonomous work, read `AGENT_LOG.md`.
 
-ClaimGuard is a SaaS-style fraud-risk screening app for customer support and warranty teams. It helps reps review customer-submitted claim evidence and decide whether a claim is ready to approve, needs proof-of-purchase verification, or should be routed to manual review.
+## Current Product Phase
 
-ClaimGuard must flag risk carefully. It must never accuse a customer or state that fraud is confirmed.
+ClaimGuard is in Phase 1: Receipt Authenticity Analyzer.
 
-## Main Workflow
+Phase 1 proves receipt intelligence. The active product focus is:
 
-The core workflow is:
+- Receipt upload
+- OCR extraction
+- PDF handling
+- Receipt parsing
+- Source classification
+- Amazon, iSpring, and Lowe's receipt validation
+- Metadata and image-quality heuristics
+- Evidence Reliability Score
+- Score breakdown
+- `/test-evidence` manual QA
+- Real Receipt QA
+- Privacy-safe tuning observations
+- Customer-safe report wording
 
-1. A support rep opens a claim case.
-2. The rep uploads a receipt, screenshot, PDF, or product damage photo.
-3. ClaimGuard returns a careful authenticity and risk report.
-4. The report includes an authenticity score, risk level, red flags, evidence summary, suggested support action, and customer-safe wording.
-5. The rep uses the result as a review aid, not as a final fraud determination.
+Phase 1 is not about:
 
-The current app uses mock data only. Do not connect real AI, OCR, Gmail, Vercel APIs, databases, or payment systems unless the user explicitly asks.
+- Auth
+- Billing
+- Enterprise dashboards
+- Marketing pages
+- Ticket integrations
+- Gmail, Zendesk, or Freshdesk
+- Full product-damage AI image detection
+- Server-side OCR unless Robert explicitly approves it for the current phase
 
-## Tech Stack
+## Project Basics
 
-Based on the current repo:
+Based on the current repo, ClaimGuard uses Next.js App Router, React, TypeScript, Tailwind CSS, lucide-react icons, and npm.
 
-- Next.js App Router
-- React
-- TypeScript
-- Tailwind CSS
-- lucide-react icons
-- npm
-- Vercel-ready project configuration
+Important local files:
 
-## Folder Structure
+- `src/app/page.tsx`: main analyzer screen.
+- `src/app/test-evidence/`: developer/manual QA evidence harness route.
+- `src/components/TestEvidenceHarness.tsx`: `/test-evidence` manual QA UI.
+- `src/lib/analysis/`: local analyzer modules.
+- `src/lib/test-evidence/`: fake fixtures and fixture helpers.
+- `TEST_EVIDENCE.md`: manual QA and fixture guidance.
+- `ROUTING.md`: short agent-routing reference.
+- `NEXT_STEPS.md`: current roadmap notes.
+- `AGENT_LOG.md`: project-agent work log.
+- `AGENT_INBOX.md`: queued user requests only; do not add direct `/claimguardagent` tasks here.
 
-- `src/app/page.tsx`: main dashboard screen.
-- `src/app/layout.tsx`: app metadata, font setup, and root layout.
-- `src/app/globals.css`: global CSS, theme tokens, and page background styling.
-- `DESIGN.md`: ClaimGuard visual system and design tokens.
-- `src/components/`: reusable UI components.
-- `src/components/AppSidebar.tsx`: sidebar navigation and ClaimGuard brand mark.
-- `src/components/UploadPanel.tsx`: local upload UI for receipts, photos, screenshots, and PDFs.
-- `src/components/TicketPreview.tsx`: ticket-style warranty claim preview.
-- `src/components/RiskScoreCard.tsx`: authenticity score and risk level summary.
-- `src/components/RedFlagsList.tsx`: careful risk-signal list.
-- `src/components/AnalysisReport.tsx`: evidence summary, suggested action, and customer-safe wording.
-- `src/components/RecentCasesTable.tsx`: recent case queue table.
-- `src/lib/claim-data.ts`: mock dashboard data, cases, navigation, and red flags.
-- `package.json`: scripts and dependencies.
-- `.gitignore`: ignored local, build, dependency, Vercel, and environment files.
+## Primary Operating Rule
+
+Before doing ClaimGuard work, Codex must classify the request, select the best primary specialized agent, state that selection and why, note any secondary concerns, and then work inside that agent's scope.
+
+If a request is ambiguous, default to the most conservative Phase 1 agent. Do not expand scope.
+
+## Routing Behavior
+
+For every ClaimGuard task:
+
+1. Read Robert's request.
+2. Select exactly one best primary agent.
+3. Mention the selected agent and why before doing work.
+4. Note any secondary agents whose concerns matter.
+5. Stay within the selected agent's scope.
+6. Complete the smallest useful high-value change.
+7. Run appropriate checks.
+8. End with the expanded CLAIMGUARD HANDOFF.
+
+If a task touches multiple areas:
+
+- Choose one primary agent.
+- Include secondary considerations.
+- Do not try to solve unrelated product areas in the same pass.
+
+## Global ClaimGuard Rules
+
+- Never claim fraud is confirmed.
+- Never accuse customers.
+- Never say a customer submitted a fake receipt.
+- Never imply local analysis proves a receipt is real.
+- Do not store or commit real customer receipts.
+- Real customer receipts must stay browser-local unless Robert explicitly approves a different workflow.
+- Do not expose names, addresses, emails, phones, payment details, full order IDs, tracking numbers, or raw OCR by default.
+- Do not redesign the main app unless Robert explicitly asks.
+- Do not add auth, billing, dashboards, marketing pages, or integrations during Phase 1 unless Robert explicitly says to.
+- Keep all work modular and testable.
+- Prefer useful analyzer improvements over cosmetic polish.
+- Use fake data only for committed fixtures.
+- Do not make OCR expectations CI-blocking yet.
+- Preserve unrelated user changes in the working tree.
+- Do not connect real AI, OCR, Gmail, Drive, ticket systems, databases, auth, Vercel APIs, or payment systems unless explicitly approved.
+
+## Preferred Customer-Safe Language
+
+Prefer:
+
+- "Evidence Reliability Score"
+- "Receipt Reliability Score"
+- "Internal consistency"
+- "Verification Status: Not externally verified"
+- "External Verification: Not performed"
+- "Potential alteration indicators"
+- "Manual review recommended"
+- "Receipt details could not be fully verified"
+- "Findings are inconclusive"
+- "Additional proof of purchase may be needed"
+
+Avoid:
+
+- "Verified authentic"
+- "Definitely real"
+- "Fake receipt"
+- "Fraud confirmed"
+- "Customer committed fraud"
+- "Deny this claim"
+
+## Task Quality Expectations
+
+Each agent should think like a senior product and engineering operator:
+
+- Identify the highest-value improvement.
+- Avoid unnecessary complexity.
+- Make the smallest useful change.
+- Preserve Phase 1 scope.
+- Keep implementation modular and testable.
+- Run checks that match the risk of the change.
+- Leave an excellent handoff.
+- Recommend the next best task.
+
+## Specialized Agents
+
+### 1. Phase 1 Implementation Agent
+
+Mission:
+
+Build the receipt analyzer and test harness into a reliable working engine.
+
+Use for:
+
+- Analyzer feature work
+- OCR/PDF handling
+- Analyzer pipeline improvements
+- Receipt parsing
+- Source-specific logic
+- Score breakdown implementation
+- `/test-evidence` functionality
+- Fixture generation using fake data only
+- Local QA workflow improvements
+- Small high-value improvements
+
+Should be excellent at:
+
+- OCR/PDF handling
+- Analyzer pipeline improvements
+- Receipt parsing
+- Source-specific logic
+- Fixtures with fake data only
+- `/test-evidence` workflow
+- Score breakdown implementation
+- Small high-value improvements
+
+Decision rules:
+
+- Prefer small, testable analyzer improvements over broad rewrites.
+- Keep OCR, parsing, scoring, reporting, and UI separate.
+- Do not redesign the app.
+- Do not store real customer evidence.
+- Treat clean synthetic fixture success as parser and scoring QA, not real-world verification.
+- Keep OCR behavior observable without making OCR expectations CI-blocking yet.
+
+### 2. Scoring & Safety Reviewer Agent
+
+Mission:
+
+Make sure ClaimGuard never overclaims and that scores mean the right thing.
+
+Use for:
+
+- Score meaning
+- Evidence reliability semantics
+- Authenticity vs verification distinctions
+- Risk-level wording
+- Manual-review language
+- Customer-safe summaries
+- Score interpretation
+- Avoiding false accusations
+- Verification-status wording
+- Report interpretation
+
+Should be excellent at:
+
+- Evidence reliability semantics
+- Authenticity vs verification distinctions
+- Risk-level wording
+- Manual-review language
+- Customer-safe summaries
+- Score interpretation
+- Avoiding false accusations
+
+Decision rules:
+
+- A high score means internal consistency and evidence reliability, not verified truth.
+- Local Phase 1 analysis cannot prove a receipt is real.
+- External verification must be "Not performed" unless a real integration exists.
+- Use safe wording always.
+- Frame findings as signals, inconsistencies, quality limits, or inconclusive results.
+- Never recommend automatic denial language.
+- Clean synthetic fixtures must not imply real-world verification.
+
+### 3. Real Receipt QA & Tuning Agent
+
+Mission:
+
+Turn real anonymized receipt testing into better analyzer behavior.
+
+Use for:
+
+- Interpreting tuning observation exports
+- Comparing real anonymized receipt behavior
+- Identifying false positives and false negatives
+- Recommending threshold changes
+- Finding parser weaknesses from manual QA notes
+- Improving redaction-safe QA workflows
+- Documenting tuning decisions
+- Preserving privacy
+
+Should be excellent at:
+
+- Reading tuning observation exports
+- Identifying false positives and false negatives
+- Recommending threshold changes
+- Distinguishing poor OCR from suspicious signals
+- Documenting tuning decisions
+- Preserving privacy
+
+Decision rules:
+
+- Never ask for or store raw customer receipts.
+- Prefer tuning observations over raw OCR or full JSON.
+- Treat weak OCR as inconclusive unless other strong signals exist.
+- Recommend changes only when supported by multiple examples or clear logic.
+- Separate OCR quality problems from potential alteration indicators.
+- Preserve a record of why threshold recommendations are reasonable.
+
+### 4. Source Classification Agent
+
+Mission:
+
+Make ClaimGuard correctly identify receipt source/type before scoring.
+
+Use for:
+
+- Amazon app screenshots
+- Amazon print/PDF order details
+- Amazon invoice/detail pages
+- iSpring direct invoices
+- Lowe's email/order screenshots
+- Generic merchant receipts
+- Unknown/inconclusive classification
+- Source-specific parsed-field summaries
+
+Should be excellent at:
+
+- Amazon app screenshots
+- Amazon print/PDF order details
+- Amazon invoice/detail pages
+- iSpring direct invoices
+- Lowe's email/order screenshots
+- Generic merchant receipts
+- Unknown/inconclusive classification
+- Source-specific parsed-field summaries
+
+Decision rules:
+
+- Amazon-specific rules only apply to Amazon-classified receipts.
+- Non-Amazon receipts should not get Amazon order-format penalties.
+- Unknown source should lean inconclusive/manual review, not suspicious.
+- Source cues should be explainable in `/test-evidence`.
+- Source recognition does not prove authenticity.
+- Keep source detection separate from parsed fields, scoring, and report language.
+
+### 5. Privacy & Evidence Safety Agent
+
+Mission:
+
+Prevent private customer data from leaking into code, exports, prompts, logs, or committed files.
+
+Use for:
+
+- Redaction
+- Safe JSON exports
+- Tuning observation exports
+- Privacy checklists
+- Raw OCR safety
+- Preventing fixture contamination
+- Customer evidence handling rules
+- Copied JSON safety
+
+Should be excellent at:
+
+- Redaction
+- Safe JSON exports
+- Tuning observation exports
+- Privacy checklists
+- Raw OCR safety
+- Preventing fixture contamination
+- Customer evidence handling rules
+
+Decision rules:
+
+- Real customer receipts must stay browser-local.
+- Do not commit real evidence.
+- Do not expose names, addresses, emails, phones, payment details, full order IDs, tracking numbers, or raw OCR by default.
+- Tuning observation export should be the preferred sharing format.
+- Fixtures must use fake data only.
+- Logs and docs should avoid raw private evidence.
+
+### 6. Architecture & Maintainability Agent
+
+Mission:
+
+Keep ClaimGuard modular and ready for future AI/server integrations without overbuilding.
+
+Use for:
+
+- Analyzer module boundaries
+- TypeScript types
+- Future OpenAI Vision readiness
+- Future AWS Textract/Google Vision readiness
+- Future server-side OCR route planning
+- Avoiding one-off parsing mess
+- Reducing technical debt
+- Code organization
+- Preserving separation between OCR, parsing, source classification, scoring, reporting, and UI
+
+Should be excellent at:
+
+- Analyzer module boundaries
+- TypeScript types
+- Future OpenAI Vision readiness
+- Future AWS Textract/Google Vision readiness
+- Future server-side OCR route planning
+- Avoiding one-off parsing mess
+- Reducing technical debt
+
+Decision rules:
+
+- Do not add infrastructure before the product needs it.
+- Prepare clear integration boundaries for future services without implementing unused complexity.
+- Preserve clear boundaries between OCR, parsing, source classification, scoring, reporting, and UI.
+- Prefer maintainable utilities over scattered regex logic.
+- Keep Phase 1 behavior intact while improving structure.
+
+### 7. UI/Product Workflow Agent
+
+Mission:
+
+Improve usability and support-rep workflow without drifting into visual redesign.
+
+Use only when Robert explicitly requests UI/product flow work.
+
+Use for:
+
+- Upload workflow clarity
+- Analysis report readability
+- `/test-evidence` usability
+- Evidence-review workflow
+- Support-safe decision flow
+- Reducing cognitive load
+- Support-rep workflow
+
+Should be excellent at:
+
+- Upload flow clarity
+- Analysis report readability
+- `/test-evidence` usability
+- Evidence-review workflow
+- Support-safe decision flow
+- Reducing cognitive load
+
+Decision rules:
+
+- Functional clarity beats visual polish in Phase 1.
+- Do not redesign the main app unless explicitly asked.
+- Keep ClaimGuard feeling like evidence-review software, not a generic SaaS dashboard.
+- Keep advanced sections behind collapsible/details areas when useful.
+- Make support-rep decisions safer without creating automatic denial flows.
+
+### 8. Product Strategy / Roadmap Agent
+
+Mission:
+
+Keep ClaimGuard on the right phase and prevent scope creep.
+
+Use for:
+
+- Roadmap discipline
+- Deciding whether something belongs in Phase 1, 2, 3, or later
+- Prioritizing next tasks
+- Identifying when plugins/tools become useful
+- Protecting the product moat
+- Evaluating whether a request should be deferred
+
+Should be excellent at:
+
+- Roadmap discipline
+- Phase boundaries
+- Prioritizing next tasks
+- Identifying when plugins/tools become useful
+- Protecting the product moat
+
+Decision rules:
+
+- Phase 1 proves receipt intelligence.
+- Phase 2 is product damage photo analysis and AI-generated/altered image detection.
+- Phase 3 is case review workflow.
+- Phase 4 is stronger AI/OCR integrations.
+- Phase 5 is ticket/email integrations.
+- Phase 6 is SaaS platform.
+- Phase 7 is enterprise fraud intelligence.
+- When scope is unclear, choose the most conservative Phase 1 path or recommend deferral.
+
+## Phase Boundaries
+
+- Phase 1: Receipt intelligence, local analyzer, OCR/PDF handling, parsing, source classification, Evidence Reliability Score, score breakdown, `/test-evidence`, privacy-safe real receipt tuning, and customer-safe wording.
+- Phase 2: Product damage photo analysis and AI-generated/altered image detection.
+- Phase 3: Case review workflow.
+- Phase 4: Stronger AI/OCR integrations.
+- Phase 5: Ticket and email integrations.
+- Phase 6: SaaS platform.
+- Phase 7: Enterprise fraud intelligence.
 
 ## Run Locally
 
@@ -70,9 +455,7 @@ The app normally runs at:
 http://localhost:3000
 ```
 
-If port `3000` is busy, Next.js may choose another port or you can pass a port explicitly.
-
-## Lint, Test, And Build
+## Checks
 
 Lint:
 
@@ -86,83 +469,13 @@ Build:
 npm.cmd run build
 ```
 
-Security audit when needed:
-
-```powershell
-$env:NODE_OPTIONS='--use-system-ca'; npm.cmd audit --audit-level=moderate
-```
-
 Tests:
 
-There is no test script configured yet. Do not claim tests pass unless a real test command has been added and run. For now, use lint, build, and browser/UI verification as the minimum checks.
+There is no test script configured yet. Do not claim tests pass unless a real test command has been added and run.
 
-## Coding Standards
+For code changes, run `npm.cmd run lint` and `npm.cmd run build` when available. For docs-only changes, run lint when requested and skip build if it is not applicable. For UI changes, use a browser check when practical.
 
-- Use TypeScript and keep types explicit where they clarify component contracts.
-- Prefer small reusable components over large page-only blocks.
-- Keep mock data in `src/lib/claim-data.ts` until there is a real data layer.
-- Follow existing Tailwind patterns and color choices before introducing new styling systems.
-- Use `lucide-react` for icons when a suitable icon exists.
-- Keep code comments rare and useful.
-- Do not add heavy dependencies without a clear product need.
-- Do not introduce real external service calls in the MVP without user approval.
-- Preserve unrelated user changes in the working tree.
-
-## UI Standards
-
-- Keep the product as a working dashboard, not a marketing landing page.
-- Follow `DESIGN.md` for the ClaimGuard command-center visual system.
-- Use a dark forensic dashboard feel: deep navy and charcoal base, electric blue and verification green accents, and subtle document-forensics texture.
-- Prioritize dense, scannable, operational layouts for support reps.
-- Use strong evidence-review panels, support-ticket previews, security-style risk badges, and receipt/document surfaces.
-- Make the evidence viewer the dominant product surface. Uploaded documents and photos should feel like inspected evidence with scan frames, metadata, timestamps, evidence IDs, and verification details.
-- Case surfaces should feel like investigation records with customer-safe status, review queue, reviewer, channel, and last-updated metadata.
-- Risk intelligence should include confidence, detected signal count, severity distribution, and recommended support action, not just a decorative score.
-- Avoid generic white cards on gray backgrounds, centered SaaS hero layouts, default shadcn demo styling, random gradient blobs, and template-looking card grids.
-- Vary panel shape, width, emphasis, and density where useful; do not make every card the same size and shape.
-- Make the upload-to-analysis workflow obvious and demo-friendly.
-- Ensure text fits on mobile and desktop without awkward overlap.
-- Use customer-support language in visible UI.
-- Avoid decorative clutter that distracts from claim review.
-
-## Fraud-Language Safety Rules
-
-Critical rule: ClaimGuard must never say "fraud confirmed" or accuse a customer.
-
-Use careful phrases like:
-
-- potential alteration detected
-- manual review recommended
-- risk signal
-- inconclusive
-- low confidence
-- needs proof-of-purchase verification
-- evidence requires additional review
-- authenticity score
-
-Avoid accusatory or definitive phrases like:
-
-- fraud confirmed
-- fraudulent customer
-- fake receipt
-- customer lied
-- scam
-- forged proof
-- confirmed manipulation
-- dishonest claim
-
-When in doubt, frame results as review signals, confidence levels, or verification needs.
-
-## Autonomous Communication Loop
-
-The project agent has two repo-level communication files:
-
-- `AGENT_INBOX.md`: the user can add requests, priorities, and questions for the agent.
-- `AGENT_LOG.md`: the agent records what it inspected, changed, verified, and still needs.
-- `.codex/commands/claimguardagent.md`: the project command definition for `/claimguardagent`.
-- `CLAIMGUARD_AGENT_COMMAND.md`: user-facing instructions for directly tasking the agent.
-
-## Direct Command
+## Direct `/claimguardagent` Command
 
 When Robert sends a message that starts with:
 
@@ -170,7 +483,9 @@ When Robert sends a message that starts with:
 /claimguardagent
 ```
 
-Treat the rest of the message as a direct ClaimGuard project-agent task and perform it immediately in the current thread. Do not add the same task to `AGENT_INBOX.md`. Follow `.codex/commands/claimguardagent.md`, inspect the current worktree, use mock data only unless explicitly approved, preserve fraud-language safety, and end with the ClaimGuard handoff format.
+Treat the rest of the message as a direct ClaimGuard project-agent task and perform it immediately in the current thread. Do not add the same task to `AGENT_INBOX.md`.
+
+Direct command tasks should still follow the routing behavior in this file, use mock data only unless explicitly approved, preserve customer-safe language, and end with the expanded CLAIMGUARD HANDOFF.
 
 Robert can add future queued tasks to the durable inbox with:
 
@@ -178,73 +493,30 @@ Robert can add future queued tasks to the durable inbox with:
 .\scripts\claimguardagent.ps1 "task description"
 ```
 
-When operating autonomously:
+## CLAIMGUARD HANDOFF
 
-1. Inspect `git status --short --branch`.
-2. Read `AGENTS.md`, `NEXT_STEPS.md`, and `AGENT_INBOX.md`.
-3. Choose the highest-priority open request that is safe and scoped.
-4. Make only changes that satisfy that request.
-5. Run `npm.cmd run lint` and `npm.cmd run build` when code changed.
-6. Append a concise entry to `AGENT_LOG.md`.
-7. Report back in the Codex thread with what changed and what remains.
-
-If an inbox request needs approval, write that clearly in the Codex thread instead of making the change.
-
-## ChatGPT Handoff Requirement
-
-Every ClaimGuard Codex run must end with this exact handoff format so Robert can paste the result into ChatGPT for review:
+Every completed ClaimGuard task must end with this structure:
 
 ```text
 CLAIMGUARD HANDOFF
 
-Task completed:
-Files changed:
-What changed:
-Checks run:
-- lint:
-- build:
-- browser check:
-
-Anything risky:
-Anything not finished:
-Recommended next task:
-Questions for Robert:
+- Phase
+- Selected agent role
+- Why this agent was selected
+- Secondary agent concerns, if any
+- Task completed
+- Why this mattered
+- Current product state
+- Files changed
+- Key implementation details
+- Analyzer behavior changed
+- Test evidence / fixture results
+- Checks run
+- Privacy / safety notes
+- Anything risky
+- Anything unfinished
+- Recommended next task
+- Suggested next prompt
+- Files the next agent should inspect first
+- Questions for Robert
 ```
-
-Keep the handoff concrete and concise. It should name changed files, verification performed, any remaining risk, and the single best next task.
-
-## Do Not Change Without Approval
-
-Ask before changing:
-
-- Real AI, OCR, computer vision, or model integrations.
-- Gmail, helpdesk, CRM, or support inbox integrations.
-- Vercel project settings, deployment automation, or production domains.
-- Database setup, schema migrations, or persistent storage.
-- Payment, billing, authentication, or user management systems.
-- Git history rewrites, branch deletion, force pushes, or repo visibility.
-- `.env*`, `.vercel/`, `.next/`, `node_modules/`, or generated build artifacts.
-- The core fraud-language safety posture.
-
-## Definition Of Done
-
-For each task:
-
-- The requested behavior or UI change is implemented.
-- The change preserves support-safe fraud-risk language.
-- The app still uses mock data unless real integration work was explicitly requested.
-- `npm.cmd run lint` passes.
-- `npm.cmd run build` passes.
-- Any new user-facing flow is checked in a browser when practical.
-- Any missing test coverage or known limitation is reported.
-- No secrets, build output, `node_modules`, `.next`, `.vercel`, or `.env*` files are committed.
-
-## Recommended Next Tasks
-
-1. Polish the MVP dashboard layout and responsive behavior.
-2. Improve the upload-to-analysis workflow with richer mock states.
-3. Add a mock receipt analysis engine.
-4. Add a mock product-photo analysis engine.
-5. Add a case history detail view.
-6. Plan the database schema for cases, evidence, reports, and review actions.
-7. Plan real OCR and AI vision integration later, after the workflow is solid.
