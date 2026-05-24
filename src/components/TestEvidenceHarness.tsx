@@ -734,6 +734,92 @@ function ScoreBreakdown({ result }: { result: LocalAnalysisResult }) {
   );
 }
 
+const phaseOneReviewModules = [
+  {
+    name: "Receipt Analyzer",
+    status: "Ran",
+    support: "OCR extraction, parser field presence, and receipt text quality review.",
+  },
+  {
+    name: "Document Inspector",
+    status: "Ran",
+    support: "Receipt structure, proof-of-purchase cues, and source-specific layout checks.",
+  },
+  {
+    name: "Metadata Analyst",
+    status: "Ran",
+    support: "Available file, PDF, EXIF, and technical context signals.",
+  },
+  {
+    name: "Risk Scorer",
+    status: "Ran",
+    support: "Evidence Reliability Score inputs, risk level, confidence, and score breakdown.",
+  },
+  {
+    name: "Evidence Summarizer",
+    status: "Ran",
+    support: "Privacy-safe summary fields and support-safe finding language.",
+  },
+  {
+    name: "Response Advisor",
+    status: "Ran",
+    support: "Customer-safe wording review without confirming fraud or receipt authenticity.",
+  },
+];
+
+const futureReviewModules = ["Image Analyzer", "Duplicate Detector", "Behavior Analyst", "Compliance Guard"];
+
+function ReviewModulesPanel() {
+  return (
+    <section className="overflow-hidden rounded-xl border border-white/10 bg-[#020713]/45">
+      <div className="border-b border-white/10 bg-[#020713]/32 px-4 py-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--cg-cyan)]">Review modules</p>
+            <h2 className="mt-1 text-xl font-semibold text-white">Receipt evidence check pipeline</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--cg-dark-muted)]">
+              Signal contributors show which local review modules ran and what evidence checks they support. They help manual review and do not independently prove a receipt outcome.
+            </p>
+          </div>
+          <span className="inline-flex w-fit items-center rounded-full border border-[rgba(251,191,36,0.38)] bg-[rgba(251,191,36,0.1)] px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-100">
+            Supports manual review
+          </span>
+        </div>
+      </div>
+
+      <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-3">
+        {phaseOneReviewModules.map((module) => (
+          <article className="rounded-lg border border-white/10 bg-white/[0.035] p-3" key={module.name}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-white">{module.name}</h3>
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--cg-dark-subtle)]">
+                {module.status}
+              </span>
+            </div>
+            <p className="mt-2 text-sm leading-5 text-[var(--cg-dark-muted)]">{module.support}</p>
+            <p className="mt-3 text-[11px] font-semibold uppercase tracking-wide text-[var(--cg-dark-subtle)]">Evidence checks / signal support</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="border-t border-white/10 px-4 py-3">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <p className="text-xs leading-5 text-[var(--cg-dark-subtle)]">
+            Future lanes are noted for roadmap visibility only and are not part of the current receipt-only decision flow.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {futureReviewModules.map((moduleName) => (
+              <span className="rounded-full border border-white/10 bg-white/[0.035] px-2.5 py-1 text-xs text-[var(--cg-dark-muted)]" key={moduleName}>
+                {moduleName}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function AnalysisDetailPanels({ result }: { result: LocalAnalysisResult }) {
   return (
     <section className="grid gap-4">
@@ -1015,6 +1101,8 @@ function AnalysisDetailPanels({ result }: { result: LocalAnalysisResult }) {
           </div>
         </div>
       </div>
+
+      <ReviewModulesPanel />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="cg-command-panel rounded-xl p-4">
