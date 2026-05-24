@@ -82,6 +82,9 @@ export type ReceiptSourceCategory =
   | "amazon-invoice-detail"
   | "ispring-direct-invoice"
   | "lowes-email-order"
+  | "home-depot-order"
+  | "costco-order"
+  | "lazada-order"
   | "generic-merchant-receipt"
   | "unknown-inconclusive";
 

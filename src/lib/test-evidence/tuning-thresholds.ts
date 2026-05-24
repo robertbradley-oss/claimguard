@@ -113,13 +113,18 @@ export const analyzerTuningSummary = {
   receiptStructure: [
     {
       label: "Source classification",
-      value: "Amazon/iSpring/Lowe's/generic/unknown",
-      detail: "Classifies receipt source before source-specific checks so non-Amazon receipts are not evaluated against Amazon-only structure; generic confidence is based on aggregate structural cues.",
+      value: "Amazon/iSpring/Lowe's/Home Depot/Costco/Lazada/generic/unknown",
+      detail: "Classifies receipt source before source-specific checks so non-Amazon receipts are not evaluated against Amazon-only structure; supported vendor confidence stays above generic fallback.",
+    },
+    {
+      label: "Supported vendor diagnostics",
+      value: "source marker + layout cue",
+      detail: "Home Depot, Costco, Lazada, and iSpring direct orders require a visible source marker plus order/layout cues; summaries report presence/counts only and do not externally verify the merchant.",
     },
     {
       label: "Generic source diagnostics",
       value: "2+ generic cues, no narrow source match",
-      detail: "Generic merchant receipts now list which receipt/order cues were visible and expose a privacy-safe field-presence summary instead of a single broad fallback cue.",
+      detail: "Generic merchant receipts remain the fallback after supported source checks and list which receipt/order cues were visible in a privacy-safe field-presence summary.",
     },
     {
       label: "Date labels",

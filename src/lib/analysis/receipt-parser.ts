@@ -20,7 +20,7 @@ const amazonInvoiceDatePattern =
 const lowesDatePattern =
   /((?:(?:Mon(?:day)?|Tue(?:sday)?|Wed(?:nesday)?|Thu(?:rsday)?|Fri(?:day)?|Sat(?:urday)?|Sun(?:day)?)\s*,?\s+)?[A-Za-z]{3,9}\s+\d{1,2}(?:,\s+\d{4})?|\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)/i;
 const fieldLabelPattern =
-  /^(order|order id|invoice|invoice number|receipt|date|status|e-mail|email|telephone|phone|purchased|purchase date|purchased on|ordered|ordered on|placed|transaction date|invoice date|order placed|placed on|order date|items ordered|order summary|order history|date added|customer order comment|image|product|model|quantity|unit price|arriving|arrives|delivered|shipped|shipped to|sold by|seller|shipping method|billing address|shipping address|payment address|bill to|billed to|subtotal|sub-total|item subtotal|estimated tax|tax|sales tax|vat|gst|hst|shipping|delivery|ship to|deliver to|recipient|grand total|orders? total|invoice total|receipt total|final total|amount due|balance due|total paid|amount paid|payment total|total|payment|payments|payment type|payment method|method of payment|payment information|paid with|charged|tender|tender type|promotion|promo|subscribe & save|visa|mastercard|amex|paypal|gift card|store credit|thank you)\b/i;
+  /^(order|order id|invoice|invoice number|receipt|date|status|e-mail|email|telephone|phone|purchased|purchase date|purchased on|ordered|ordered on|placed|transaction date|invoice date|order placed|placed on|order date|items ordered|order summary|order history|date added|customer order comment|image|product|model|quantity|unit price|arriving|arrives|delivered|shipped|shipped to|sold by|seller|seller voucher|membership|member number|package|warehouse|shipping method|billing address|shipping address|payment address|bill to|billed to|subtotal|sub-total|item subtotal|estimated tax|tax|sales tax|vat|gst|hst|shipping|shipping fee|delivery|delivery option|ship to|deliver to|recipient|grand total|orders? total|invoice total|receipt total|final total|amount due|balance due|total paid|amount paid|payment total|total|payment|payments|payment type|payment method|method of payment|payment information|paid with|charged|tender|tender type|promotion|promo|subscribe & save|visa|mastercard|amex|paypal|gift card|store credit|thank you)\b/i;
 
 function compact(text: string) {
   return text.replace(/[^\S\r\n]+/g, " ").trim();
@@ -82,7 +82,7 @@ function isAmazonInvoiceOrDetailSource(sourceCategory?: ReceiptSourceCategory) {
 }
 
 function hasGenericMerchantMarker(text: string) {
-  return /\b(walmart|target|best buy|costco|shopify|home\s*depot(?:\s+canada)?|homedepot(?:\.com|\.ca)?)\b/i.test(text);
+  return /\b(walmart|target|best buy|costco|shopify|home\s*depot(?:\s+canada)?|homedepot(?:\.com|\.ca)?|lazada)\b/i.test(text);
 }
 
 function hasVisiblePaymentLastFour(line: string) {
@@ -746,7 +746,7 @@ function getSelectedTotal(lines: string[]) {
 
 function getMerchantName(lines: string[]) {
   const merchantLine = lines.find((line) =>
-    /amazon|walmart|target|best buy|costco|shopify|home\s*depot|homedepot|lowe'?s|ispring|ispringfilter|invoice|receipt/i.test(line),
+    /amazon|walmart|target|best buy|costco|shopify|home\s*depot|homedepot|lazada|lowe'?s|ispring|ispringfilter|invoice|receipt/i.test(line),
   );
 
   if (merchantLine) {
@@ -761,8 +761,11 @@ function sourceLabelFor(category: ReceiptSourceCategory) {
     "amazon-app-screenshot": "Amazon app screenshot",
     "amazon-print-order-details": "Amazon print order details / PDF",
     "amazon-invoice-detail": "Amazon invoice/detail page",
-    "ispring-direct-invoice": "iSpring direct website invoice",
+    "ispring-direct-invoice": "iSpring direct website invoice/order",
     "lowes-email-order": "Lowe's email/order screenshot",
+    "home-depot-order": "Home Depot / Home Depot Canada order",
+    "costco-order": "Costco / Costco Canada order",
+    "lazada-order": "Lazada order",
     "generic-merchant-receipt": "Generic merchant receipt",
     "unknown-inconclusive": "Unknown / inconclusive",
   };
@@ -836,7 +839,7 @@ function classifyReceiptSource(text: string, lines: string[]): ReceiptSourceClas
       confidence: 88,
       cues: [
         ["iSpring direct marker", /\bispringfilter\.com\b|\babantecart\b|\bispring water systems\b|\bispringfilter\b/i],
-        ["Direct invoice payment/order cue", /\border id\b|credit card\s*\/\s*debit card.*stripe|payment method|order history/i],
+        ["Direct order/invoice cue", /\border\s*(?:id|number|no\.?|details|history|confirmation)\b|credit card\s*\/\s*debit card.*stripe|payment method|invoice|order total/i],
       ],
     },
     {
@@ -845,6 +848,30 @@ function classifyReceiptSource(text: string, lines: string[]): ReceiptSourceClas
       cues: [
         ["Lowe's marker", /\blowe'?s\b|\blowes\b/i],
         ["Email/order-card cue", /\b(view order|review store|delivered|thanks,|we'?ve received your order|order number)\b/i],
+      ],
+    },
+    {
+      category: "home-depot-order",
+      confidence: 87,
+      cues: [
+        ["Home Depot marker", /\bthe\s+home\s+depot\b|\bhome\s*depot(?:\s+canada)?\b|\bhomedepot\.(?:com|ca)\b/i],
+        ["Home Depot order/receipt cue", /\b(order\s*(?:#|number|no\.?|id|confirmation|details)|date\s*ordered|store\s*pickup|pickup|delivery|ship(?:ped)?\s*to|item\s*subtotal|sales\s*tax|order\s*total|total\s*paid)\b/i],
+      ],
+    },
+    {
+      category: "costco-order",
+      confidence: 86,
+      cues: [
+        ["Costco marker", /\bcostco(?:\.(?:ca|com))?\b|\bcostco\s+wholesale\b/i],
+        ["Costco order/receipt cue", /\b(order\s*(?:#|number|no\.?|id|confirmation|details)|membership|member\s*(?:number|#)|ship(?:ping)?|delivery|item\s*subtotal|order\s*total|total\s*paid)\b/i],
+      ],
+    },
+    {
+      category: "lazada-order",
+      confidence: 84,
+      cues: [
+        ["Lazada marker", /\blazada\b/i],
+        ["Lazada marketplace order cue", /\b(order\s*(?:#|number|no\.?|id|details)|seller|package|delivery\s*option|paid\s*by|payment\s*method|subtotal|shipping\s*fee|order\s*total|total\s*paid)\b/i],
       ],
     },
   ];
@@ -919,7 +946,7 @@ function lineItemRejectionReason(line: string, previousLine?: string) {
     return "Receipt field label or summary line";
   }
 
-  if (/amazon|walmart|target|best buy|costco|shopify|home\s*depot|homedepot|ispring water systems/i.test(line)) {
+  if (/amazon|walmart|target|best buy|costco|shopify|home\s*depot|homedepot|lazada|ispring water systems/i.test(line)) {
     return "Merchant/platform heading";
   }
 
@@ -1044,10 +1071,10 @@ function buildISpringDirectSummary(params: {
   const fields = [
     fieldSummary({
       key: "orderId",
-      label: "Order ID present",
-      present: /\border id\b/i.test(params.text),
-      presentNote: "Order ID label detected; raw identifier is not included in this summary.",
-      missingNote: "Order ID label was not detected.",
+      label: "Order ID or number present",
+      present: /\border\s*(?:id|number|no\.?)\b/i.test(params.text),
+      presentNote: "Order ID/number label detected; raw identifier is not included in this summary.",
+      missingNote: "Order ID/number label was not detected.",
     }),
     fieldSummary({
       key: "status",
@@ -1162,6 +1189,101 @@ function buildISpringDirectSummary(params: {
   };
 }
 
+function vendorMarkerPatternFor(category: ReceiptSourceCategory) {
+  if (category === "home-depot-order") {
+    return /\bthe\s+home\s+depot\b|\bhome\s*depot(?:\s+canada)?\b|\bhomedepot\.(?:com|ca)\b/i;
+  }
+
+  if (category === "costco-order") {
+    return /\bcostco(?:\.(?:ca|com))?\b|\bcostco\s+wholesale\b/i;
+  }
+
+  if (category === "lazada-order") {
+    return /\blazada\b/i;
+  }
+
+  return /$a/;
+}
+
+function buildVendorOrderSummary(params: {
+  text: string;
+  lineItems: string[];
+  amountCategories: Partial<Record<ReceiptAmountCategory, string[]>>;
+  paymentCandidates: ReceiptPaymentCandidate[];
+  classification: ReceiptSourceClassification;
+}): ReceiptSourceStructureSummary {
+  const fields = [
+    fieldSummary({
+      key: "vendorMarker",
+      label: "Vendor/source marker present",
+      present: vendorMarkerPatternFor(params.classification.category).test(params.text),
+      presentNote: "Supported vendor/source marker detected without treating it as external verification.",
+      missingNote: "Supported vendor/source marker was not detected.",
+    }),
+    fieldSummary({
+      key: "orderOrReceiptId",
+      label: "Order or receipt ID cue present",
+      present: /\b(order\s*(?:#|id|number|no\.?|confirmation|details)|receipt\s*(?:#|id|number|no\.?)|transaction\s*(?:#|id|number|no\.?))\b/i.test(params.text),
+      presentNote: "Order, receipt, or transaction identifier label detected without exposing the identifier.",
+      missingNote: "Order, receipt, or transaction identifier label was not detected.",
+    }),
+    fieldSummary({
+      key: "dateCue",
+      label: "Date cue present",
+      present: /\b(date|date ordered|order date|purchase date|purchased|ordered|placed|transaction date|invoice date)\b/i.test(params.text),
+      presentNote: "A purchase/order/date cue was detected.",
+      missingNote: "Purchase/order/date cue was not detected.",
+    }),
+    fieldSummary({
+      key: "itemEvidence",
+      label: "Item or product detail present",
+      present: params.lineItems.length > 0,
+      count: params.lineItems.length,
+      presentNote: `${params.lineItems.length} item/product candidate(s) detected.`,
+      missingNote: "No item/product candidate was detected.",
+    }),
+    fieldSummary({
+      key: "amountStructure",
+      label: "Amount structure present",
+      present: Boolean(params.amountCategories.subtotal?.length || params.amountCategories.tax?.length || params.amountCategories.total?.length),
+      presentNote: "Subtotal, tax, or total amount structure detected.",
+      missingNote: "Subtotal, tax, or total amount structure was not detected.",
+    }),
+    fieldSummary({
+      key: "paymentCue",
+      label: "Payment or tender cue present",
+      present: params.paymentCandidates.length > 0,
+      count: params.paymentCandidates.length,
+      presentNote: `${params.paymentCandidates.length} payment/tender cue(s) detected without exposing payment values.`,
+      missingNote: "Payment/tender cue was not detected.",
+    }),
+    fieldSummary({
+      key: "fulfillmentCue",
+      label: "Fulfillment cue present",
+      present: /\b(shipping|delivery|delivered|ship to|shipped to|pickup|store pickup|warehouse|package|delivery option)\b/i.test(params.text),
+      presentNote: "Shipping, delivery, pickup, warehouse, or package context detected.",
+      missingNote: "Shipping, delivery, pickup, warehouse, or package context was not detected.",
+    }),
+  ];
+  const coverage = sourceStructureConfidence(fields);
+
+  return {
+    category: params.classification.category,
+    label: `${params.classification.label} parsed-field summary`,
+    confidence: coverage.confidence,
+    fieldsPresent: coverage.present,
+    fieldsExpected: coverage.expected,
+    fields,
+    notes: [
+      "Privacy-safe source summary: reports field presence and counts only, not raw merchant, order, customer, address, payment, membership, or tracking values.",
+      "Source detection is based on visible vendor/layout markers only and is not external verification.",
+      coverage.confidence >= 70
+        ? "Supported vendor/order layout is well represented in local OCR text."
+        : "Supported vendor/order layout is incomplete; use parsed fields for manual matching.",
+    ],
+  };
+}
+
 function buildGenericMerchantSummary(params: {
   text: string;
   lineItems: string[];
@@ -1258,6 +1380,20 @@ function buildSourceSpecificSummary(params: {
 
   if (params.classification.category === "generic-merchant-receipt") {
     return buildGenericMerchantSummary({
+      text: params.text,
+      lineItems: params.lineItems,
+      amountCategories: params.amountCategories,
+      paymentCandidates: params.paymentCandidates,
+      classification: params.classification,
+    });
+  }
+
+  if (
+    params.classification.category === "home-depot-order" ||
+    params.classification.category === "costco-order" ||
+    params.classification.category === "lazada-order"
+  ) {
+    return buildVendorOrderSummary({
       text: params.text,
       lineItems: params.lineItems,
       amountCategories: params.amountCategories,

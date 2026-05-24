@@ -7,8 +7,12 @@ export type SampleEvidenceFixtureId =
   | "quantity-sku-receipt"
   | "generic-order-confirmation"
   | "generic-split-summary"
+  | "home-depot-order"
+  | "costco-order"
   | "lowes-email-order"
   | "ispring-direct-invoice"
+  | "ispring-direct-order"
+  | "lazada-order"
   | "adjusted-receipt"
   | "amazon-print-order-details"
   | "amazon-order-page"
@@ -517,6 +521,150 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
     ],
   },
   {
+    id: "home-depot-order",
+    label: "Home Depot order",
+    fileName: "home-depot-order.jpg",
+    type: "image",
+    description: "Synthetic Home Depot Canada order confirmation with order, date, pickup, payment, item, and total cues.",
+    expectedRisk: "Low",
+    expectedOutcome: "Home Depot markers should classify before generic fallback while keeping source summaries privacy-safe.",
+    tuningNotes:
+      "Use this to tune Home Depot / Home Depot Canada source identification only. Source recognition is layout detection, not merchant verification.",
+    loadFile: () =>
+      canvasToFile(
+        drawReceiptCanvas([
+          "The Home Depot Canada",
+          "Order Confirmation",
+          "Date Ordered: May 6, 2026",
+          "Order Number",
+          "Store Pickup",
+          "iSpring replacement filter kit $88.00",
+          "Item Subtotal: $88.00",
+          "Sales Tax: $11.44",
+          "Order Total: $99.44",
+          "Payment Method",
+          "Credit card payment",
+          "Pickup selected",
+        ]),
+        "home-depot-order.jpg",
+      ),
+    evaluate: (result) => [
+      {
+        label: "Home Depot source is classified before generic fallback",
+        status: expectationStatus(
+          result.receipt.sourceClassification.category === "home-depot-order" &&
+            result.receipt.source === "merchant-receipt" &&
+            result.receipt.sourceClassification.confidence > 80,
+          "Warning",
+        ),
+        detail: `Class ${result.receipt.sourceClassification.label}; confidence ${result.receipt.sourceClassification.confidence}%; cues ${result.receipt.sourceClassification.cues.join(
+          " | ",
+        )}.`,
+        note:
+          "Clear Home Depot markers should use the supported source lane instead of generic merchant fallback.",
+      },
+      {
+        label: "Home Depot source summary is privacy-safe",
+        status: expectationStatus(
+          result.receipt.sourceSpecificSummary?.category === "home-depot-order" &&
+            (result.receipt.sourceSpecificSummary?.fieldsPresent ?? 0) >= 5 &&
+            !/[A-Z]{2,}-\d{3,}|card\s+(?:ending|suffix|last four)|pickup location/i.test(JSON.stringify(result.receipt.sourceSpecificSummary)),
+          "Warning",
+        ),
+        detail: result.receipt.sourceSpecificSummary
+          ? `${result.receipt.sourceSpecificSummary.confidence}% confidence; ${result.receipt.sourceSpecificSummary.fieldsPresent}/${result.receipt.sourceSpecificSummary.fieldsExpected} fields.`
+          : "No source summary.",
+        note:
+          "Home Depot summaries should expose field presence and counts only, not order, payment, date, or location values.",
+      },
+      {
+        label: "Home Depot order skips Amazon validation",
+        status: expectationStatus(
+          result.receipt.structure.amazonOrderFormat === "not-applicable" &&
+            !result.signals.some((signal) => /Amazon/i.test(signal.title)),
+          "Warning",
+        ),
+        detail: `Amazon format ${result.receipt.structure.amazonOrderFormat}; signals: ${
+          result.signals.map((signal) => signal.title).join(" | ") || "none"
+        }.`,
+        note:
+          "Home Depot order identifiers should not become Amazon order-number issues.",
+      },
+    ],
+  },
+  {
+    id: "costco-order",
+    label: "Costco.ca order",
+    fileName: "costco-order.jpg",
+    type: "image",
+    description: "Synthetic Costco.ca order details layout with order, membership, delivery, product, total, and payment cues.",
+    expectedRisk: "Low",
+    expectedOutcome: "Costco markers should classify before generic fallback while keeping source summaries privacy-safe.",
+    tuningNotes:
+      "Use this to tune Costco / Costco Canada source identification only. Membership and order fields must remain presence-only in summaries.",
+    loadFile: () =>
+      canvasToFile(
+        drawReceiptCanvas([
+          "Costco.ca",
+          "Order Details",
+          "Order Number",
+          "Order Date: 2026-05-07",
+          "Membership",
+          "Standard Delivery",
+          "iSpring filter pack $72.00",
+          "Item Subtotal: $72.00",
+          "GST/HST: $9.36",
+          "Order Total: $81.36",
+          "Payment Method",
+          "Visa payment",
+        ]),
+        "costco-order.jpg",
+      ),
+    evaluate: (result) => [
+      {
+        label: "Costco source is classified before generic fallback",
+        status: expectationStatus(
+          result.receipt.sourceClassification.category === "costco-order" &&
+            result.receipt.source === "merchant-receipt" &&
+            result.receipt.sourceClassification.confidence > 80,
+          "Warning",
+        ),
+        detail: `Class ${result.receipt.sourceClassification.label}; confidence ${result.receipt.sourceClassification.confidence}%; cues ${result.receipt.sourceClassification.cues.join(
+          " | ",
+        )}.`,
+        note:
+          "Clear Costco.ca markers should use the supported source lane instead of generic merchant fallback.",
+      },
+      {
+        label: "Costco source summary is privacy-safe",
+        status: expectationStatus(
+          result.receipt.sourceSpecificSummary?.category === "costco-order" &&
+            (result.receipt.sourceSpecificSummary?.fieldsPresent ?? 0) >= 5 &&
+            !/[A-Z]{2,}-\d{3,}|card\s+(?:ending|suffix|last four)|member\s*(?:number|#)\s*\d/i.test(JSON.stringify(result.receipt.sourceSpecificSummary)),
+          "Warning",
+        ),
+        detail: result.receipt.sourceSpecificSummary
+          ? `${result.receipt.sourceSpecificSummary.confidence}% confidence; ${result.receipt.sourceSpecificSummary.fieldsPresent}/${result.receipt.sourceSpecificSummary.fieldsExpected} fields.`
+          : "No source summary.",
+        note:
+          "Costco summaries should expose field presence and counts only, including membership cues as presence-only context.",
+      },
+      {
+        label: "Costco order skips Amazon validation",
+        status: expectationStatus(
+          result.receipt.structure.amazonOrderFormat === "not-applicable" &&
+            !result.signals.some((signal) => /Amazon/i.test(signal.title)),
+          "Warning",
+        ),
+        detail: `Amazon format ${result.receipt.structure.amazonOrderFormat}; signals: ${
+          result.signals.map((signal) => signal.title).join(" | ") || "none"
+        }.`,
+        note:
+          "Costco order identifiers should not become Amazon order-number issues.",
+      },
+    ],
+  },
+  {
     id: "suspicious-edited-receipt",
     label: "Suspicious edited receipt",
     fileName: "suspicious-edited-receipt.jpg",
@@ -814,6 +962,149 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
           result.riskLevel !== "High"
             ? "iSpring direct invoice structure is being treated as source-specific purchase context."
             : "Inspect whether PDF extraction, footer rejection, or non-Amazon source classification is over-penalizing a readable synthetic invoice.",
+      },
+    ],
+  },
+  {
+    id: "ispring-direct-order",
+    label: "iSpring direct order",
+    fileName: "ispring-direct-order.jpg",
+    type: "image",
+    description: "Synthetic iSpring direct order confirmation with direct website marker, order ID, product detail, total, and payment method.",
+    expectedRisk: "Low",
+    expectedOutcome: "iSpring direct order layouts should classify as iSpring direct even when they are not full invoices.",
+    tuningNotes:
+      "Use this to tune direct iSpring order confirmations separately from marketplace receipts. Source recognition is based on direct-site markers and order layout only.",
+    loadFile: () =>
+      canvasToFile(
+        drawReceiptCanvas([
+          "iSpringFilter.com",
+          "iSpring Water Systems",
+          "Order Confirmation",
+          "Order ID",
+          "Order Date: May 8, 2026",
+          "iSpring RCC7AK filter bundle $241.99",
+          "Sub-Total: $241.99",
+          "Free Shipping: $0.00",
+          "Total: $241.99",
+          "Payment Method",
+          "Credit Card / Debit Card",
+        ]),
+        "ispring-direct-order.jpg",
+      ),
+    evaluate: (result) => [
+      {
+        label: "iSpring direct order source is classified",
+        status: expectationStatus(
+          result.receipt.sourceClassification.category === "ispring-direct-invoice" &&
+            result.receipt.source === "merchant-receipt",
+          "Warning",
+        ),
+        detail: `Class ${result.receipt.sourceClassification.label}; confidence ${result.receipt.sourceClassification.confidence}%; cues ${result.receipt.sourceClassification.cues.join(
+          " | ",
+        )}.`,
+        note:
+          "Direct iSpring order confirmations should use the iSpring source lane rather than generic merchant fallback.",
+      },
+      {
+        label: "iSpring direct order summary is privacy-safe",
+        status: expectationStatus(
+          result.receipt.sourceSpecificSummary?.category === "ispring-direct-invoice" &&
+            (result.receipt.sourceSpecificSummary?.fieldsPresent ?? 0) >= 5 &&
+            !/[A-Z]{2,}-\d{3,}|May 8, 2026/i.test(JSON.stringify(result.receipt.sourceSpecificSummary)),
+          "Warning",
+        ),
+        detail: result.receipt.sourceSpecificSummary
+          ? `${result.receipt.sourceSpecificSummary.confidence}% confidence; ${result.receipt.sourceSpecificSummary.fieldsPresent}/${result.receipt.sourceSpecificSummary.fieldsExpected} fields.`
+          : "No source-specific summary.",
+        note:
+          "iSpring direct summaries should expose source structure without raw order, date, customer, or payment values.",
+      },
+      {
+        label: "iSpring direct order skips Amazon validation",
+        status: expectationStatus(
+          result.receipt.structure.amazonOrderFormat === "not-applicable" &&
+            !result.signals.some((signal) => /Amazon/i.test(signal.title)),
+          "Warning",
+        ),
+        detail: `Amazon format ${result.receipt.structure.amazonOrderFormat}; signals: ${
+          result.signals.map((signal) => signal.title).join(" | ") || "none"
+        }.`,
+        note:
+          "Direct iSpring order IDs should not become Amazon order-number issues.",
+      },
+    ],
+  },
+  {
+    id: "lazada-order",
+    label: "Lazada order",
+    fileName: "lazada-order.jpg",
+    type: "image",
+    description: "Synthetic Lazada marketplace order detail layout with order, seller/package, delivery, payment, item, and total cues.",
+    expectedRisk: "Low",
+    expectedOutcome: "Lazada markers should classify before generic fallback while preserving generic-safe extraction behavior.",
+    tuningNotes:
+      "Use this only for narrow Lazada source/layout detection. It should not imply marketplace order verification or use customer/member data.",
+    loadFile: () =>
+      canvasToFile(
+        drawReceiptCanvas([
+          "Lazada",
+          "Order Details",
+          "Order No.",
+          "Placed: 08 May 2026",
+          "Seller details present",
+          "Package 1 of 1",
+          "Delivery Option: Standard",
+          "Replacement filter cartridge $39.90",
+          "Subtotal: $39.90",
+          "Shipping Fee: $3.00",
+          "Total Paid: $42.90",
+          "Paid by",
+          "Wallet Visa payment",
+        ]),
+        "lazada-order.jpg",
+      ),
+    evaluate: (result) => [
+      {
+        label: "Lazada source is classified before generic fallback",
+        status: expectationStatus(
+          result.receipt.sourceClassification.category === "lazada-order" &&
+            result.receipt.source === "merchant-receipt" &&
+            result.receipt.sourceClassification.confidence > 80,
+          "Warning",
+        ),
+        detail: `Class ${result.receipt.sourceClassification.label}; confidence ${result.receipt.sourceClassification.confidence}%; cues ${result.receipt.sourceClassification.cues.join(
+          " | ",
+        )}.`,
+        note:
+          "Clear Lazada order markers should use the supported source lane instead of generic merchant fallback.",
+      },
+      {
+        label: "Lazada source summary is privacy-safe",
+        status: expectationStatus(
+          result.receipt.sourceSpecificSummary?.category === "lazada-order" &&
+            (result.receipt.sourceSpecificSummary?.fieldsPresent ?? 0) >= 5 &&
+            !/[A-Z]{2,}-\d{3,}|card\s+(?:ending|suffix|last four)|seller\s*:\s*[^"}]+|08 May 2026/i.test(JSON.stringify(result.receipt.sourceSpecificSummary)),
+          "Warning",
+        ),
+        detail: result.receipt.sourceSpecificSummary
+          ? `${result.receipt.sourceSpecificSummary.confidence}% confidence; ${result.receipt.sourceSpecificSummary.fieldsPresent}/${result.receipt.sourceSpecificSummary.fieldsExpected} fields.`
+          : "No source summary.",
+        note:
+          "Lazada summaries should expose field presence and counts only, not order, seller, payment, date, or customer values.",
+      },
+      {
+        label: "Lazada order skips Amazon validation",
+        status: expectationStatus(
+          result.receipt.structure.amazonOrderFormat === "not-applicable" &&
+            !result.signals.some((signal) => /Amazon/i.test(signal.title)),
+          "Warning",
+        ),
+        detail: `Amazon format ${result.receipt.structure.amazonOrderFormat}; signals: ${
+          result.signals.map((signal) => signal.title).join(" | ") || "none"
+        }.`,
+        note:
+          "Lazada order identifiers should not become Amazon order-number issues.",
       },
     ],
   },
