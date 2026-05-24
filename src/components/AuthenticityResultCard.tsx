@@ -43,7 +43,7 @@ export function AuthenticityResultCard({ report, status }: AuthenticityResultCar
 
       <div className={`mt-7 flex flex-col gap-5 sm:flex-row sm:items-center ${isComplete ? "sm:gap-7" : ""}`}>
         <div className={`relative shrink-0 rounded-full bg-white shadow-[0_18px_42px_rgba(8,174,234,0.1)] ring-1 ring-[#E4F0F7] ${isComplete ? "size-40" : "size-32"}`}>
-          <svg className={`${isComplete ? "size-40" : "size-32"} -rotate-90`} viewBox="0 0 104 104" role="img" aria-label="Authenticity score">
+          <svg className={`${isComplete ? "size-40" : "size-32"} -rotate-90`} viewBox="0 0 104 104" role="img" aria-label="Evidence Reliability Score">
             <defs>
               <linearGradient id="scoreGradient" x1="16" y1="16" x2="88" y2="88">
                 <stop offset="0%" stopColor="#08AEEA" />

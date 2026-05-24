@@ -99,7 +99,7 @@ export function AnalysisReport({ report, status }: AnalysisReportProps) {
             <article className="rounded-2xl border border-[var(--cg-border)] bg-[#06101f]/62 p-4">
               <div className="flex items-center gap-2 text-sm font-semibold text-white">
                 <Gauge className="size-4 text-[var(--cg-cyan)]" aria-hidden="true" />
-                Authenticity score
+                Evidence Reliability Score
               </div>
               <p className="mt-3 font-mono text-4xl font-semibold text-white">{report.score}</p>
               <p className="text-xs font-medium text-[var(--cg-text-muted)]">out of 100</p>

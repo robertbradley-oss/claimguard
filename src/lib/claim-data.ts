@@ -47,10 +47,19 @@ export type AnalysisStep = {
 export type MockAnalysisReport = {
   evidenceType: EvidenceType;
   evidenceLabel: string;
+  scoreLabel?: "Evidence Reliability Score";
   score: number;
   riskLevel: RiskLevel;
   confidenceLevel: AnalysisConfidence;
   reviewLabel: string;
+  verificationStatus?: "Not externally verified" | "Locally analyzed only" | "External verification unavailable";
+  externalVerification?: "Not performed";
+  internalStructureConfidence?: number;
+  scoreMeaning?: {
+    highScore: string;
+    lowOrMediumScore: string;
+    safetyNote: string;
+  };
   primaryFinding: string;
   scoreExplanation: string;
   summary: string;
