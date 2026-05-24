@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clipboard,
   ClipboardCheck,
+  Download,
   FileText,
   ImageIcon,
   Info,
@@ -43,9 +44,15 @@ type HarnessRun = {
 
 type RealQaNotes = {
   expectedRisk: "" | "Low" | "Medium" | "High";
+  expectedClassification: string;
   ocrAccuracy: "" | "Accurate" | "Partially accurate" | "Inaccurate";
   parsedFields: "" | "Correct" | "Partially correct" | "Incorrect";
   scoreFit: "" | "Too harsh" | "Too lenient" | "About right";
+  observation: string;
+  expectedBehavior: string;
+  actualBehavior: string;
+  tuningFollowUp: string;
+  safeForThresholdTuning: boolean;
   thresholdAdjustment: string;
 };
 
@@ -70,9 +77,15 @@ const acceptedEvidenceTypes = ["image/png", "image/jpeg", "image/webp", "applica
 
 const emptyRealQaNotes: RealQaNotes = {
   expectedRisk: "",
+  expectedClassification: "",
   ocrAccuracy: "",
   parsedFields: "",
   scoreFit: "",
+  observation: "",
+  expectedBehavior: "",
+  actualBehavior: "",
+  tuningFollowUp: "",
+  safeForThresholdTuning: false,
   thresholdAdjustment: "",
 };
 
@@ -235,6 +248,146 @@ function sensitiveFindingCount(result?: LocalAnalysisResult) {
   return patterns.reduce((count, pattern) => count + (copiedText.match(pattern)?.length ?? 0), 0);
 }
 
+function safeQaNote(value: string) {
+  const trimmedValue = value.trim();
+  return trimmedValue ? redactSensitiveText(trimmedValue) : "Not noted";
+}
+
+function expectationDisplayStatus(status: FixtureExpectationResult["status"]) {
+  return status === "Needs Tuning" ? "Needs review" : status;
+}
+
+function riskMatches(expected: string | undefined, actual: string | undefined) {
+  return Boolean(expected && actual && expected === actual);
+}
+
+function parserCompletionLabel(result: LocalAnalysisResult) {
+  if (result.receipt.missingFields.length === 0) {
+    return "Parser complete";
+  }
+
+  if (result.receipt.missingFields.length <= 2) {
+    return "Extraction incomplete";
+  }
+
+  return "Manual tuning review suggested";
+}
+
+function reviewStatusForResult(result: LocalAnalysisResult, expectedRisk?: string) {
+  if (!riskMatches(expectedRisk, result.riskLevel) && expectedRisk) {
+    return "Unexpected classification";
+  }
+
+  if (result.confidenceLevel === "Low confidence") {
+    return "Low confidence";
+  }
+
+  if (result.receipt.missingFields.length > 0) {
+    return "Extraction incomplete";
+  }
+
+  if (result.signals.some((signal) => signal.severity === "High")) {
+    return "Needs review";
+  }
+
+  return "Pass";
+}
+
+function safeSignalSummary(result: LocalAnalysisResult) {
+  return result.signals.map((signal) => ({
+    id: signal.id,
+    title: signal.title,
+    category: signal.evidenceSource,
+    severity: signal.severity,
+    confidence: signal.confidence,
+  }));
+}
+
+function privacySafeAnalysisSummary(result: LocalAnalysisResult) {
+  return {
+    evidenceType: result.evidenceType,
+    evidenceLabel: result.evidenceLabel,
+    sourceClassification: {
+      category: result.receipt.sourceClassification.category,
+      label: result.receipt.sourceClassification.label,
+      confidence: result.receipt.sourceClassification.confidence,
+      cues: result.receipt.sourceClassification.cues,
+    },
+    score: result.score,
+    scoreLabel: result.scoreLabel,
+    riskLevel: result.riskLevel,
+    confidenceLevel: result.confidenceLevel,
+    reviewLabel: result.reviewLabel,
+    verificationStatus: result.verificationStatus.status,
+    externalVerification: result.externalVerification,
+    internalStructureConfidence: result.internalStructureConfidence,
+    ocrQuality: {
+      bucket: result.ocr.quality.label,
+      averageConfidence: result.ocr.averageConfidence,
+      wordCount: result.ocr.quality.wordCount,
+      lowConfidenceRatePercent: Math.round(result.ocr.quality.lowConfidenceRate * 100),
+    },
+    parserFieldPresence: parsedFieldPresenceSummary(result),
+    parserCompletion: parserCompletionLabel(result),
+    sourceSpecificSummary: sourceSpecificSummaryFor(result),
+    scoreBreakdown: {
+      formula: result.scoreBreakdown.formula,
+      interpretation: result.scoreBreakdown.interpretation,
+      categories: scoreRuleSummary(result),
+    },
+    reviewSignals: safeSignalSummary(result),
+  };
+}
+
+function fixtureResultSummaryFor(run: HarnessRun) {
+  if (!run.result) {
+    return undefined;
+  }
+
+  return redactSensitiveValue({
+    exportType: "privacy-safe-fixture-result-summary",
+    privacyPosture:
+      "Synthetic fixture result summary. Excludes raw OCR text, raw receipt text, complete analysis JSON, EXIF-like metadata, and parsed private-bearing values by default.",
+    fixture: {
+      id: run.fixture.id,
+      label: run.fixture.label,
+      expectedRisk: run.fixture.expectedRisk,
+      expectedOutcome: run.fixture.expectedOutcome,
+      fileType: run.fixture.type,
+    },
+    comparison: {
+      expectedFixtureClassification: run.fixture.expectedRisk,
+      actualAnalyzerClassification: run.result.riskLevel,
+      reviewStatus: reviewStatusForResult(run.result, run.fixture.expectedRisk),
+      expectationChecks: (run.expectations ?? []).map((expectation) => ({
+        label: expectation.label,
+        status: expectationDisplayStatus(expectation.status),
+        detail: expectation.detail,
+      })),
+    },
+    analyzerResult: privacySafeAnalysisSummary(run.result),
+    highLevelNotes: {
+      fixtureTuningNotes: run.fixture.tuningNotes,
+    },
+  });
+}
+
+function exportJsonFile(filename: string, payload: unknown) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+function safeFileSlug(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 72) || "summary";
+}
+
 function scoreRuleSummary(result: LocalAnalysisResult) {
   const breakdown = result.scoreBreakdown;
   const rows = [
@@ -335,9 +488,17 @@ function sourceSpecificSummaryFor(result: LocalAnalysisResult) {
 function manualQaSummaryFor(notes: RealQaNotes) {
   return {
     expectedRisk: notes.expectedRisk || "Not noted",
+    expectedClassification: safeQaNote(notes.expectedClassification),
     ocrAccuracy: notes.ocrAccuracy || "Not noted",
     parsedFields: notes.parsedFields || "Not noted",
     scoreFit: notes.scoreFit || "Not noted",
+    highLevelNotes: {
+      observation: safeQaNote(notes.observation),
+      expectedBehavior: safeQaNote(notes.expectedBehavior),
+      actualBehavior: safeQaNote(notes.actualBehavior),
+      tuningFollowUp: safeQaNote(notes.tuningFollowUp || notes.thresholdAdjustment),
+    },
+    safeForThresholdTuning: notes.safeForThresholdTuning ? "Marked safe for threshold tuning" : "Not marked safe for threshold tuning",
   };
 }
 
@@ -365,7 +526,7 @@ function tuningObservationFor(run: RealReceiptRun, index: number) {
     },
     manualQa: {
       ...manualQaSummaryFor(run.notes),
-      reviewerNotes: run.notes.thresholdAdjustment || "Not noted",
+      reviewerNotes: safeQaNote(run.notes.tuningFollowUp || run.notes.thresholdAdjustment),
     },
     analyzerResult: {
       actualRisk: result.riskLevel,
@@ -459,7 +620,7 @@ function redactedDiagnosticFor(run: RealReceiptRun, index: number) {
     },
     manualQa: {
       ...manualQaSummaryFor(run.notes),
-      reviewerNotePresent: Boolean(run.notes.thresholdAdjustment.trim()),
+      reviewerNotePresent: Boolean((run.notes.tuningFollowUp || run.notes.thresholdAdjustment || run.notes.observation).trim()),
     },
     analyzerResult: {
       evidenceType: result.evidenceType,
@@ -1208,6 +1369,7 @@ function RealReceiptQaSection({
   onCopyJson,
   onCopyObservation,
   onCopySessionSummary,
+  onExportSessionSummary,
   onClearRun,
   onClearSession,
 }: {
@@ -1223,6 +1385,7 @@ function RealReceiptQaSection({
   onCopyJson: (redacted: boolean) => void;
   onCopyObservation: () => void;
   onCopySessionSummary: () => void;
+  onExportSessionSummary: () => void;
   onClearRun: (id: string) => void;
   onClearSession: () => void;
 }) {
@@ -1288,7 +1451,17 @@ function RealReceiptQaSection({
                 title="Copy a privacy-safe summary for every completed real receipt run"
               >
                 {copiedMode === "session" ? <ClipboardCheck className="size-4" aria-hidden="true" /> : <Clipboard className="size-4" aria-hidden="true" />}
-                {copiedMode === "session" ? "Copied session summary" : "Copy session tuning summary"}
+                {copiedMode === "session" ? "Copied session summary" : "Copy tuning summary"}
+              </button>
+              <button
+                className="inline-flex items-center gap-2 rounded-lg border border-[var(--cg-border)] px-3 py-2 text-sm font-semibold text-white transition hover:border-[var(--cg-border-strong)] disabled:cursor-not-allowed disabled:opacity-50"
+                type="button"
+                onClick={onExportSessionSummary}
+                disabled={!runs.some((run) => run.result)}
+                title="Download a privacy-safe session summary JSON file"
+              >
+                <Download className="size-4" aria-hidden="true" />
+                Export session summary
               </button>
               <button
                 className="rounded-lg border border-[var(--cg-border)] px-3 py-2 text-sm font-semibold text-white transition hover:border-[var(--cg-border-strong)]"
@@ -1459,7 +1632,7 @@ function RealReceiptQaSection({
                     title="Preferred sharing format for tuning because it excludes raw OCR and parsed private values by default"
                   >
                     {copiedMode === "observation" ? <ClipboardCheck className="size-4" aria-hidden="true" /> : <Clipboard className="size-4" aria-hidden="true" />}
-                    {copiedMode === "observation" ? "Copied tuning observation" : "Copy tuning observation"}
+                    {copiedMode === "observation" ? "Copied tuning summary" : "Copy tuning summary"}
                   </button>
                   <button
                     className="inline-flex items-center gap-2 rounded-lg border border-[var(--cg-border)] px-3 py-2 text-sm font-semibold text-white transition hover:border-[var(--cg-border-strong)]"
@@ -1468,7 +1641,7 @@ function RealReceiptQaSection({
                     title="Copy a diagnostic JSON shape with raw OCR and private-bearing parsed structures omitted"
                   >
                     {copiedMode === "redacted" ? <ClipboardCheck className="size-4" aria-hidden="true" /> : <Clipboard className="size-4" aria-hidden="true" />}
-                    {copiedMode === "redacted" ? "Copied redacted JSON" : "Copy redacted JSON"}
+                    {copiedMode === "redacted" ? "Copied redacted observation" : "Copy redacted QA observation"}
                   </button>
                   <button
                     className="inline-flex items-center gap-2 rounded-lg border border-[var(--cg-border)] px-3 py-2 text-sm font-semibold text-white transition hover:border-[var(--cg-border-strong)] disabled:cursor-not-allowed disabled:opacity-50"
@@ -1485,9 +1658,9 @@ function RealReceiptQaSection({
             </div>
 
             <div className="mt-4 rounded-lg border border-[rgba(53,217,255,0.3)] bg-[rgba(53,217,255,0.07)] p-3 text-sm leading-6 text-cyan-100">
-              `Copy tuning observation` is the preferred sharing format for threshold and reliability-score review. It avoids raw OCR text,
+              `Copy tuning summary` is the preferred sharing format for threshold and reliability-score review. It avoids raw OCR text,
               original file names, parsed private values, full order IDs, payment last-four values, names, addresses, emails, phone numbers,
-              and tracking numbers by default. `Copy redacted JSON` is for diagnostics and omits raw OCR text, raw parsed candidate text,
+              and tracking numbers by default. `Copy redacted QA observation` is for diagnostics and omits raw OCR text, raw parsed candidate text,
               EXIF-like metadata, file names, and raw final-report fields by default.
             </div>
 
@@ -1674,33 +1847,24 @@ export function TestEvidenceHarness() {
     setCopiedRealMode(null);
   }
 
-  async function copyActiveResult() {
+  async function copyActiveFixtureSummary() {
     if (!activeRun?.result) {
       return;
     }
 
-    const payload = {
-      fixture: {
-        id: activeRun.fixture.id,
-        label: activeRun.fixture.label,
-        expectedRisk: activeRun.fixture.expectedRisk,
-        expectedOutcome: activeRun.fixture.expectedOutcome,
-        tuningNotes: activeRun.fixture.tuningNotes,
-      },
-      file: {
-        name: activeRun.file.name,
-        type: activeRun.file.type,
-        size: activeRun.file.size,
-        lastModified: activeRun.file.lastModified,
-      },
-      manualQaExpectations: activeRun.expectations ?? [],
-      analysisResult: activeRun.result,
-      finalReport: mapLocalAnalysisToReport(activeRun.result),
-    };
+    const payload = fixtureResultSummaryFor(activeRun);
 
     await copyTextToClipboard(JSON.stringify(payload, null, 2));
     setCopiedFixtureId(activeRun.fixture.id);
     window.setTimeout(() => setCopiedFixtureId(null), 1600);
+  }
+
+  function exportActiveFixtureSummary() {
+    if (!activeRun?.result) {
+      return;
+    }
+
+    exportJsonFile(`claimguard-fixture-result-summary-${safeFileSlug(activeRun.fixture.id)}.json`, fixtureResultSummaryFor(activeRun));
   }
 
   async function handleRealReceiptFiles(files: File[]) {
@@ -1847,6 +2011,10 @@ export function TestEvidenceHarness() {
     window.setTimeout(() => setCopiedRealMode(null), 1600);
   }
 
+  function exportSessionTuningSummary() {
+    exportJsonFile("claimguard-real-receipt-session-summary.json", sessionTuningSummaryFor(realRuns));
+  }
+
   return (
     <div className="mx-auto grid min-w-0 max-w-[1560px] gap-4">
       <header className="px-1 py-2">
@@ -1899,6 +2067,7 @@ export function TestEvidenceHarness() {
         onCopyJson={copyRealResult}
         onCopyObservation={copyTuningObservation}
         onCopySessionSummary={copySessionTuningSummary}
+        onExportSessionSummary={exportSessionTuningSummary}
         onClearRun={clearRealReceipt}
         onClearSession={clearRealSession}
       />
@@ -2011,14 +2180,22 @@ export function TestEvidenceHarness() {
                 <button
                   className="inline-flex items-center gap-2 rounded-lg border border-[var(--cg-border)] px-3 py-2 text-sm font-semibold text-white transition hover:border-[var(--cg-border-strong)]"
                   type="button"
-                  onClick={copyActiveResult}
+                  onClick={copyActiveFixtureSummary}
                 >
                   {copiedFixtureId === activeRun.fixture.id ? (
                     <ClipboardCheck className="size-4" aria-hidden="true" />
                   ) : (
                     <Clipboard className="size-4" aria-hidden="true" />
                   )}
-                  {copiedFixtureId === activeRun.fixture.id ? "Copied JSON" : "Copy result JSON"}
+                  {copiedFixtureId === activeRun.fixture.id ? "Copied summary" : "Copy fixture result summary"}
+                </button>
+                <button
+                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--cg-border)] px-3 py-2 text-sm font-semibold text-white transition hover:border-[var(--cg-border-strong)]"
+                  type="button"
+                  onClick={exportActiveFixtureSummary}
+                >
+                  <Download className="size-4" aria-hidden="true" />
+                  Export fixture result summary
                 </button>
                 <button
                   className="inline-flex items-center gap-2 rounded-lg border border-[var(--cg-border)] px-3 py-2 text-sm font-semibold text-white transition hover:border-[var(--cg-border-strong)]"
