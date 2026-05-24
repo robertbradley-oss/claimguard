@@ -168,19 +168,57 @@ function hasVisiblePaymentLastFour(line: string) {
   return /\b(?:ending(?:\s+(?:in|with))?|last\s*(?:four|4)|x{2,}|\*{2,}|\u2022{2,})\s*\d{4}\b/i.test(line);
 }
 
+function amazonInvoiceDateSourceFor(line: string) {
+  return /\b(invoice\s*date|date\s*of\s*invoice|invoice\s*issued|date\s*issued|issued\s*on)\b/i.test(line)
+    ? "Amazon invoice date label"
+    : "Amazon order date label";
+}
+
+function isAmazonInvoiceDateLabel(line: string) {
+  return /\b(invoice\s*date|date\s*of\s*invoice|invoice\s*issued|date\s*issued|issued\s*on|order\s*date|order\s*placed|placed\s*on|ordered\s*on|date\s*of\s*order)\b/i.test(
+    line,
+  );
+}
+
+function adjacentAmazonInvoiceDate(lines: string[], labelIndex: number, source: string) {
+  for (let offset = 1; offset <= 3; offset += 1) {
+    const candidateLine = lines[labelIndex + offset];
+
+    if (!candidateLine) {
+      return undefined;
+    }
+
+    const match = candidateLine.match(amazonInvoiceDatePattern);
+
+    if (match?.[1]) {
+      return {
+        value: match[1].trim(),
+        source: source === "Amazon invoice date label" ? "Adjacent Amazon invoice date label" : "Adjacent Amazon order date label",
+      };
+    }
+
+    if (fieldLabelPattern.test(candidateLine) && !/\b(?:date|time\s*zone|utc|gmt)\b/i.test(candidateLine)) {
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
+
 function getAmazonInvoiceDetailPurchaseDate(text: string, lines: string[]) {
+  const labelJoiner = String.raw`(?:\s*\([^)]+\)|\s+(?:UTC|GMT|PST|PDT|EST|EDT|CST|CDT|MST|MDT))*\s*:?\s*`;
   const labeledDatePatterns = [
     {
       source: "Amazon invoice date label",
       pattern: new RegExp(
-        String.raw`\b(?:invoice\s*date|date\s*of\s*invoice)\b(?:\s*\([^)]+\))?\s*:?\s*${amazonInvoiceDatePattern.source}`,
+        String.raw`\b(?:invoice\s*date|date\s*of\s*invoice|invoice\s*issued|date\s*issued|issued\s*on)\b${labelJoiner}${amazonInvoiceDatePattern.source}`,
         "i",
       ),
     },
     {
       source: "Amazon order date label",
       pattern: new RegExp(
-        String.raw`\b(?:order\s*date|order\s*placed|placed\s*on|ordered\s*on|date\s*of\s*order)\b(?:\s*\([^)]+\))?\s*:?\s*${amazonInvoiceDatePattern.source}`,
+        String.raw`\b(?:order\s*date|order\s*placed|placed\s*on|ordered\s*on|date\s*of\s*order)\b${labelJoiner}${amazonInvoiceDatePattern.source}`,
         "i",
       ),
     },
@@ -198,29 +236,16 @@ function getAmazonInvoiceDetailPurchaseDate(text: string, lines: string[]) {
 
   for (let index = 0; index < lines.length - 1; index += 1) {
     const line = lines[index];
-    const nextLine = lines[index + 1];
 
-    if (!line || !nextLine || amazonInvoiceDatePattern.test(line) || !amazonInvoiceDatePattern.test(nextLine)) {
+    if (!line || amazonInvoiceDatePattern.test(line)) {
       continue;
     }
 
-    if (/\b(invoice\s*date|date\s*of\s*invoice)\b/i.test(line)) {
-      const match = nextLine.match(amazonInvoiceDatePattern);
-      if (match?.[1]) {
-        return {
-          value: match[1].trim(),
-          source: "Adjacent Amazon invoice date label",
-        };
-      }
-    }
+    if (isAmazonInvoiceDateLabel(line)) {
+      const dateResult = adjacentAmazonInvoiceDate(lines, index, amazonInvoiceDateSourceFor(line));
 
-    if (/\b(order\s*date|order\s*placed|placed|ordered|date\s*of\s*order)\b/i.test(line)) {
-      const match = nextLine.match(amazonInvoiceDatePattern);
-      if (match?.[1]) {
-        return {
-          value: match[1].trim(),
-          source: "Adjacent Amazon order date label",
-        };
+      if (dateResult) {
+        return dateResult;
       }
     }
   }
@@ -593,7 +618,7 @@ function hasPaymentCue(line: string, sourceCategory?: ReceiptSourceCategory) {
 
   if (
     isAmazonInvoiceOrDetailSource(sourceCategory) &&
-    /\b(payment method|payment information|payment details|payment instrument|paid with|paid by|charged to|visa|mastercard|amex|american express|discover|paypal|gift card|store credit|amazon(?:\.com)? store card|amazon visa|prime visa|credit card|debit card|card ending|ending(?:\s+(?:in|with))?|last\s*(?:four|4))\b/i.test(
+    /\b(payment method|payment information|payment details|payment instrument|paid with|paid by|charged to|visa|mastercard|amex|american express|discover|paypal|amazon pay|wallet|gift card|store credit|amazon(?:\.com)? store card|amazon visa|prime visa|payment card|credit card|debit card|\bcard\b|card ending|ending(?:\s+(?:in|with))?|last\s*(?:four|4)|x{2,}|\*{2,}|\u2022{2,}|masked|redacted)\b/i.test(
       line,
     )
   ) {

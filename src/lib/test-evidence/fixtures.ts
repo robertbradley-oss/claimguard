@@ -25,6 +25,7 @@ export type SampleEvidenceFixtureId =
   | "amazon-split-date"
   | "amazon-split-context"
   | "amazon-invoice-detail"
+  | "amazon-invoice-split-detail"
   | "suspicious-edited-receipt"
   | "poor-quality-receipt"
   | "sparse-high-confidence-pdf"
@@ -2070,6 +2071,98 @@ export const sampleEvidenceFixtures: SampleEvidenceFixture[] = [
           result.riskLevel !== "High"
             ? "Invoice and promotion wording is being treated as matching context rather than standalone high-risk evidence."
             : "Inspect whether invoice or promotion context is over-penalizing a readable Amazon baseline.",
+      },
+    ],
+  },
+  {
+    id: "amazon-invoice-split-detail",
+    label: "Amazon split invoice detail",
+    fileName: "amazon-invoice-split-detail.jpg",
+    type: "image",
+    description: "Amazon invoice/detail layout with date metadata split across lines and payment details represented as masked summary text.",
+    expectedRisk: "Low",
+    expectedOutcome: "Invoice/detail date and masked payment summary lines should populate local parsed fields without using raw private values.",
+    tuningNotes:
+      "Use this to guard real anonymized invoice/detail regressions where classification succeeds but date or payment fields are missed because labels and values are split across neutral rows.",
+    loadFile: () =>
+      canvasToFile(
+        drawReceiptCanvas([
+          "Amazon.com",
+          "Tax Invoice",
+          "Invoice Date",
+          "(UTC)",
+          "Apr 21, 2026",
+          "Order details available",
+          "Print this page for your records",
+          "iSpring replacement cartridge",
+          "Sold by: Example Seller",
+          "Billing address: Redacted Recipient",
+          "Payment Details",
+          "Payment Card",
+          "Masked account",
+          "Item subtotal: $64.00",
+          "Promotion applied: $4.00",
+          "Total paid: $63.90",
+        ]),
+        "amazon-invoice-split-detail.jpg",
+      ),
+    evaluate: (result) => [
+      {
+        label: "Amazon split invoice detail source is classified",
+        status: expectationStatus(
+          result.receipt.sourceClassification.category === "amazon-invoice-detail" && result.receipt.source === "amazon",
+          "Warning",
+        ),
+        detail: `Class ${result.receipt.sourceClassification.label}; cues ${result.receipt.sourceClassification.cues.join(" | ")}.`,
+        note:
+          "Invoice/detail evidence should stay in the Amazon invoice/detail source lane before field extraction is evaluated.",
+      },
+      {
+        label: "Amazon split invoice detail extracts adjacent date",
+        status: expectationStatus(
+          Boolean(result.receipt.purchaseDate) &&
+            /Adjacent Amazon invoice date label/i.test(result.receipt.parsingDetails.purchaseDateSource ?? ""),
+          "Warning",
+        ),
+        detail: `Date ${result.receipt.purchaseDate ?? "missing"} from ${result.receipt.parsingDetails.purchaseDateSource ?? "no source"}.`,
+        note:
+          "Invoice date labels may have neutral metadata rows before the date value; the parser should still keep the local date field available for manual matching.",
+      },
+      {
+        label: "Amazon split invoice detail extracts masked payment summary",
+        status: expectationStatus(
+          Boolean(result.receipt.paymentMethod) &&
+            result.receipt.parsingDetails.paymentSource === "Payment detail after label" &&
+            result.receipt.parsingDetails.paymentCandidates.some((candidate) => candidate.kind === "card" && !candidate.hasVisibleLastFour),
+          "Warning",
+        ),
+        detail: `Payment present ${Boolean(result.receipt.paymentMethod)}; source ${
+          result.receipt.parsingDetails.paymentSource ?? "missing"
+        }; candidates ${result.receipt.parsingDetails.paymentCandidates.length}.`,
+        note:
+          "Masked card summaries should count as payment context without needing or exposing a payment value.",
+      },
+      {
+        label: "Amazon split invoice source summary stays privacy-safe",
+        status: expectationStatus(
+          !result.receipt.sourceSpecificSummary ||
+            !/\b(?:\d{3}-\d{7}-\d{7}|payment card|masked account|billing address|redacted recipient|example seller)\b/i.test(
+              JSON.stringify(result.receipt.sourceSpecificSummary),
+            ),
+          "Warning",
+        ),
+        detail: result.receipt.sourceSpecificSummary
+          ? `${result.receipt.sourceSpecificSummary.confidence}% confidence; ${result.receipt.sourceSpecificSummary.fieldsPresent}/${result.receipt.sourceSpecificSummary.fieldsExpected} fields.`
+          : "No source-specific summary emitted for Amazon invoice/detail.",
+        note:
+          "Source summaries must remain presence/count-only and should not expose raw order, payment, address, seller, or recipient values.",
+      },
+      {
+        label: "Amazon split invoice detail does not broaden sparse behavior",
+        status: expectationStatus(result.riskLevel !== "High", "Warning"),
+        detail: `Received ${result.riskLevel} at ${result.score}; missing fields ${result.receipt.missingFields.join(", ") || "none"}.`,
+        note:
+          "Readable split invoice details should avoid automatic high-risk treatment while sparse/incomplete evidence remains a separate manual-review path.",
       },
     ],
   },
