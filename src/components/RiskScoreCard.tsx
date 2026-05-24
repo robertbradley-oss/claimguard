@@ -63,7 +63,7 @@ export function RiskScoreCard({
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--cg-text-muted)]">
-              Authenticity confidence
+              Evidence Reliability Score
             </p>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="font-mono text-6xl font-semibold leading-none tabular-nums text-white">
@@ -85,6 +85,14 @@ export function RiskScoreCard({
             }`}
             style={{ width: isPending ? "0%" : `${score}%` }}
           />
+        </div>
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.025] p-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--cg-text-muted)]">
+            External Verification: Not performed
+          </p>
+          <p className="mt-1 text-sm leading-5 text-[var(--cg-text-soft)]">
+            Not externally verified. This score reflects readable, structurally consistent local evidence only.
+          </p>
         </div>
       </div>
 

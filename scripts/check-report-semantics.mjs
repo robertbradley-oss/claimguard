@@ -80,7 +80,8 @@ const requiredSemanticSignals = [
 ];
 
 const guardedBannedPhrases = [
-  /Authenticity\s+score/i,
+  /Authenticity\s+(?:score|confidence|rating)/i,
+  /confidence\s+in\s+authenticity/i,
   /verified authentic/i,
   /verified authenticity/i,
   /authenticity verified/i,
