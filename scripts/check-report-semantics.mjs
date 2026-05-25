@@ -8,6 +8,12 @@ const filesToCheck = [
   "src/lib/analysis/report-adapter.ts",
   "src/lib/analysis/scoring.ts",
   "src/lib/analysis/types.ts",
+  "src/lib/analysis/product-photo-analyzer.ts",
+  "src/lib/analysis/product-photo-heuristics.ts",
+  "src/lib/analysis/product-photo-result.probe.ts",
+  "src/lib/analysis/shared-result.probe.ts",
+  "src/lib/analysis/product-photo-report-view-model.ts",
+  "src/lib/analysis/product-photo-report-view-model.probe.ts",
   "src/components/AnalysisReport.tsx",
   "src/components/AuthenticityResultCard.tsx",
   "src/components/ClaimReviewWorkflow.tsx",
@@ -33,6 +39,10 @@ const fileContents = new Map(filesToCheck.map((filePath) => [filePath, readRequi
 const corpus = [...fileContents.values()].join("\n");
 const sourceCorpus = [...fileContents]
   .filter(([filePath]) => filePath.startsWith("src/"))
+  .map(([, contents]) => contents)
+  .join("\n");
+const productPhotoCorpus = [...fileContents]
+  .filter(([filePath]) => filePath.includes("product-photo") || filePath.includes("shared-result.probe"))
   .map(([, contents]) => contents)
   .join("\n");
 
@@ -98,6 +108,46 @@ const guardedBannedPhrases = [
   /(?:proves|proven)\s+(?:that\s+)?(?:the\s+)?receipt\s+(?:is\s+)?(?:real|authentic)/i,
 ];
 
+const requiredProductPhotoSemanticSignals = [
+  {
+    label: "product-photo mapping boundary",
+    patterns: [/product-photo-report-view-model/i],
+  },
+  {
+    label: "product-photo local-only score scope",
+    patterns: [/Local evidence quality and review readiness only/i],
+  },
+  {
+    label: "product-photo high score is not proof language",
+    patterns: [/High score does not prove the product photo or claim/i],
+  },
+  {
+    label: "product-photo external verification not performed",
+    patterns: [/External verification was not performed/i, /externalVerification:\s*"Not performed"/i],
+  },
+  {
+    label: "product-photo manual review wording",
+    patterns: [/Manual review recommended/i],
+  },
+  {
+    label: "product-photo privacy-safe omission flags",
+    patterns: [/rawExifOmitted/i, /originalFilenameOmitted/i, /rawValueOmitted/i],
+  },
+];
+
+const productPhotoBannedPhrases = [
+  phrasePattern("fraud", "confirmed"),
+  phrasePattern("confirmed", "fraud"),
+  phrasePattern("manipulation", "confirmed"),
+  /\bfake\b/i,
+  /\bapproved\b/i,
+  /\brejected\b/i,
+  /\b(?:photo|image|claim|evidence)\s+verified\b/i,
+  /\bverified\s+(?:photo|image|claim|evidence|authentic|authenticity)\b/i,
+  /\b(?:approve|deny|reject)\s+(?:this\s+)?claim\b/i,
+  /automatic\s+(?:outcome|decision|disposition)/i,
+];
+
 const unsafeHighScoreProofPattern = /High score(?![^.]*does not prove)[^.]*\b(?:proves?|confirms?|verifies?|authentic|real)\b/i;
 const unsafeExternalVerificationPatterns = [
   /externalVerification\s*:\s*["'`](?!Not performed)/i,
@@ -116,9 +166,21 @@ for (const signal of requiredSemanticSignals) {
   }
 }
 
+for (const signal of requiredProductPhotoSemanticSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(productPhotoCorpus))) {
+    failures.push(`Missing product-photo semantic signal: ${signal.label}`);
+  }
+}
+
 for (const bannedPhrase of guardedBannedPhrases) {
   if (bannedPhrase.test(corpus)) {
     failures.push(`Unsafe report, fixture, or QA wording found: ${bannedPhrase}`);
+  }
+}
+
+for (const bannedPhrase of productPhotoBannedPhrases) {
+  if (bannedPhrase.test(productPhotoCorpus)) {
+    failures.push(`Unsafe product-photo wording found: ${bannedPhrase}`);
   }
 }
 
@@ -164,6 +226,27 @@ const forbiddenRedactedDiagnosticPatterns = [
   /contextCandidates\s*:\s*result\.receipt\.parsingDetails\.contextCandidates/,
   /value:\s*field\.value/,
 ];
+const productPhotoReportViewModel =
+  fileContents.get("src/lib/analysis/product-photo-report-view-model.ts") ?? "";
+const reportAdapter = fileContents.get("src/lib/analysis/report-adapter.ts") ?? "";
+const forbiddenProductPhotoMapperImports = [
+  "@/lib/analysis/analyzer",
+  "@/lib/analysis/analyzer-routing",
+  "@/lib/analysis/report-adapter",
+  "@/lib/analysis/scoring",
+  "@/lib/analysis/receipt-parser",
+  "@/lib/test-evidence",
+  "@/components/",
+  "@/lib/claim-data",
+];
+const forbiddenProductPhotoMapperPatterns = [
+  /LocalAnalysisResult/,
+  /MockAnalysisReport/,
+  /result\.evidenceSummary/,
+  /result\.recommendedSupportAction/,
+  /result\.customerSafeWording/,
+  /\.\.\.\s*(?:result|details|metadataSummary)/,
+];
 
 if (redactedProductTableNote !== safeProductTableNote) {
   failures.push("Privacy redaction check failed: product table row counts must remain visible in tuning observations.");
@@ -195,6 +278,26 @@ for (const pattern of forbiddenRedactedDiagnosticPatterns) {
 
 if (testEvidenceHarness.includes("redacted ? redactSensitiveValue(payload) : payload")) {
   failures.push("Privacy redacted JSON check failed: redacted copy still appears to share the full payload with regex masking.");
+}
+
+for (const importPath of forbiddenProductPhotoMapperImports) {
+  if (productPhotoReportViewModel.includes(importPath)) {
+    failures.push(`Product-photo report mapping boundary check failed: mapper imports forbidden path ${importPath}`);
+  }
+}
+
+for (const pattern of forbiddenProductPhotoMapperPatterns) {
+  if (pattern.test(productPhotoReportViewModel)) {
+    failures.push(`Product-photo report mapping boundary check failed: mapper uses forbidden pattern ${pattern}`);
+  }
+}
+
+if (reportAdapter.includes("product-photo-report-view-model") || reportAdapter.includes("mapProductPhotoAnalysisToReportViewModel")) {
+  failures.push("Product-photo report mapping boundary check failed: receipt report adapter imports product-photo mapper.");
+}
+
+if (!reportAdapter.includes("mapLocalAnalysisToReport(result: LocalAnalysisResult)")) {
+  failures.push("Product-photo report mapping boundary check failed: receipt report adapter signature changed.");
 }
 
 if (failures.length > 0) {
