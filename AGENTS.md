@@ -593,7 +593,7 @@ When to use:
 - Photo evidence taxonomy.
 - Phase 2.0 scaffold/type-boundary review.
 - Product damage review planning.
-- AI-generated or altered image signal planning.
+- Image consistency uncertainty signal planning.
 - Provider-neutral computer-vision readiness.
 
 When not to use:

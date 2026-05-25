@@ -57,7 +57,7 @@ Meaning:
 
 - Product-damage photo evidence model.
 - Photo quality and visibility signals.
-- Planning for altered-image and AI-generated-image risk signals.
+- Planning for image consistency uncertainty signals.
 - Provider-neutral image analysis contracts.
 - Manual-review language for photo findings.
 
