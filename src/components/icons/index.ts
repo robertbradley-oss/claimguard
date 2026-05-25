@@ -1,1 +1,0 @@
-export { NucleoCameraIcon } from "./NucleoCameraIcon";

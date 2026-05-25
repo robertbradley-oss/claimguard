@@ -2,11 +2,12 @@
 
 /* eslint-disable @next/next/no-img-element -- Local object URL evidence previews cannot be optimized through next/image. */
 
-import { useEffect, useMemo, useRef, useState, type DragEvent, type ElementType, type KeyboardEvent, type ReactNode, type SVGProps } from "react";
+import { useEffect, useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
 import Image from "next/image";
 import {
   AlertTriangle,
   CalendarCheck,
+  Camera,
   CheckCircle2,
   Clipboard,
   ClipboardCheck,
@@ -29,6 +30,7 @@ import {
   Type,
   UploadCloud,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import {
   mockAnalysisReports,
   mockAnalysisSteps,
@@ -41,18 +43,15 @@ import { analyzeEvidenceFile, getEvidenceTypeFromFile } from "@/lib/analysis/ana
 import { renderPdfFirstPagePreview } from "@/lib/analysis/pdf-preview";
 import { mapLocalAnalysisToReport } from "@/lib/analysis/report-adapter";
 import type { LocalAnalysisResult } from "@/lib/analysis/types";
-import { NucleoCameraIcon } from "@/components/icons";
 import { formatFileSize } from "@/lib/file-format";
-
-type ChipIcon = ElementType<SVGProps<SVGSVGElement>>;
 
 type IconChip = {
   label: string;
-  Icon: ChipIcon;
+  Icon: LucideIcon;
 };
 
 const acceptedFileTypeChips: IconChip[] = [
-  { label: "Receipt photo", Icon: NucleoCameraIcon },
+  { label: "Receipt photo", Icon: Camera },
   { label: "Order screenshot", Icon: FileImage },
   { label: "PDF receipt", Icon: FileText },
   { label: "Receipt image", Icon: ImageIcon },
