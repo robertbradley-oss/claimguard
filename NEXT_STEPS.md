@@ -65,16 +65,20 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 
 ## Phase 2.2 Staged Live Analyzer-Routing Integration Plan
 
-This is a docs-only integration plan. It records the safest future path for analyzer routing without opening runtime behavior, wiring product-photo analysis into the UI, or changing the shipped receipt analyzer path.
+This is a docs-only integration gate. It records the safest future path for analyzer routing without opening runtime behavior, wiring product-photo analysis into the UI, or changing the shipped receipt analyzer path.
+
+Live-routing integration means a guarded internal analyzer-routing decision path that can be reviewed with probes before any user-facing behavior changes. It does not mean UI display, upload routing, report mapping, scoring changes, parser changes, fixture changes, provider calls, storage, integrations, or case queues.
 
 Staged order:
 
-1. Complete this docs-only live-routing integration plan and keep `routeAnalyzerEvidenceInput` decision-only and unwired.
-2. Expand probe coverage for the planned contract before any runtime wiring is attempted.
-3. Refine type-only/shared-result boundaries only if the staged plan requires a result model that can safely represent receipts and product photos without forcing one into the other's shape.
-4. Add probe coverage that proves the non-live product-photo shared-result boundary stays unwired from live analyzer/UI/upload/report/scoring/parser paths.
-5. Add a guarded internal route-to-adapter path that is still not callable by UI/upload/report/scoring/parser paths.
-6. Seek separate approval for live analyzer/UI/upload integration only after the result shape, report mapping, probes, and safety wording are ready.
+1. Complete this docs-only live-routing gate and keep `routeAnalyzerEvidenceInput` decision-only and unwired.
+2. Add or preserve probes for the future contract before any runtime wiring is attempted.
+3. Keep `analyzeEvidenceFile` receipt-only and unchanged in the first future routing slice.
+4. Add a separate guarded internal routing entrypoint only after probes show receipt behavior is preserved.
+5. Keep product-photo output in a shared result shape and out of `LocalAnalysisResult`.
+6. Keep the first future routing slice away from UI, upload, report mapping, scoring, parser, fixtures, providers, storage, integrations, and case queues.
+7. Plan product-photo report mapping and UI wording as later separate slices before any product-photo result is displayed.
+8. Seek separate approval before any live UI/upload/report integration or provider-backed behavior.
 
 Live-use conditions before any future integration:
 
@@ -85,6 +89,20 @@ Live-use conditions before any future integration:
 - Product-photo analysis must remain local-heuristics-only, provider-ready, and not externally verified unless a future authorized provider slice explicitly changes that.
 - No real photos, real metadata fixtures, providers, storage, integrations, or case queues are part of this staged path.
 - The product-photo runtime flag remains guarded until Robert explicitly opens it.
+
+Required prerequisites before any code change:
+
+- The future prompt must explicitly open a narrow runtime-routing implementation slice.
+- Starting `git status --short --branch` must be clean and on `main`.
+- The latest pushed checkpoint must include the product-photo result boundary isolation probes.
+- The existing analyzer-routing preservation probe must pass conceptually before edits.
+- Receipt-like object and file inputs must keep the existing receipt path.
+- Product-photo candidates must remain guarded until the future slice intentionally changes exactly that guard.
+- `LocalAnalysisResult` must remain receipt-shaped.
+- `analyzeEvidenceFile` must remain the receipt analyzer entrypoint unless a separate shared-result migration is planned first.
+- Product-photo result wording must remain local evidence quality and review readiness only.
+- External verification must remain not performed.
+- No real photo, raw metadata, provider, storage, integration, or case queue work may be part of the first routing slice.
 
 Required probes before live integration:
 
@@ -97,6 +115,57 @@ Required probes before live integration:
 - Product-photo shared result variants do not require receipt-only OCR/parser/result fields.
 - Decision-only wrapper does not invoke adapter/analyzer/UI/report paths.
 - Safety-wording scan remains clean.
+- The public wrapper does not expose shared-result payload fields before report/UI mapping is planned.
+- Product-photo samples remain synthetic and contain no file bytes, image buffers, raw EXIF objects, provider handles, storage handles, integration handles, or case queue handles.
+
+Allowed files for the first future live-routing implementation slice:
+
+- `src/lib/analysis/analyzer-routing.ts`
+- `src/lib/analysis/analyzer-routing.probe.ts`
+- `src/lib/analysis/product-photo-result.probe.ts` only if a probe assertion must be tightened.
+- `src/lib/analysis/shared-result.probe.ts` only if a probe assertion must be tightened.
+- `NEXT_STEPS.md` and `AGENT_LOG.md` for status updates.
+
+Protected files for the first future live-routing implementation slice:
+
+- `src/lib/analysis/analyzer.ts`
+- `src/lib/analysis/product-photo-analyzer.ts` unless a clear boundary bug is found.
+- `src/lib/analysis/types.ts` unless a separate shared-result type slice is explicitly opened.
+- `src/lib/analysis/report-adapter.ts`
+- `src/components/ClaimReviewWorkflow.tsx`
+- Upload files.
+- Scoring files.
+- Parser files.
+- Fixtures.
+- Package scripts and dependencies.
+- Providers, storage, integrations, and case queues.
+
+Stop conditions for the future implementation:
+
+- `analyzeEvidenceFile` changes or starts calling product-photo boundary code.
+- `LocalAnalysisResult` changes or product-photo data is forced into receipt-only fields.
+- Receipt-like inputs stop preserving the existing receipt path.
+- Product-photo results reach UI, upload, report mapping, scoring, parser, fixture, provider, storage, integration, or case queue paths.
+- Report/UI language is needed before product-photo-specific report mapping and safety checks exist.
+- Any wording implies proof, customer wrongdoing, external verification, or an automatic outcome.
+- Any raw image bytes, image buffers, raw EXIF, raw metadata fixtures, original filenames, raw label values, private evidence, provider handles, storage handles, integration handles, or case queue handles appear.
+- Any required check fails or cannot be interpreted safely.
+
+Checks required for the future implementation slice:
+
+- `git status --short --branch`
+- `git log -1 --oneline`
+- `npm.cmd run lint`
+- `npm.cmd run build`
+- `npm.cmd run check:report-semantics`
+- `git diff --check`
+- Final `git status --short --branch`
+
+Recommended next implementation prompt after this docs gate is committed and pushed:
+
+```text
+/claimguardagent implement the first guarded internal analyzer-routing slice only: keep analyzeEvidenceFile receipt-only and unchanged; preserve LocalAnalysisResult; update only analyzer-routing.ts and required routing probes so product-photo candidates can exercise a guarded internal route without UI, upload, report mapping, scoring, parser, fixtures, providers, storage, integrations, or case queues; run lint, build, report semantics, and diff check; commit only if safe; do not push
+```
 
 ## Future Evidence Review UX Direction
 
