@@ -25,8 +25,10 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 - `7459a15` added a dev-only analyzer-routing preservation/status probe.
 - `2071374` added a decision-only public analyzer routing wrapper.
 - A type-only shared `EvidenceAnalysisResult` envelope and compile-only shared-result probe now exist for future analyzer routing.
-- Shared evidence model types, product-photo scaffold/defaults, signal builders, summary/completeness helpers, compile probes, an exported-only analyzer builder, analyzer and routing-adapter probes, a shared result envelope/probe, a dev-only recognition boundary, a dev-only routing adapter, a dev-only analyzer routing guard, an optional file-aware routing boundary, a dev-only analyzer-routing preservation/status probe, and a decision-only public analyzer routing wrapper exist.
+- A non-live product-photo shared-result boundary now prepares `ProductPhotoEvidenceAnalysisResult` for dev/probe use only.
+- Shared evidence model types, product-photo scaffold/defaults, signal builders, summary/completeness helpers, compile probes, an exported-only analyzer builder, analyzer and routing-adapter probes, a shared result envelope/probe, a non-live product-photo shared-result boundary/probe, a dev-only recognition boundary, a dev-only routing adapter, a dev-only analyzer routing guard, an optional file-aware routing boundary, a dev-only analyzer-routing preservation/status probe, and a decision-only public analyzer routing wrapper exist.
 - The shared result envelope represents receipt and product-photo as separate module variants and does not force product-photo into `LocalAnalysisResult`.
+- The product-photo shared-result boundary returns the shared result shape with `module: "productPhoto"`, keeps details nested under `moduleDetails.productPhoto`, and remains unwired from live analyzer, routing, UI, upload, report, scoring, parser, and fixture paths.
 - The recognition boundary is isolated and dev-only. `recognizeProductPhotoEvidence` is not called by `analyzeEvidenceFile`.
 - The routing adapter composes the recognition boundary and product-photo analyzer builder only inside an isolated dev-only module.
 - The routing adapter returns its own adapter-specific result, not `LocalAnalysisResult`.
@@ -40,7 +42,7 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 - Product-photo runtime analyzer behavior is still not live.
 - `analyzeEvidenceFile` remains the live receipt analyzer entrypoint and still protects the shipped receipt pipeline.
 - `LocalAnalysisResult` remains unchanged and receipt-path shaped.
-- The shared-result probe confirms product-photo shared results do not require receipt-only OCR/parser/result fields and keep external verification as not performed / not externally verified.
+- The shared-result and product-photo result probes confirm product-photo shared results do not require receipt-only OCR/parser/result fields and keep external verification as not performed / not externally verified.
 - No runtime analyzer routing, upload, UI, report, scoring, parser, metadata extraction, or fixture behavior changed during Phase 2.0, Phase 2.1, or Phase 2.2 helper/boundary work.
 - Runtime routing remains blocked until Robert explicitly opens that slice.
 - `product-photo` is canonical.
@@ -68,7 +70,7 @@ Staged order:
 1. Complete this docs-only live-routing integration plan and keep `routeAnalyzerEvidenceInput` decision-only and unwired.
 2. Expand probe coverage for the planned contract before any runtime wiring is attempted.
 3. Refine type-only/shared-result boundaries only if the staged plan requires a result model that can safely represent receipts and product photos without forcing one into the other's shape.
-4. Add a non-live product-photo adapter/result boundary that returns the shared result shape and remains separate from `LocalAnalysisResult`.
+4. Add probe coverage that proves the non-live product-photo shared-result boundary stays unwired from live analyzer/UI/upload/report/scoring/parser paths.
 5. Add a guarded internal route-to-adapter path that is still not callable by UI/upload/report/scoring/parser paths.
 6. Seek separate approval for live analyzer/UI/upload integration only after the result shape, report mapping, probes, and safety wording are ready.
 
@@ -78,7 +80,7 @@ Live-use conditions before any future integration:
 - Product-photo results must not be forced into receipt-shaped `LocalAnalysisResult` without a planned shared result model.
 - `src/lib/analysis/report-adapter.ts` must support product-photo-safe mapping before any product-photo result can be displayed in the UI.
 - UI language must stay manual-review-only and must not imply proof, customer wrongdoing, or automatic denial.
-- Product-photo analysis must remain local-heuristics-only, provider-ready, and not externally verified unless a future approved provider slice explicitly changes that.
+- Product-photo analysis must remain local-heuristics-only, provider-ready, and not externally verified unless a future authorized provider slice explicitly changes that.
 - No real photos, real metadata fixtures, providers, storage, integrations, or case queues are part of this staged path.
 - The product-photo runtime flag remains guarded until Robert explicitly opens it.
 
@@ -123,5 +125,5 @@ Robert wants the eventual result screen to feel like an evidence triage workspac
 ## Current Recommended Next Prompt
 
 ```text
-/claimguardagent implement the next non-live product-photo adapter/result boundary using the shared EvidenceAnalysisResult envelope; keep it dev-only/probe-only and unwired; do not touch analyzeEvidenceFile, LocalAnalysisResult, UI, upload, report mapping, scoring, parser behavior, fixtures, providers, storage, integrations, or case queues
+/claimguardagent review and expand probe-only coverage proving the non-live product-photo shared-result boundary remains unwired from analyzer routing, analyzeEvidenceFile, UI, upload, report mapping, scoring, parser behavior, fixtures, providers, storage, integrations, and case queues; do not implement live routing
 ```
