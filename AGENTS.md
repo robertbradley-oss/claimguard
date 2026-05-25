@@ -10,11 +10,9 @@ ClaimGuard is post-Phase-1.
 
 Phase 1, the Receipt Intelligence module, is closed, pushed, deployed, and production-smoked. The latest production polish checkpoint is commit `19ef25e` (`polish post-phase1 evidence workspace`).
 
-Phase 2.0 implementation has officially started as scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired. Shared evidence model types and product-photo scaffold/defaults exist, but no product-photo analyzer behavior is live yet.
+Phase 2.0 scaffold work is closed. Phase 2.1 has officially started as Product Photo Local Heuristic Design: documentation/planning-only, local-only, manual-review-safe, provider-ready, and intentionally unwired. Shared evidence model types and product-photo scaffold/defaults exist, but no product-photo analyzer behavior is live yet.
 
-No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during the overnight Phase 2 scaffold. `product-photo` is the canonical Phase 2 evidence type; `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
-
-Do not start Phase 2.1 until Robert/ChatGPT explicitly confirms the scaffold review is complete.
+No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during Phase 2.0 or Phase 2.1 planning. `product-photo` is the canonical Phase 2 evidence type; `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
 
 ClaimGuard is broader than the receipt analyzer. Receipt intelligence is one evidence module inside a larger fraud-risk screening and evidence intelligence platform. Future ClaimGuard may include photo evidence analysis, case review workflow, customer and ticket context, integrations, audit history, scoring signals, and enterprise fraud intelligence, but those areas must remain phase-gated.
 
@@ -110,7 +108,7 @@ Specialized agents should operate as senior/expert reviewers and builders, not n
 - Scoring & Safety Reviewer Agent should prevent overclaiming, unsafe wrongdoing language, and score semantics drift.
 - Privacy & Evidence Safety Agent should prevent evidence leakage across prompts, logs, exports, fixtures, screenshots, commits, and integrations.
 - Receipt Intelligence Agent should maintain receipt module quality while preserving its role as one evidence module in the larger platform.
-- Photo Evidence / Phase 2 Readiness Agent should keep Phase 2.0 scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired until Robert/ChatGPT explicitly confirms the scaffold review is complete.
+- Photo Evidence / Phase 2 Readiness Agent should keep Phase 2.1 documentation/planning-only, local-only, manual-review-safe, provider-ready, and intentionally unwired until Robert explicitly opens a Phase 2.2 runtime slice.
 - Case Workflow / Phase 3 Readiness Agent should remain planning-only until Phase 3 is explicitly opened.
 - QA Harness Agent should catch shallow verification and keep fixture/manual QA discipline privacy-safe.
 - Deployment & Release Agent should enforce clean commits, checks, deployment discipline, smoke testing, and no unapproved deploys.
@@ -159,7 +157,7 @@ Agents must stop and report instead of forcing progress when they find:
 - Upload mechanics are touched during unrelated UI work.
 - Real customer evidence, private customer data, raw OCR, or copied private JSON appears in files, logs, fixtures, prompts, or screenshots.
 - Unsafe wrongdoing-confirming language, customer-accusation language, or automatic-denial language appears.
-- Phase 2.1 runtime behavior, UI/upload wiring, analyzer routing, scoring/report/parser/fixture changes, or provider work appears before Robert/ChatGPT explicitly confirms the Phase 2.0 scaffold review is complete.
+- Phase 2.2 runtime behavior, UI/upload wiring, analyzer routing, scoring/report/parser/fixture changes, or provider work appears before Robert explicitly opens that runtime slice.
 - A required check cannot run, fails, or gives a result the agent cannot interpret safely.
 - A requested action would require a real integration, credential, deploy, commit, push, or package dependency change without explicit approval.
 
@@ -585,13 +583,13 @@ Phase boundaries:
 
 Purpose:
 
-Guide product-photo evidence readiness while Phase 2.0 is scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired.
+Guide product-photo evidence readiness while Phase 2.1 is documentation/planning-only, local-only, manual-review-safe, provider-ready, and intentionally unwired.
 
 When to use:
 
 - Phase 2 requirements.
 - Photo evidence taxonomy.
-- Phase 2.0 scaffold/type-boundary review.
+- Phase 2.1 local heuristic design review.
 - Product damage review planning.
 - Image consistency uncertainty signal planning.
 - Provider-neutral computer-vision readiness.
@@ -599,7 +597,7 @@ When to use:
 When not to use:
 
 - Implementing photo analysis.
-- Starting Phase 2.1 runtime behavior before Robert/ChatGPT explicitly confirms the Phase 2.0 scaffold review is complete.
+- Starting Phase 2.2 runtime behavior before Robert explicitly opens that slice.
 - Connecting AI vision providers.
 - Modifying receipt analyzer behavior.
 - Changing current UI to include Phase 2 features.
@@ -614,17 +612,17 @@ Files to inspect first:
 
 Hard constraints:
 
-- Phase 2.0 implementation has officially started as scaffold/type-boundary work only.
-- Current Phase 2.0 state is scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired.
+- Phase 2.0 scaffold work is closed.
+- Current Phase 2.1 state is documentation/planning-only, local-only, manual-review-safe, provider-ready, and intentionally unwired.
 - Shared evidence model types and product-photo scaffold/defaults exist.
 - No product-photo analyzer behavior is live yet.
-- No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during the overnight Phase 2 scaffold.
+- No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during Phase 2.0 or Phase 2.1 planning.
 - `product-photo` is canonical.
 - `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
-- Do not start Phase 2.1 until Robert/ChatGPT explicitly confirms the scaffold review is complete.
+- Do not start Phase 2.2 runtime work until Robert explicitly opens it.
 - Do not add product damage photo analysis.
 - Do not connect AI or computer-vision providers.
-- Do not modify app runtime code unless Robert explicitly approves that Phase 2.1 slice.
+- Do not modify app runtime code unless Robert explicitly opens that Phase 2 slice.
 
 Required checks:
 
@@ -633,13 +631,13 @@ Required checks:
 
 Handoff expectations:
 
-- State Phase 2.0 remains scaffold-only and intentionally unwired unless Robert/ChatGPT explicitly approves the next slice.
+- State Phase 2.1 remains documentation/planning-only and intentionally unwired unless Robert explicitly opens a runtime slice.
 - List readiness gaps.
 - Recommend the next planning artifact.
 
 Phase boundaries:
 
-- Scaffold/type-boundary work only until Robert/ChatGPT confirms the Phase 2.0 scaffold review is complete. Phase 2.1 runtime behavior requires explicit approval.
+- Documentation/planning-only until Robert opens Phase 2.2 runtime behavior.
 
 ### 8. Case Workflow / Phase 3 Readiness Agent
 
@@ -893,7 +891,7 @@ Phase boundaries:
 Use `ROADMAP.md` for durable phase definitions. The short version:
 
 - Phase 1: Receipt Intelligence module. Closed, deployed, and production-smoked.
-- Phase 2: Photo Evidence. Phase 2.0 implementation has officially started as scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired. No product-photo analyzer behavior is live yet.
+- Phase 2: Photo Evidence. Phase 2.1 has officially started as documentation/planning-only, local-only, manual-review-safe, provider-ready, and intentionally unwired. No product-photo analyzer behavior is live yet.
 - Phase 3: Case Review Workflow readiness and later implementation.
 - Phase 4: Stronger OCR/AI service integrations.
 - Phase 5: Ticket, email, drive, and customer-context integrations.

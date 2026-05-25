@@ -32,7 +32,7 @@ The Main ClaimGuard Agent must ensure each specialist operates at a senior/exper
 - Scoring & Safety prevents overclaiming and unsafe wrongdoing language.
 - Privacy & Evidence Safety prevents evidence leakage.
 - Receipt Intelligence maintains receipt quality without making receipts the whole product.
-- Photo Evidence remains Phase 2.0 scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired until Robert/ChatGPT explicitly confirms the scaffold review is complete. Case Workflow remains planning-only until its phase is explicitly opened.
+- Photo Evidence remains Phase 2.1 documentation/planning-only, local-only, manual-review-safe, provider-ready, and intentionally unwired until Robert explicitly opens a Phase 2.2 runtime slice. Case Workflow remains planning-only until its phase is explicitly opened.
 - QA Harness requires meaningful verification.
 - Deployment & Release enforces clean commits, checks, deployment discipline, and smoke testing.
 
@@ -48,7 +48,7 @@ Before accepting delegated work, the Main ClaimGuard Agent must ask: what could 
 
 ## Stop Conditions
 
-Stop and report instead of forcing progress when the repo path is wrong, a OneDrive duplicate is active, mixed dirty work makes scope unclear, unexpected app-code or analyzer/parser/scoring/report/privacy diffs appear, upload mechanics are touched out of scope, real customer evidence or raw OCR appears, unsafe wrongdoing-confirming language appears, Phase 2.1 runtime behavior appears before Robert/ChatGPT explicitly confirms the Phase 2.0 scaffold review is complete, or required checks cannot be completed.
+Stop and report instead of forcing progress when the repo path is wrong, a OneDrive duplicate is active, mixed dirty work makes scope unclear, unexpected app-code or analyzer/parser/scoring/report/privacy diffs appear, upload mechanics are touched out of scope, real customer evidence or raw OCR appears, unsafe wrongdoing-confirming language appears, Phase 2.2 runtime behavior appears before Robert explicitly opens that slice, or required checks cannot be completed.
 
 ## Definition Of Done Summary
 
@@ -96,12 +96,12 @@ The Main ClaimGuard Agent should request another pass when a handoff is vague, m
 ## Phase Gates
 
 - Phase 1 receipt intelligence is closed, deployed, and production-smoked.
-- Phase 2.0 implementation has officially started. Current Phase 2.0 state is scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired.
+- Phase 2.0 scaffold work is closed. Current Phase 2.1 state is documentation/planning-only, local-only, manual-review-safe, provider-ready, and intentionally unwired.
 - Shared evidence model types and product-photo scaffold/defaults exist.
 - No product-photo analyzer behavior is live yet.
-- No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during the overnight Phase 2 scaffold.
+- No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during Phase 2.0 or Phase 2.1 planning.
 - `product-photo` is canonical; `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
-- Do not start Phase 2.1 until Robert/ChatGPT explicitly confirms the scaffold review is complete.
+- Do not start Phase 2.2 runtime work until Robert explicitly opens it.
 - Phase 3 case workflow is planning-only unless Robert explicitly opens implementation.
 - Phase 4 and Phase 5 integrations are planning-only unless Robert explicitly approves real services.
 - Phase 6 SaaS platform and Phase 7 enterprise intelligence are strategy/planning only.
