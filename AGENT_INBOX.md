@@ -21,6 +21,50 @@ Do not request real integrations here unless you are ready for explicit approval
 Add new requests below this line.
 
 ```text
+[priority: high] 9AM CHECK-IN INSTRUCTIONS FOR ROBERT
+
+At the 9am review point, do not continue making changes until Robert reviews the overnight result.
+
+Prepare a concise morning checkpoint that includes:
+
+1. Current branch and sync state:
+   - git status --short --branch
+   - latest commit hash
+   - whether main is pushed and synced with origin/main
+
+2. Overnight work summary:
+   - commits created
+   - files changed per commit
+   - which planned slices were completed
+   - which slices were skipped or stopped
+
+3. Safety verification:
+   - confirm whether runtime behavior changed
+   - confirm whether analyzer.ts changed
+   - confirm whether upload behavior changed
+   - confirm whether UI changed
+   - confirm whether fixtures changed
+   - confirm whether report mapping/scoring/parser behavior changed
+
+4. Checks:
+   - npm.cmd run lint
+   - npm.cmd run build
+   - npm.cmd run check:report-semantics
+   - git diff --check
+
+5. Risk callout:
+   - anything risky
+   - anything intentionally left unwired
+   - anything Robert should inspect before the next task
+
+6. Recommended next move:
+   - one safest next Phase 2 task
+   - whether to continue scaffolding, begin local heuristic design, or pause for review
+
+Do not start a new slice after preparing the 9am checkpoint unless Robert explicitly approves it.
+
+End with the CLAIMGUARD HANDOFF format.
+
 [priority: medium] Example: Improve the upload-to-analysis workflow using mock data only.
 ```
 
