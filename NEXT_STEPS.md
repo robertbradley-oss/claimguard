@@ -43,6 +43,8 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 - `analyzeEvidenceFile` remains the live receipt analyzer entrypoint and still protects the shipped receipt pipeline.
 - `LocalAnalysisResult` remains unchanged and receipt-path shaped.
 - The shared-result and product-photo result probes confirm product-photo shared results do not require receipt-only OCR/parser/result fields and keep external verification as not performed / not externally verified.
+- Probe-only isolation assertions now explicitly record that the product-photo shared-result boundary does not invoke `analyzeEvidenceFile`, analyzer routing, UI, upload, report mapping, scoring, parser, fixtures, providers, storage, integrations, or case queues.
+- Probe sample data is synthetic and records no file bytes, image buffers, raw EXIF objects, provider handles, storage handles, integration handles, or case queue handles.
 - No runtime analyzer routing, upload, UI, report, scoring, parser, metadata extraction, or fixture behavior changed during Phase 2.0, Phase 2.1, or Phase 2.2 helper/boundary work.
 - Runtime routing remains blocked until Robert explicitly opens that slice.
 - `product-photo` is canonical.
@@ -57,7 +59,7 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 5. Keep the analyzer routing guard and optional file-aware boundary out of the live UI/upload flow until a separate live-routing plan is explicitly opened.
 6. Keep `LocalAnalysisResult` receipt-path shaped until a separate shared-result migration slice is explicitly opened.
 7. Keep image-consistency uncertainty dormant until a future explicitly opened provider, validated local-metrics, and QA-evidence slice.
-8. Confirm the product-photo helpers, analyzer builder, probes, recognition boundary, routing adapter, analyzer routing guard, optional file-aware boundary, preservation probe, and public wrapper remain unwired from runtime analyzer, upload, UI, report, scoring, parser, metadata extraction, and fixture behavior.
+8. Keep the product-photo helpers, analyzer builder, probes, recognition boundary, routing adapter, analyzer routing guard, optional file-aware boundary, preservation probe, and public wrapper unwired from runtime analyzer, upload, UI, report, scoring, parser, metadata extraction, and fixture behavior.
 9. Keep the shipped receipt module stable unless Robert explicitly requests maintenance.
 10. Preserve a clean operational queue after each completed agent task.
 
@@ -125,5 +127,5 @@ Robert wants the eventual result screen to feel like an evidence triage workspac
 ## Current Recommended Next Prompt
 
 ```text
-/claimguardagent review and expand probe-only coverage proving the non-live product-photo shared-result boundary remains unwired from analyzer routing, analyzeEvidenceFile, UI, upload, report mapping, scoring, parser behavior, fixtures, providers, storage, integrations, and case queues; do not implement live routing
+/claimguardagent plan the next live analyzer-routing integration slice as docs-only: define guardrails, prerequisites, and checks for any future runtime wiring; do not implement live routing, UI/upload changes, report mapping, scoring, parser behavior, fixtures, providers, storage, integrations, or case queues
 ```

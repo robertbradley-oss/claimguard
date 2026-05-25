@@ -28,6 +28,17 @@ type FinalDecisionLikeKeys =
   | "externalDecision"
   | "evidenceDisposition";
 
+type PrivateEvidenceOrIntegrationLeakKeys =
+  | "fileBytes"
+  | "imageBuffer"
+  | "rawExif"
+  | "rawMetadata"
+  | "privateEvidence"
+  | "provider"
+  | "storage"
+  | "integration"
+  | "caseQueue";
+
 type LocalAnalysisResultStillReceiptOnly = LocalAnalysisResult extends {
   ocr: unknown;
   receipt: unknown;
@@ -37,7 +48,7 @@ type LocalAnalysisResultStillReceiptOnly = LocalAnalysisResult extends {
   ? true
   : false;
 
-const boundaryMetadataSummary = {
+const syntheticBoundaryMetadataSummary = {
   fileTypeCategory: "image",
   fileSizeBucket: "medium",
   dimensionsPresent: true,
@@ -55,7 +66,7 @@ const productPhotoBoundaryInput = {
   subjectType: "damage-close-up",
   damageVisibility: "inconclusive",
   productContext: "partial",
-  metadataSummary: boundaryMetadataSummary,
+  metadataSummary: syntheticBoundaryMetadataSummary,
   requestedAdditionalViews: ["wider-product-photo", "proof-of-purchase-match"],
   missingContext: ["wider-product-photo", "proof-of-purchase-match"],
   purchaseOrReceiptMatchNeeded: true,
@@ -72,6 +83,8 @@ const productPhotoDoesNotRequireReceiptOnlyFields =
   false satisfies HasAnyKey<ProductPhotoEvidenceAnalysisResult, ReceiptOnlyResultKeys>;
 const productPhotoDoesNotExposeFinalDecisionFields =
   false satisfies HasAnyKey<ProductPhotoEvidenceAnalysisResult, FinalDecisionLikeKeys>;
+const productPhotoDoesNotExposePrivateEvidenceOrIntegrationFields =
+  false satisfies HasAnyKey<ProductPhotoEvidenceAnalysisResult, PrivateEvidenceOrIntegrationLeakKeys>;
 
 function hasManualReviewOnlyWording(result: ProductPhotoEvidenceAnalysisResult) {
   return (
@@ -113,20 +126,42 @@ export const PRODUCT_PHOTO_RESULT_BOUNDARY_DEVELOPER_PROBE = {
       externalVerification: productPhotoBoundaryResult.externalVerification,
       verificationStatus: productPhotoBoundaryResult.verificationStatus.status,
       verificationMethod: productPhotoBoundaryResult.verificationStatus.method,
+      verificationSummaryStatesNotPerformed:
+        productPhotoBoundaryResult.verificationStatus.summary.includes("External verification was not performed"),
+      scoreSafetyNoteDoesNotProve:
+        productPhotoBoundaryResult.scoreMeaning.safetyNote.toLowerCase().includes("does not prove"),
       manualReviewOnlyWording: hasManualReviewOnlyWording(productPhotoBoundaryResult),
       productPhotoDoesNotExposeFinalDecisionFields,
     },
     privacy: {
+      sampleDataIsSynthetic: true,
       rawExifOmitted: productPhotoBoundaryResult.privacySafeMetadataSummary.rawExifOmitted,
       originalFilenameOmitted: productPhotoBoundaryResult.privacySafeMetadataSummary.originalFilenameOmitted,
       productLabelRawValueOmitted:
         productPhotoBoundaryResult.moduleDetails.productPhoto.productLabelContext.rawValueOmitted,
+      productPhotoDoesNotExposePrivateEvidenceOrIntegrationFields,
+      includesFileBytes: false,
+      includesImageBuffer: false,
+      includesRawExifObject: false,
+      includesProviderHandle: false,
+      includesStorageHandle: false,
+      includesIntegrationHandle: false,
+      includesCaseQueueHandle: false,
     },
     importBoundary: {
       importsLiveAnalyzer: false,
       importsAnalyzerRouting: false,
       importsUiUploadReportScoringParserFixtures: false,
       importsProvidersStorageIntegrationsCaseQueues: false,
+      invokesAnalyzeEvidenceFile: false,
+      invokesAnalyzerRouting: false,
+      invokesUi: false,
+      invokesUpload: false,
+      invokesReportMapping: false,
+      invokesScoring: false,
+      invokesParser: false,
+      invokesFixtures: false,
+      invokesProvidersStorageIntegrationsCaseQueues: false,
     },
   },
 } as const;

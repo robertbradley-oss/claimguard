@@ -114,6 +114,15 @@ function lacksProductPhotoResultDetails(decision: object) {
   );
 }
 
+function lacksSharedResultBoundaryPayload(decision: object) {
+  return (
+    !("moduleDetails" in decision) &&
+    !("evidenceReliabilityScore" in decision) &&
+    !("verificationStatus" in decision) &&
+    !("privacySafeMetadataSummary" in decision)
+  );
+}
+
 function hasManualReviewOnlySafetyWording(decision: { limitations: readonly string[] }) {
   return decision.limitations.some((limitation) => limitation.includes("manual-review support only"));
 }
@@ -262,6 +271,8 @@ const publicWrapperChecks = {
     lacksProductPhotoResultDetails(publicProductPhotoRuntimeOffDecision) &&
     lacksProductPhotoResultDetails(publicProductPhotoRuntimeTrueDecision) &&
     lacksProductPhotoResultDetails(publicDamagePhotoAliasDecision),
+  publicWrapperDoesNotExposeSharedResultBoundary:
+    publicWrapperDecisions.every(lacksSharedResultBoundaryPayload),
   unknownInputRouteInconclusive: publicUnknownDecision.route === "unknown-inconclusive",
   unknownInputCandidateInconclusive: publicUnknownDecision.evidenceCandidate === "unknown-inconclusive",
   pdfLikeRoutesToExistingReceiptPath: publicPdfLikeDecision.route === "existing-receipt-path-candidate",

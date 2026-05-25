@@ -29,6 +29,23 @@ type UnsafeFinalJudgmentKeys =
   | "externalDecision"
   | "evidenceDisposition";
 
+type LiveRuntimeOrPrivateEvidenceKeys =
+  | "analyzeEvidenceFile"
+  | "ui"
+  | "upload"
+  | "reportMapping"
+  | "scoring"
+  | "parser"
+  | "fixture"
+  | "provider"
+  | "storage"
+  | "integration"
+  | "caseQueue"
+  | "fileBytes"
+  | "imageBuffer"
+  | "rawExif"
+  | "rawMetadata";
+
 type LocalAnalysisResultStillReceiptShaped = LocalAnalysisResult extends {
   scoreLabel: "Evidence Reliability Score";
   verificationStatus: VerificationStatus;
@@ -180,6 +197,18 @@ const productPhotoDoesNotRequireReceiptOnlyFields =
   false satisfies HasAnyKey<ProductPhotoEvidenceAnalysisResult, ReceiptOnlyResultKeys>;
 const sharedEnvelopeAvoidsUnsafeFinalJudgmentFields =
   false satisfies HasAnyKey<EvidenceAnalysisResult, UnsafeFinalJudgmentKeys>;
+const sharedEnvelopeAvoidsRuntimeAndPrivateEvidenceFields =
+  false satisfies HasAnyKey<EvidenceAnalysisResult, LiveRuntimeOrPrivateEvidenceKeys>;
+
+function hasManualReviewOnlySharedResultWording(result: ProductPhotoEvidenceAnalysisResult) {
+  return (
+    result.reviewLabel === "Manual review recommended" &&
+    result.recommendedSupportAction.toLowerCase().includes("manual review recommended") &&
+    result.evidenceReliabilityScore.scoreScope === "Local evidence quality and review readiness only" &&
+    result.scoreMeaning.safetyNote.toLowerCase().includes("does not prove") &&
+    result.verificationStatus.summary.includes("External verification was not performed")
+  );
+}
 
 export const SHARED_RESULT_DEVELOPER_PROBE = {
   localReceiptContractStillUsable,
@@ -187,10 +216,31 @@ export const SHARED_RESULT_DEVELOPER_PROBE = {
   sharedEnvelopeRepresentsProductPhoto,
   productPhotoDoesNotRequireReceiptOnlyFields,
   sharedEnvelopeAvoidsUnsafeFinalJudgmentFields,
+  sharedEnvelopeAvoidsRuntimeAndPrivateEvidenceFields,
+  manualReviewOnlyWording: hasManualReviewOnlySharedResultWording(productPhotoSharedResult),
   productPhotoExternalVerification: productPhotoSharedResult.externalVerification,
   productPhotoVerificationStatus: productPhotoSharedResult.verificationStatus.status,
   productPhotoModule: productPhotoSharedResult.moduleDetails.module,
   productPhotoDetailsNested: "productPhoto" in productPhotoSharedResult.moduleDetails,
   receiptOnlyFieldsRequiredByProductPhoto: false,
   importsLimitedToSharedTypes: true,
+  isolationBoundary: {
+    invokesAnalyzeEvidenceFile: false,
+    invokesAnalyzerRouting: false,
+    invokesUi: false,
+    invokesUpload: false,
+    invokesReportMapping: false,
+    invokesScoring: false,
+    invokesParser: false,
+    invokesFixtures: false,
+    invokesProvidersStorageIntegrationsCaseQueues: false,
+    sampleDataIsSynthetic: true,
+    includesFileBytes: false,
+    includesImageBuffer: false,
+    includesRawExifObject: false,
+    includesProviderHandle: false,
+    includesStorageHandle: false,
+    includesIntegrationHandle: false,
+    includesCaseQueueHandle: false,
+  },
 } as const;
