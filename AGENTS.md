@@ -10,7 +10,11 @@ ClaimGuard is post-Phase-1.
 
 Phase 1, the Receipt Intelligence module, is closed, pushed, deployed, and production-smoked. The latest production polish checkpoint is commit `19ef25e` (`polish post-phase1 evidence workspace`).
 
-Phase 2 has not started.
+Phase 2.0 implementation has officially started as scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired. Shared evidence model types and product-photo scaffold/defaults exist, but no product-photo analyzer behavior is live yet.
+
+No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during the overnight Phase 2 scaffold. `product-photo` is the canonical Phase 2 evidence type; `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
+
+Do not start Phase 2.1 until Robert/ChatGPT explicitly confirms the scaffold review is complete.
 
 ClaimGuard is broader than the receipt analyzer. Receipt intelligence is one evidence module inside a larger fraud-risk screening and evidence intelligence platform. Future ClaimGuard may include photo evidence analysis, case review workflow, customer and ticket context, integrations, audit history, scoring signals, and enterprise fraud intelligence, but those areas must remain phase-gated.
 
@@ -106,7 +110,7 @@ Specialized agents should operate as senior/expert reviewers and builders, not n
 - Scoring & Safety Reviewer Agent should prevent overclaiming, unsafe wrongdoing language, and score semantics drift.
 - Privacy & Evidence Safety Agent should prevent evidence leakage across prompts, logs, exports, fixtures, screenshots, commits, and integrations.
 - Receipt Intelligence Agent should maintain receipt module quality while preserving its role as one evidence module in the larger platform.
-- Photo Evidence / Phase 2 Readiness Agent should remain planning-only until Phase 2 is explicitly opened.
+- Photo Evidence / Phase 2 Readiness Agent should keep Phase 2.0 scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired until Robert/ChatGPT explicitly confirms the scaffold review is complete.
 - Case Workflow / Phase 3 Readiness Agent should remain planning-only until Phase 3 is explicitly opened.
 - QA Harness Agent should catch shallow verification and keep fixture/manual QA discipline privacy-safe.
 - Deployment & Release Agent should enforce clean commits, checks, deployment discipline, smoke testing, and no unapproved deploys.
@@ -155,7 +159,7 @@ Agents must stop and report instead of forcing progress when they find:
 - Upload mechanics are touched during unrelated UI work.
 - Real customer evidence, private customer data, raw OCR, or copied private JSON appears in files, logs, fixtures, prompts, or screenshots.
 - Unsafe wrongdoing-confirming language, customer-accusation language, or automatic-denial language appears.
-- Phase 2 implementation work appears before Robert explicitly opens Phase 2.
+- Phase 2.1 runtime behavior, UI/upload wiring, analyzer routing, scoring/report/parser/fixture changes, or provider work appears before Robert/ChatGPT explicitly confirms the Phase 2.0 scaffold review is complete.
 - A required check cannot run, fails, or gives a result the agent cannot interpret safely.
 - A requested action would require a real integration, credential, deploy, commit, push, or package dependency change without explicit approval.
 
@@ -296,7 +300,7 @@ Files to inspect first:
 Hard constraints:
 
 - Treat Phase 1 as closed.
-- Do not start Phase 2, Phase 3, integrations, SaaS work, or enterprise intelligence implementation without explicit approval.
+- Do not start Phase 2.1, Phase 3, integrations, SaaS work, or enterprise intelligence implementation without explicit approval.
 - Keep strategic decisions support-safe and privacy-aware.
 
 Required checks:
@@ -575,18 +579,19 @@ Handoff expectations:
 Phase boundaries:
 
 - Owns Phase 1 module maintenance.
-- Does not start Phase 2 photo work.
+- Does not start Phase 2.1 photo runtime work.
 
 ### 7. Photo Evidence / Phase 2 Readiness Agent
 
 Purpose:
 
-Plan product-damage photo evidence and image-risk readiness before Phase 2 implementation begins.
+Guide product-photo evidence readiness while Phase 2.0 is scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired.
 
 When to use:
 
 - Phase 2 requirements.
 - Photo evidence taxonomy.
+- Phase 2.0 scaffold/type-boundary review.
 - Product damage review planning.
 - AI-generated or altered image signal planning.
 - Provider-neutral computer-vision readiness.
@@ -594,6 +599,7 @@ When to use:
 When not to use:
 
 - Implementing photo analysis.
+- Starting Phase 2.1 runtime behavior before Robert/ChatGPT explicitly confirms the Phase 2.0 scaffold review is complete.
 - Connecting AI vision providers.
 - Modifying receipt analyzer behavior.
 - Changing current UI to include Phase 2 features.
@@ -608,10 +614,17 @@ Files to inspect first:
 
 Hard constraints:
 
-- Phase 2 has not started.
+- Phase 2.0 implementation has officially started as scaffold/type-boundary work only.
+- Current Phase 2.0 state is scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired.
+- Shared evidence model types and product-photo scaffold/defaults exist.
+- No product-photo analyzer behavior is live yet.
+- No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during the overnight Phase 2 scaffold.
+- `product-photo` is canonical.
+- `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
+- Do not start Phase 2.1 until Robert/ChatGPT explicitly confirms the scaffold review is complete.
 - Do not add product damage photo analysis.
 - Do not connect AI or computer-vision providers.
-- Do not modify app code unless Robert explicitly opens Phase 2 implementation.
+- Do not modify app runtime code unless Robert explicitly approves that Phase 2.1 slice.
 
 Required checks:
 
@@ -620,13 +633,13 @@ Required checks:
 
 Handoff expectations:
 
-- State Phase 2 remains not started unless Robert says otherwise.
+- State Phase 2.0 remains scaffold-only and intentionally unwired unless Robert/ChatGPT explicitly approves the next slice.
 - List readiness gaps.
 - Recommend the next planning artifact.
 
 Phase boundaries:
 
-- Planning-only until Robert opens Phase 2.
+- Scaffold/type-boundary work only until Robert/ChatGPT confirms the Phase 2.0 scaffold review is complete. Phase 2.1 runtime behavior requires explicit approval.
 
 ### 8. Case Workflow / Phase 3 Readiness Agent
 
@@ -880,7 +893,7 @@ Phase boundaries:
 Use `ROADMAP.md` for durable phase definitions. The short version:
 
 - Phase 1: Receipt Intelligence module. Closed, deployed, and production-smoked.
-- Phase 2: Photo Evidence readiness and later implementation. Not started.
+- Phase 2: Photo Evidence. Phase 2.0 implementation has officially started as scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired. No product-photo analyzer behavior is live yet.
 - Phase 3: Case Review Workflow readiness and later implementation.
 - Phase 4: Stronger OCR/AI service integrations.
 - Phase 5: Ticket, email, drive, and customer-context integrations.

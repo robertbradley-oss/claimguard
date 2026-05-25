@@ -17,7 +17,14 @@ The OneDrive Documents path may exist as a shell starting point, but it is not t
 ## Phase-Aware Workflow
 
 - Phase 1 Receipt Intelligence is closed, deployed, and production-smoked.
-- Phase 2 has not started.
+- Phase 2.0 implementation has officially started.
+- Current Phase 2.0 state is scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired.
+- Shared evidence model types and product-photo scaffold/defaults exist.
+- No product-photo analyzer behavior is live yet.
+- No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during the overnight Phase 2 scaffold.
+- `product-photo` is canonical.
+- `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
+- Do not start Phase 2.1 until Robert/ChatGPT explicitly confirms the scaffold review is complete.
 - Future-phase planning is allowed when requested.
 - Future-phase implementation requires explicit approval from Robert.
 - Use `ROADMAP.md` for durable phase definitions.
@@ -43,7 +50,7 @@ Stop and report before continuing when:
 - Unexpected app-code, analyzer, parser, scoring, report, privacy, fixture, package, script, or upload-mechanics diffs appear.
 - Real customer evidence, private customer data, raw OCR, copied private JSON, or credentials appear in files or logs.
 - Unsafe wrongdoing-confirming language, customer-accusation language, or automatic-denial language appears.
-- Phase 2 implementation appears before Robert explicitly opens Phase 2.
+- Phase 2.1 runtime behavior, UI/upload wiring, analyzer routing, scoring/report/parser/fixture changes, or provider work appears before Robert/ChatGPT explicitly confirms the Phase 2.0 scaffold review is complete.
 - A required check fails or cannot run.
 
 ## Check Guidance

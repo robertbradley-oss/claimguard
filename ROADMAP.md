@@ -64,8 +64,12 @@ Meaning:
 Current implementation boundary:
 
 - Shared evidence and product-photo scaffold/type-boundary work is allowed.
+- Shared evidence model types and product-photo scaffold/defaults exist.
 - No product-photo analyzer behavior is live yet.
 - No runtime analyzer, upload, UI, report, scoring, parser, fixture, storage, integration, or external provider behavior is live for Phase 2 yet.
+- `product-photo` is canonical.
+- `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
+- Do not start Phase 2.1 until Robert/ChatGPT explicitly confirms the scaffold review is complete.
 
 Deferred until Robert explicitly approves a later Phase 2 runtime slice:
 

@@ -9,9 +9,13 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 - Phase 1 Receipt Intelligence is closed, pushed, deployed, and production-smoked.
 - Post-Phase-1 evidence workspace polish is live from commit `19ef25e`.
 - Phase 2.0 implementation has officially started.
-- Current Phase 2 status is scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired.
+- Current Phase 2.0 state is scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired.
+- Shared evidence model types and product-photo scaffold/defaults exist.
 - No product-photo analyzer behavior is live yet.
 - No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during the overnight Phase 2 scaffold.
+- `product-photo` is canonical.
+- `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
+- Do not start Phase 2.1 until Robert/ChatGPT explicitly confirms the scaffold review is complete.
 
 ## Next Safe Tasks
 
