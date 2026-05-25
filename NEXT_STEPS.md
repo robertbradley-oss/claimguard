@@ -29,6 +29,18 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 5. Keep the shipped receipt module stable unless Robert explicitly requests maintenance.
 6. Preserve a clean operational queue after each completed agent task.
 
+## Future Evidence Review UX Direction
+
+Robert wants the eventual result screen to feel like an evidence triage workspace, not a stack of competing result cards. This is product direction only; do not implement it during the current Phase 2.2 runtime-boundary work.
+
+- Show one primary review state, with signals as the centerpiece of the result.
+- Let each signal eventually point to the exact document or photo region that produced it.
+- Keep the score breakdown explainable so reviewers can see why the overall Evidence Reliability Score landed where it did.
+- Treat confidence and risk as separate concepts: confidence describes analysis certainty, while risk describes review priority.
+- Include clear reviewer next actions such as "Request clearer evidence", "Flag for manual review", "Record as reviewed", and "Export privacy-safe summary".
+- Make the idle screen less repetitive over time, while better communicating the workflow, local-only handling, and privacy posture.
+- Preserve manual-review discipline: result actions should support reviewer workflow, not imply ClaimGuard has made a final evidence or claim decision.
+
 ## Do Not Touch Right Now
 
 - Do not wire product-photo scaffold into runtime analyzer behavior.
