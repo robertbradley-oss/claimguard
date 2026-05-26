@@ -51,6 +51,7 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 - The first isolated product-photo UI display contract probe now strengthens the existing product-photo report view-model probe without adding a UI component or live workflow wiring. It proves future display surfaces can consume `ProductPhotoReportViewModel` only, covers missing-context and complete-context display cases, low/medium/high score semantics, missing metadata summaries, label-context raw value omission, overconfident review-label clamping, recursive private-key denial, sentinel private-value omission, and receipt/report-adapter preservation.
 - A docs-only standalone product-photo display component plan now defines the future component as an isolated `ProductPhotoReviewPanel`-style evidence-review panel with exactly one prop, `viewModel: ProductPhotoReportViewModel`. The planned component remains unwired from `ClaimReviewWorkflow`, owns no image preview or object URL, adds no upload/analyzer/report/scoring/parser/fixture behavior, and must receive semantic/privacy coverage before implementation.
 - The first isolated `ProductPhotoReviewPanel` component now exists as a standalone, unwired display surface that accepts exactly `viewModel: ProductPhotoReportViewModel`, renders derived product-photo review summaries only, keeps status, priority, confidence, evidence quality, score, recommended action, limitations, review signals, and privacy posture separate, and is covered by a dedicated component probe plus semantic/import/privacy guards. It is not inserted into `ClaimReviewWorkflow` or any live route.
+- A docs-only render-host plan now recommends a future non-live synthetic visual verification host for `ProductPhotoReviewPanel`, but keeps the current task implementation-free. The safest immediate browser-checkable option is a separate unlinked, production-disabled developer route such as `src/app/dev/product-photo-review-panel/page.tsx` with colocated literal `ProductPhotoReportViewModel` cases, not `/test-evidence` and not `ClaimReviewWorkflow`. A non-route component/browser harness remains preferred if appropriate tooling is added later.
 - Probe sample data is synthetic and records no file bytes, image buffers, raw EXIF objects, provider handles, storage handles, integration handles, or case queue handles.
 - No runtime analyzer routing, upload, UI, report, scoring, parser, metadata extraction, or fixture behavior changed during Phase 2.0, Phase 2.1, or Phase 2.2 helper/boundary work.
 - Runtime routing remains blocked until Robert explicitly opens that slice.
@@ -59,7 +60,7 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 
 ## Next Safe Tasks
 
-1. Plan the next isolated product-photo UI verification slice only after an explicit prompt: either add a non-live synthetic render host for `ProductPhotoReviewPanel` browser checks, or keep planning for later live insertion gates. Continue keeping it out of `ClaimReviewWorkflow`, upload routing, analyzer routing, report mapping, scoring, parser behavior, fixtures, providers, storage, integrations, and case queues.
+1. Implement the non-live synthetic `ProductPhotoReviewPanel` visual verification host only after an explicit implementation prompt: keep it unlinked, production-disabled, synthetic `ProductPhotoReportViewModel`-only, covered by semantic/privacy checks, and out of `/test-evidence`, `ClaimReviewWorkflow`, upload routing, analyzer routing, report mapping, scoring, parser behavior, fixtures, providers, storage, integrations, and case queues.
 2. Keep the decision-only public analyzer routing wrapper out of live UI/upload/report/scoring/parser paths until a separate live-routing plan is explicitly opened.
 3. Keep the dev-only routing adapter out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
 4. Keep `recognizeProductPhotoEvidence` out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
@@ -562,7 +563,128 @@ Why later slices remain separate:
 Recommended next implementation prompt after this docs plan is committed and pushed:
 
 ```text
-/claimguardagent plan the next isolated product-photo UI verification slice only: decide whether to add a non-live synthetic render host for ProductPhotoReviewPanel browser checks or keep the next step docs-only; do not wire ProductPhotoReviewPanel into ClaimReviewWorkflow or any live route; do not add upload routing, analyzer routing, report-adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, or case queues; preserve ProductPhotoReportViewModel-only display; run the relevant checks; do not push
+/claimguardagent implement the non-live synthetic ProductPhotoReviewPanel visual verification host only: add a separate unlinked and production-disabled developer route at src/app/dev/product-photo-review-panel/page.tsx with colocated literal ProductPhotoReportViewModel render cases; do not use /test-evidence, ClaimReviewWorkflow, upload routing, analyzeEvidenceFile, analyzer-routing, report-adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, case queues, real photos, image URLs, object URLs, file/blob data, raw metadata, or private identifiers; add semantic/privacy coverage for the host files; run lint, build, report semantics, diff check, and browser checks; commit only if safe; do not push
+```
+
+## Phase 2.2 Non-Live Product-Photo Render Host Plan
+
+This is a docs-only visual verification gate for the already-implemented `ProductPhotoReviewPanel`. It does not create a route, host, story, component, probe, fixture, runtime path, upload path, report mapping, analyzer routing, provider, storage, integration, or case queue.
+
+Recommendation:
+
+- Add a non-live synthetic render host in a future implementation slice so the isolated panel can receive browser and visual QA.
+- Prefer a non-route component/browser harness if the repo later adds suitable tooling.
+- If a URL-based browser check is needed before component-harness tooling exists, use a separate unlinked developer route, not `/test-evidence` and not the main workflow.
+
+Safest future browser-checkable location:
+
+- Route file: `src/app/dev/product-photo-review-panel/page.tsx`.
+- Synthetic cases file: `src/app/dev/product-photo-review-panel/render-cases.ts`.
+- URL: `/dev/product-photo-review-panel`.
+- The route must be clearly internal/developer-only, unlinked from app navigation, and production-disabled with `notFound()` or equivalent unless Robert explicitly approves deployed QA access.
+
+What the host means:
+
+- A synthetic visual QA surface for `ProductPhotoReviewPanel`.
+- A way to run browser checks for desktop and mobile layout, console cleanliness, text fit, section visibility, no overlap, no primary nested scroll, and responsive signal rows.
+- A route-local display of hand-authored synthetic `ProductPhotoReportViewModel` cases only.
+
+What the host does not mean:
+
+- It is not live product-photo UI insertion.
+- It is not a new upload or analysis workflow.
+- It is not part of `ClaimReviewWorkflow`, `/`, `/test-evidence`, receipt QA, report adapter mapping, analyzer routing, scoring, parser behavior, fixtures, provider behavior, storage, integrations, or case queues.
+- It does not make product-photo runtime live.
+- It does not display real photos, uploaded images, image previews, object URLs, image URLs, raw metadata, raw labels, filenames, provider output, or private identifiers.
+
+Required synthetic data contract:
+
+- `render-cases.ts` should export readonly literal objects that satisfy `ProductPhotoReportViewModel`.
+- Synthetic cases should cover missing context, complete context, no requested views, multiple requested views, low/medium/high scores, no-signal state, long review text, limited/missing metadata summaries, label context with raw values omitted, and high-score-not-proof copy.
+- Synthetic strings must be allowlisted review summaries only. Do not include case IDs, claim IDs, evidence IDs, ticket IDs, realistic order numbers, customer names, addresses, filenames, URLs, Windows paths, serial/model values, barcode/QR values, provider IDs, storage IDs, integration IDs, case queue IDs, or copied metadata notes.
+- Do not import `ProductPhotoReviewPanel.probe.tsx`, mapper inputs, product-photo analyzer results, shared-result types, receipt fixtures, real files, blobs, object URLs, or metadata objects.
+
+Required import boundaries:
+
+- The route may import `ProductPhotoReviewPanel`, the synthetic render cases, and framework helpers needed to disable the route in production.
+- The synthetic cases file may import only the `ProductPhotoReportViewModel` type.
+- Do not import `analyzeEvidenceFile`, analyzer routing, product-photo analyzer/result builders, report adapter mapping, scoring, parser, upload modules, `ClaimReviewWorkflow`, `TestEvidenceHarness`, fixtures, providers, storage, integrations, case queues, or receipt report types.
+
+Required UI and visual QA goals:
+
+- Verify the panel renders without console errors.
+- Verify required sections are visible: status/review summary, review priority, confidence, evidence quality, Evidence Reliability Score, product/photo context, recommended support action, limitations, review signals, and privacy posture.
+- Verify score, review priority, confidence, evidence quality, and limitations remain visually distinct.
+- Verify manual-review-only wording is visible.
+- Verify `External Verification: Not performed` and `Not externally verified` remain visible.
+- Verify high score does not imply proof.
+- Verify severity and confidence use text labels beyond color.
+- Verify no text overlap, no clipped button-like labels, no incoherent wrapping, no primary nested scrolling, and no layout shift across desktop and mobile.
+- Verify reduced-motion posture by avoiding analysis-running animation.
+
+Required privacy and safety constraints:
+
+- Use synthetic view-model data only.
+- Do not use real photos, screenshots of real evidence, uploaded files, image/media elements, object URLs, data URLs, file/blob props, raw EXIF, raw metadata, original filenames, raw label values, precise timestamps, GPS, customer identifiers, private background details, provider payloads, storage handles, integration handles, case queue handles, or case workflow identifiers.
+- Browser screenshots must capture only the synthetic host. Do not capture `/`, `/test-evidence` real QA state, uploaded evidence previews, localStorage/session state, object URLs, real filenames, real photos, or real metadata.
+- Do not commit screenshots unless the image is fully synthetic and privacy-reviewed.
+- Keep all copy manual-review-only and avoid proof, external-verification, customer-accusation, final-outcome, automatic-decision, approval, rejection, and policy-disposition wording.
+
+Required future probes/checks/browser steps:
+
+- Add the future host route and render-cases files to `scripts/check-report-semantics.mjs`.
+- Extend semantic checks to deny forbidden imports, raw/private keys, URL/path patterns, case/ticket/evidence identifiers, realistic customer/order identifiers, and unsafe wording in both host files.
+- Preserve existing `ProductPhotoReviewPanel.probe.tsx` contract coverage.
+- Run `git status --short --branch`, `npm.cmd run lint`, `npm.cmd run build`, `npm.cmd run check:report-semantics`, `git diff --check`, and final `git status --short --branch`.
+- Start the dev server and browser-check `/dev/product-photo-review-panel` only if the route is implemented.
+- Browser-check desktop and mobile viewports for console errors, responsive layout, no text overlap, no primary nested scroll, visible manual-review copy, visible external-verification-not-performed copy, and section order.
+- Confirm `/` still renders the existing receipt workflow and does not link to or import the product-photo host.
+
+Allowed files for the future implementation slice:
+
+- `src/app/dev/product-photo-review-panel/page.tsx`.
+- `src/app/dev/product-photo-review-panel/render-cases.ts`.
+- `scripts/check-report-semantics.mjs` for host semantic/privacy coverage.
+- `NEXT_STEPS.md` and `AGENT_LOG.md` for status updates.
+- `PHASE_2_PHOTO_EVIDENCE_PLAN.md` only if durable host guidance needs a small update.
+
+Protected files for the future implementation slice:
+
+- `src/app/page.tsx`.
+- `src/app/test-evidence/page.tsx`.
+- `src/components/ClaimReviewWorkflow.tsx`.
+- `src/components/TestEvidenceHarness.tsx`.
+- `src/components/ProductPhotoReviewPanel.tsx` unless a browser check reveals a tiny display bug and Robert explicitly opens that fix.
+- `src/components/ProductPhotoReviewPanel.probe.tsx` unless semantic coverage must be tightened without changing the component contract.
+- `src/lib/analysis/analyzer.ts`.
+- `src/lib/analysis/analyzer-routing.ts`.
+- `src/lib/analysis/product-photo-analyzer.ts`.
+- `src/lib/analysis/product-photo-report-view-model.ts`.
+- `src/lib/analysis/report-adapter.ts`.
+- `src/lib/analysis/types.ts`.
+- Upload files, scoring, parser, fixtures, package dependencies, providers, storage, integrations, and case queues.
+
+Stop conditions:
+
+- The host requires `File`, `Blob`, image URL, object URL, data URL, image preview ownership, uploaded state, browser storage, route params, fetch, provider output, raw metadata, original filename, raw label value, case/ticket/evidence/customer identifiers, or real photos.
+- The host imports `analyzeEvidenceFile`, analyzer routing, product-photo analyzer/result builders, report adapter mapping, scoring, parser, upload modules, fixtures, providers, storage, integrations, case queues, `ClaimReviewWorkflow`, `TestEvidenceHarness`, `LocalAnalysisResult`, `EvidenceAnalysisResult`, `ProductPhotoEvidenceAnalysisResult`, or `MockAnalysisReport`.
+- The host is added to `/`, `/test-evidence`, app navigation, upload flow, report output, live analyzer paths, scoring, parser, fixtures, providers, storage, integrations, or case queues.
+- Product-photo runtime becomes live, receipt behavior changes, `LocalAnalysisResult` changes, `analyzeEvidenceFile` changes, or receipt UI/report output changes.
+- Any wording implies proof, external verification happened, customer wrongdoing, final claim outcome, approval, rejection, automatic disposition, or policy disposition.
+- The future host files are not included in semantic/privacy checks.
+- Browser checks show console errors, overlapping text, primary nested scrolling, inaccessible color-only state, or mobile layout breakage.
+
+Why this is not live UI insertion:
+
+- The host is a developer visual QA surface for synthetic view models only.
+- It does not call analysis code, route uploads, map reports, or participate in support workflow.
+- It is unlinked from the real app and production-disabled unless separately approved.
+- `ClaimReviewWorkflow` remains the live receipt workflow, and product-photo remains non-live.
+
+Recommended next implementation prompt after this docs plan is committed and pushed:
+
+```text
+/claimguardagent implement the non-live synthetic ProductPhotoReviewPanel visual verification host only: add a separate unlinked and production-disabled developer route at src/app/dev/product-photo-review-panel/page.tsx plus src/app/dev/product-photo-review-panel/render-cases.ts with literal ProductPhotoReportViewModel cases only; do not use /test-evidence, ClaimReviewWorkflow, upload routing, analyzeEvidenceFile, analyzer-routing, report-adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, case queues, real photos, image URLs, object URLs, file/blob data, raw metadata, or private identifiers; add semantic/privacy coverage for the host files; run lint, build, report semantics, diff check, and browser checks for desktop/mobile layout and console errors; commit only if safe; do not push
 ```
 
 ## Future Evidence Review UX Direction
@@ -594,5 +716,5 @@ Robert wants the eventual result screen to feel like an evidence triage workspac
 ## Current Recommended Next Prompt
 
 ```text
-/claimguardagent plan the next isolated product-photo UI verification slice only: decide whether to add a non-live synthetic render host for ProductPhotoReviewPanel browser checks or keep the next step docs-only; do not wire ProductPhotoReviewPanel into ClaimReviewWorkflow or any live route; do not add upload routing, analyzer routing, report-adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, or case queues; preserve ProductPhotoReportViewModel-only display; run the relevant checks; do not push
+/claimguardagent implement the non-live synthetic ProductPhotoReviewPanel visual verification host only: add a separate unlinked and production-disabled developer route at src/app/dev/product-photo-review-panel/page.tsx plus src/app/dev/product-photo-review-panel/render-cases.ts with literal ProductPhotoReportViewModel cases only; do not use /test-evidence, ClaimReviewWorkflow, upload routing, analyzeEvidenceFile, analyzer-routing, report-adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, case queues, real photos, image URLs, object URLs, file/blob data, raw metadata, or private identifiers; add semantic/privacy coverage for the host files; run lint, build, report semantics, diff check, and browser checks for desktop/mobile layout and console errors; commit only if safe; do not push
 ```

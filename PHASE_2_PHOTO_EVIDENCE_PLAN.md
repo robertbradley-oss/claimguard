@@ -569,6 +569,39 @@ The component must not own image preview display. Any evidence preview anchoring
 
 The future slice must add semantic/privacy coverage for every new display/export file, prove receipt UI/report behavior remains unchanged, and keep product-photo runtime non-live. Stop if the component needs live routing, report-adapter mapping, receipt-only fields, raw/private data, provider output, storage/integration/case handles, final outcome wording, or external-verification wording beyond not performed.
 
+### Non-Live Render Host Gate
+
+`ProductPhotoReviewPanel` now exists as an isolated display component. A future render host may be useful for browser and visual QA, but it must remain a synthetic developer verification surface rather than live product-photo UI.
+
+Recommended posture:
+
+- Prefer a non-route component/browser harness if suitable tooling is added later.
+- If a URL-based browser check is needed first, use a separate unlinked developer route such as `src/app/dev/product-photo-review-panel/page.tsx` with colocated literal synthetic cases in `src/app/dev/product-photo-review-panel/render-cases.ts`.
+- Do not place the host under `/test-evidence`, because that surface is receipt/manual QA and can couple the host to live analyzer expectations.
+- Production-disable the route with `notFound()` or equivalent unless Robert explicitly approves deployed QA access.
+
+Host data must be literal `ProductPhotoReportViewModel` cases only. Do not call the product-photo mapper, product-photo analyzer, analyzer routing, receipt analyzer, report adapter, upload flow, fixture helpers, provider code, storage code, integrations, or case queues. Do not import existing probe files into the host.
+
+Required synthetic cases should cover missing context, complete context, no requested views, multiple requested views, low/medium/high score states, no review signals, long text, limited or missing metadata summaries, label context with raw values omitted, and high-score-not-proof copy.
+
+The host must not include or render real photos, uploaded images, image URLs, object URLs, file/blob data, raw EXIF, raw metadata, original filenames, raw label values, serial/model/barcode/QR values, case IDs, ticket IDs, evidence IDs, claim IDs, customer identifiers, provider IDs, storage IDs, integration IDs, case queue IDs, URLs, Windows paths, or realistic order/customer details.
+
+Visual QA should verify:
+
+- Desktop and mobile rendering.
+- No console errors.
+- Required sections visible.
+- Score, review priority, confidence, evidence quality, and limitations visually distinct.
+- Manual-review-only copy visible.
+- `External Verification: Not performed` visible.
+- High score does not imply proof.
+- Severity and confidence are labeled with text, not color alone.
+- No text overlap, no clipped labels, no primary nested scrolling, and no analysis-running motion.
+
+The future host files must be added to `scripts/check-report-semantics.mjs` as product-photo display surfaces. Semantic checks should deny forbidden imports, raw/private field names, URL/path patterns, private identifiers, realistic customer/order data, unsafe outcome wording, and any permission to wire the host into the live workflow.
+
+Stop if the host touches `ClaimReviewWorkflow`, `/`, `/test-evidence`, upload routing, `analyzeEvidenceFile`, analyzer routing, live report mapping, scoring, parser behavior, fixtures, providers, storage, integrations, case queues, receipt UI/report behavior, `LocalAnalysisResult`, or product-photo runtime behavior.
+
 ## 17. Phase 2.1 First-Pass Local Heuristic Signals
 
 Phase 2.1 starts with a small signal catalog only. These signals are manual-review support language and future implementation guidance; they do not run in `analyzeEvidenceFile`, do not change `LocalAnalysisResult`, do not affect scoring, and do not change upload, UI, report mapping, fixtures, receipt parsing, metadata extraction behavior, routing, storage, integrations, or case queues.
