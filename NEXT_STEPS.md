@@ -48,6 +48,7 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 - A pushed isolated product-photo report view-model boundary now maps product-photo shared results to a dev/probe-only, display-safe view model without using `LocalAnalysisResult`, `MockAnalysisReport`, `mapLocalAnalysisToReport`, `analyzeEvidenceFile`, analyzer routing, UI, upload, scoring, parser, fixtures, providers, storage, integrations, or case queues.
 - The product-photo report view-model keeps score, review priority, confidence, and limitations separate; keeps external verification not performed; clamps unsupported clear-style labels away from a display outcome; and omits raw photo bytes, image buffers, raw EXIF, raw metadata, original filenames, raw label values, provider output, storage handles, integration handles, and case queue handles.
 - Probe-only isolation assertions now explicitly record that the product-photo shared-result boundary does not invoke `analyzeEvidenceFile`, analyzer routing, UI, upload, report mapping, scoring, parser, fixtures, providers, storage, integrations, or case queues.
+- The first isolated product-photo UI display contract probe now strengthens the existing product-photo report view-model probe without adding a UI component or live workflow wiring. It proves future display surfaces can consume `ProductPhotoReportViewModel` only, covers missing-context and complete-context display cases, low/medium/high score semantics, missing metadata summaries, label-context raw value omission, overconfident review-label clamping, recursive private-key denial, sentinel private-value omission, and receipt/report-adapter preservation.
 - Probe sample data is synthetic and records no file bytes, image buffers, raw EXIF objects, provider handles, storage handles, integration handles, or case queue handles.
 - No runtime analyzer routing, upload, UI, report, scoring, parser, metadata extraction, or fixture behavior changed during Phase 2.0, Phase 2.1, or Phase 2.2 helper/boundary work.
 - Runtime routing remains blocked until Robert explicitly opens that slice.
@@ -56,7 +57,7 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 
 ## Next Safe Tasks
 
-1. Complete the docs-only product-photo report/UI display gate before any product-photo display work.
+1. Keep the first product-photo display work probe-only and unwired; do not add a standalone display component or live UI insertion until a separate prompt explicitly opens that slice.
 2. Keep the decision-only public analyzer routing wrapper out of live UI/upload/report/scoring/parser paths until a separate live-routing plan is explicitly opened.
 3. Keep the dev-only routing adapter out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
 4. Keep `recognizeProductPhotoEvidence` out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
@@ -430,7 +431,7 @@ Why routing, providers, and case workflow remain separate:
 Recommended next implementation prompt after this docs gate is committed and pushed:
 
 ```text
-/claimguardagent implement the first isolated product-photo UI display probe slice only: add a standalone product-photo display component and required probes that consume ProductPhotoReportViewModel only; do not edit ClaimReviewWorkflow.tsx, upload routing, analyzeEvidenceFile, analyzer-routing live behavior, report-adapter.ts, LocalAnalysisResult, receipt behavior, scoring, parser behavior, fixtures, providers, storage, integrations, or case queues; expand semantic checks only for the new display surface; run lint, build, report semantics, and diff check; commit only if safe; do not push
+/claimguardagent plan the first standalone product-photo display component slice only: keep it isolated from ClaimReviewWorkflow, upload routing, analyzeEvidenceFile, analyzer-routing live behavior, report-adapter.ts, LocalAnalysisResult, receipt behavior, scoring, parser behavior, fixtures, providers, storage, integrations, and case queues; require ProductPhotoReportViewModel-only props and semantic coverage for the new display surface; do not implement live UI insertion or push
 ```
 
 ## Future Evidence Review UX Direction

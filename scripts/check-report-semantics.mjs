@@ -228,6 +228,8 @@ const forbiddenRedactedDiagnosticPatterns = [
 ];
 const productPhotoReportViewModel =
   fileContents.get("src/lib/analysis/product-photo-report-view-model.ts") ?? "";
+const productPhotoReportViewModelProbe =
+  fileContents.get("src/lib/analysis/product-photo-report-view-model.probe.ts") ?? "";
 const reportAdapter = fileContents.get("src/lib/analysis/report-adapter.ts") ?? "";
 const forbiddenProductPhotoMapperImports = [
   "@/lib/analysis/analyzer",
@@ -246,6 +248,73 @@ const forbiddenProductPhotoMapperPatterns = [
   /result\.recommendedSupportAction/,
   /result\.customerSafeWording/,
   /\.\.\.\s*(?:result|details|metadataSummary)/,
+];
+const requiredProductPhotoMapperSignals = [
+  {
+    label: "targeted product-photo score scope",
+    patterns: [/scope:\s*"Local evidence quality and review readiness only"/i],
+  },
+  {
+    label: "targeted product-photo high-score safety note",
+    patterns: [/High score does not prove the product photo or claim/i],
+  },
+  {
+    label: "targeted product-photo external verification summary",
+    patterns: [/External verification was not performed/i],
+  },
+  {
+    label: "targeted product-photo manual review support action",
+    patterns: [/Manual review recommended/i],
+  },
+];
+const requiredProductPhotoDisplayProbeSignals = [
+  {
+    label: "display contract probe execution marker",
+    patterns: [/assertProbeChecksPass\("display", displayChecks\)/],
+  },
+  {
+    label: "display contract complete context case",
+    patterns: [/completeContextNoRequestedViews/],
+  },
+  {
+    label: "display contract requested views case",
+    patterns: [/missingContextRequestedViewsDisplayLabels/],
+  },
+  {
+    label: "display contract score-band cases",
+    patterns: [/lowMediumHighScoreCasesKeepLocalScope/],
+  },
+  {
+    label: "display contract missing metadata case",
+    patterns: [/missingMetadataCaseUsesSafeSummary/],
+  },
+  {
+    label: "display contract label omission case",
+    patterns: [/labelContextPresentRawValuesOmitted/],
+  },
+  {
+    label: "display contract clear label clamp",
+    patterns: [/overconfidentClearLabelClamped/],
+  },
+  {
+    label: "recursive private key audit",
+    patterns: [/forbiddenPrivateKeyPathsAbsent/],
+  },
+  {
+    label: "sentinel private value audit",
+    patterns: [/sentinelPrivateValuesAbsent/],
+  },
+];
+const productPhotoDisplayBannedPatterns = [
+  phrasePattern("passed", "authenticity", "check"),
+  phrasePattern("failed", "authenticity", "check"),
+  /\b(?:valid|invalid)\s+(?:photo|image|claim|evidence)\b/i,
+  /\b(?:photo|image|claim|evidence)\s+(?:valid|invalid)\b/i,
+  /\b(?:altered|tampered)\s+(?:photo|image|claim|evidence)\b/i,
+  phrasePattern("misleading", "evidence"),
+  phrasePattern("customer", "caused", "the", "damage"),
+  phrasePattern("ai", "detected", "manipulation"),
+  /\b(?:image|photo|evidence)\s+proves?\b/i,
 ];
 
 if (redactedProductTableNote !== safeProductTableNote) {
@@ -289,6 +358,24 @@ for (const importPath of forbiddenProductPhotoMapperImports) {
 for (const pattern of forbiddenProductPhotoMapperPatterns) {
   if (pattern.test(productPhotoReportViewModel)) {
     failures.push(`Product-photo report mapping boundary check failed: mapper uses forbidden pattern ${pattern}`);
+  }
+}
+
+for (const signal of requiredProductPhotoMapperSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(productPhotoReportViewModel))) {
+    failures.push(`Product-photo report mapping boundary check failed: missing ${signal.label}`);
+  }
+}
+
+for (const signal of requiredProductPhotoDisplayProbeSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(productPhotoReportViewModelProbe))) {
+    failures.push(`Product-photo display contract probe check failed: missing ${signal.label}`);
+  }
+}
+
+for (const pattern of productPhotoDisplayBannedPatterns) {
+  if (pattern.test(productPhotoCorpus)) {
+    failures.push(`Unsafe product-photo display wording found: ${pattern}`);
   }
 }
 
