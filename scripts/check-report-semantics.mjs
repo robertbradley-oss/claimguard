@@ -4,6 +4,10 @@ import { join } from "node:path";
 const repoRoot = process.cwd();
 
 const filesToCheck = [
+  "src/app/page.tsx",
+  "src/app/layout.tsx",
+  "src/app/dev/product-photo-review-panel/page.tsx",
+  "src/app/dev/product-photo-review-panel/render-cases.ts",
   "src/lib/analysis/analyzer.ts",
   "src/lib/analysis/report-adapter.ts",
   "src/lib/analysis/scoring.ts",
@@ -239,8 +243,14 @@ const productPhotoReportViewModelProbe =
   fileContents.get("src/lib/analysis/product-photo-report-view-model.probe.ts") ?? "";
 const productPhotoReviewPanel = fileContents.get("src/components/ProductPhotoReviewPanel.tsx") ?? "";
 const productPhotoReviewPanelProbe = fileContents.get("src/components/ProductPhotoReviewPanel.probe.tsx") ?? "";
+const productPhotoReviewPanelHostPage =
+  fileContents.get("src/app/dev/product-photo-review-panel/page.tsx") ?? "";
+const productPhotoReviewPanelRenderCases =
+  fileContents.get("src/app/dev/product-photo-review-panel/render-cases.ts") ?? "";
 const claimReviewWorkflow = fileContents.get("src/components/ClaimReviewWorkflow.tsx") ?? "";
 const reportAdapter = fileContents.get("src/lib/analysis/report-adapter.ts") ?? "";
+const appPage = fileContents.get("src/app/page.tsx") ?? "";
+const appLayout = fileContents.get("src/app/layout.tsx") ?? "";
 const forbiddenProductPhotoMapperImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/analyzer-routing",
@@ -516,6 +526,131 @@ const forbiddenProductPhotoReviewPanelPatterns = [
   /privacySafeMetadataSummary/,
   /\.\.\.\s*(?:viewModel|result|details|metadataSummary)/,
 ];
+const productPhotoHostCorpus = `${productPhotoReviewPanelHostPage}\n${productPhotoReviewPanelRenderCases}`;
+const requiredProductPhotoHostPageSignals = [
+  {
+    label: "host imports notFound production guard",
+    patterns: [/import \{ notFound \} from "next\/navigation";/],
+  },
+  {
+    label: "host imports isolated panel",
+    patterns: [/import \{ ProductPhotoReviewPanel \} from "@\/components\/ProductPhotoReviewPanel";/],
+  },
+  {
+    label: "host imports colocated render cases",
+    patterns: [/import \{ productPhotoReviewPanelRenderCases \} from "\.\/render-cases";/],
+  },
+  {
+    label: "host production-disabled by default",
+    patterns: [/process\.env\.NODE_ENV !== "production"/],
+  },
+  {
+    label: "host returns notFound when disabled",
+    patterns: [/notFound\(\)/],
+  },
+  {
+    label: "host synthetic non-live visible label",
+    patterns: [/Synthetic non-live visual QA surface/],
+  },
+  {
+    label: "host manual review visible label",
+    patterns: [/Manual review only/],
+  },
+];
+const requiredProductPhotoRenderCaseSignals = [
+  {
+    label: "render cases type-only view-model import",
+    patterns: [
+      /import type \{ ProductPhotoReportViewModel \} from "@\/lib\/analysis\/product-photo-report-view-model";/,
+    ],
+  },
+  {
+    label: "render cases use satisfies ProductPhotoReportViewModel",
+    patterns: [/satisfies readonly ProductPhotoReportViewModel\[\]/],
+  },
+  {
+    label: "render cases low-confidence case",
+    patterns: [/confidence:\s*"Low confidence"/],
+  },
+  {
+    label: "render cases medium review-priority case",
+    patterns: [/reviewPriority:\s*"Review"/],
+  },
+  {
+    label: "render cases stronger manual-review case",
+    patterns: [/Stronger product-photo context, still manual review/],
+  },
+  {
+    label: "render cases external verification not performed",
+    patterns: [/externalVerification:\s*"Not performed"/],
+  },
+  {
+    label: "render cases runtime remains non-live",
+    patterns: [/runtimeLive:\s*false/],
+  },
+  {
+    label: "render cases analyzeEvidenceFile not invoked",
+    patterns: [/analyzeEvidenceFileInvoked:\s*false/],
+  },
+  {
+    label: "render cases analyzer routing not invoked",
+    patterns: [/analyzerRoutingInvoked:\s*false/],
+  },
+  {
+    label: "render cases upload/report/scoring/parser/fixture paths not invoked",
+    patterns: [/uiUploadReportScoringParserFixturePathsInvoked:\s*false/],
+  },
+];
+const forbiddenProductPhotoHostImports = [
+  "@/components/ClaimReviewWorkflow",
+  "@/components/TestEvidenceHarness",
+  "@/components/AnalysisReport",
+  "@/components/AuthenticityResultCard",
+  "@/components/RiskScoreCard",
+  "@/components/UploadPanel",
+  "@/lib/analysis/analyzer",
+  "@/lib/analysis/analyzer-routing",
+  "@/lib/analysis/product-photo-analyzer",
+  "@/lib/analysis/product-photo-routing-adapter",
+  "@/lib/analysis/report-adapter",
+  "@/lib/analysis/scoring",
+  "@/lib/analysis/receipt-parser",
+  "@/lib/test-evidence",
+  "@/lib/claim-data",
+  "next/image",
+];
+const forbiddenProductPhotoHostPatterns = [
+  /mapProductPhotoAnalysisToReportViewModel/,
+  /prepareProductPhotoEvidenceAnalysisResultForDevOnlyBoundary/,
+  /ProductPhotoReviewPanel\.probe/,
+  /LocalAnalysisResult/,
+  /EvidenceAnalysisResult/,
+  /ProductPhotoEvidenceAnalysisResult/,
+  /MockAnalysisReport/,
+  /<img\b/i,
+  /createObjectURL/,
+  /\bobjectUrl\b/,
+  /\bimageUrl\b/,
+  /\bdataUrl\b/,
+  /\bFile\b/,
+  /\bBlob\b/,
+  /\bfetch\s*\(/,
+  /localStorage/,
+  /sessionStorage/,
+  /routeParams|searchParams/,
+  /\bDate\b/,
+  /lastModified/,
+  /latitude|longitude|\bgps\b/i,
+  /providerPayload|providerHandle(?!Included)|storageHandle(?!Included)|integrationHandle(?!Included)|caseQueueHandle(?!Included)/,
+  /moduleDetails/,
+  /privacySafeMetadataSummary/,
+  /\.\.\.\s*(?:viewModel|result|details|metadataSummary|caseData)/,
+  /https?:\/\//i,
+  /[A-Za-z]:\\/,
+  /\b(?:case|claim|ticket|evidence|provider|storage|integration)[-_ ]?id\b/i,
+  /\border\s*(?:number|id|#)\b/i,
+  /\b[A-Z]{2,}-\d{3,}\b/,
+];
 
 if (redactedProductTableNote !== safeProductTableNote) {
   failures.push("Privacy redaction check failed: product table row counts must remain visible in tuning observations.");
@@ -601,6 +736,82 @@ for (const pattern of forbiddenProductPhotoReviewPanelPatterns) {
   if (pattern.test(productPhotoReviewPanel)) {
     failures.push(`Product-photo review panel boundary check failed: component uses forbidden pattern ${pattern}`);
   }
+}
+
+for (const signal of requiredProductPhotoHostPageSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(productPhotoReviewPanelHostPage))) {
+    failures.push(`Product-photo visual host check failed: missing ${signal.label}`);
+  }
+}
+
+for (const signal of requiredProductPhotoRenderCaseSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(productPhotoReviewPanelRenderCases))) {
+    failures.push(`Product-photo visual host render-case check failed: missing ${signal.label}`);
+  }
+}
+
+for (const importPath of forbiddenProductPhotoHostImports) {
+  if (productPhotoHostCorpus.includes(importPath)) {
+    failures.push(`Product-photo visual host boundary check failed: host imports forbidden path ${importPath}`);
+  }
+}
+
+for (const pattern of forbiddenProductPhotoHostPatterns) {
+  if (pattern.test(productPhotoHostCorpus)) {
+    failures.push(`Product-photo visual host privacy/import check failed: host uses forbidden pattern ${pattern}`);
+  }
+}
+
+if (!/rawPhotoBytesIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: raw photo bytes must be explicitly omitted.");
+}
+
+if (!/imageBufferIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: image buffers must be explicitly omitted.");
+}
+
+if (!/rawExifIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: raw EXIF must be explicitly omitted.");
+}
+
+if (!/rawMetadataIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: raw metadata must be explicitly omitted.");
+}
+
+if (!/originalFilenameIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: original filenames must be explicitly omitted.");
+}
+
+if (!/rawLabelValueIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: raw label values must be explicitly omitted.");
+}
+
+if (!/providerOutputIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: provider output must be explicitly omitted.");
+}
+
+if (!/storageHandleIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: storage handles must be explicitly omitted.");
+}
+
+if (!/integrationHandleIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: integration handles must be explicitly omitted.");
+}
+
+if (!/caseQueueHandleIncluded:\s*false/.test(productPhotoReviewPanelRenderCases)) {
+  failures.push("Product-photo visual host privacy check failed: case queue handles must be explicitly omitted.");
+}
+
+if (
+  [
+    appPage,
+    appLayout,
+    testEvidenceHarness,
+    claimReviewWorkflow,
+    reportAdapter,
+  ].some((source) => source.includes("/dev/product-photo-review-panel") || source.includes("render-cases"))
+) {
+  failures.push("Product-photo visual host boundary check failed: host route or render cases are linked from live app files.");
 }
 
 if (claimReviewWorkflow.includes("ProductPhotoReviewPanel")) {
