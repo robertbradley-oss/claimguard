@@ -2,7 +2,7 @@
 
 This document defines Phase 2 before runtime implementation. It is planning guidance only.
 
-Phase 1 Receipt Intelligence is closed, pushed, deployed, and production-smoked. Phase 2.0 scaffold work is closed. Phase 2.1 Product Photo Local Heuristic Design is reviewed and closed. Phase 2.2 Product Photo Boundary and Display Readiness is closed after non-live helper, result, routing, view-model, display, synthetic render-host, semantic/privacy guard, and desktop/mobile browser-QA work. Phase 2.3 is ready to open only with an explicit prompt for a narrow, unwired local heuristic analyzer slice.
+Phase 1 Receipt Intelligence is closed, pushed, deployed, and production-smoked. Phase 2.0 scaffold work is closed. Phase 2.1 Product Photo Local Heuristic Design is reviewed and closed. Phase 2.2 Product Photo Boundary and Display Readiness is closed after non-live helper, result, routing, view-model, display, synthetic render-host, semantic/privacy guard, and desktop/mobile browser-QA work. Phase 2.3 is open as a narrow, unwired local heuristic analyzer slice; the first analyzer slice and Phase 2.3.1 probe refinement are closed and pushed.
 
 Phase 2.2 did not make product-photo runtime live. `analyzeEvidenceFile` remains the live receipt analyzer entrypoint, `LocalAnalysisResult` remains receipt-shaped, receipt UI/report behavior remains unchanged, and product-photo remains out of upload routing, live report adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, and case queues.
 
