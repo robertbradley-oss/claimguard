@@ -1048,6 +1048,14 @@ const requiredProductPhotoAdapterReadinessSignals = [
     patterns: [/legacyDamagePhotoQuarantineResult/, /damagePhotoReadinessRejected/],
   },
   {
+    label: "adapter readiness top-level mismatch quarantine cases",
+    patterns: [/topLevelEvidenceTypeMismatches/, /topLevelAnalysisEvidenceTypeMismatchesCollapsed/],
+  },
+  {
+    label: "adapter readiness report-view-model mismatch case",
+    patterns: [/topLevelReportViewModelEvidenceTypeMismatchesCollapsed/, /topLevelReceiptViewModelMismatchResult/],
+  },
+  {
     label: "adapter readiness raw/private sentinel omission",
     patterns: [/forbiddenPrivateSentinelValues/, /hostileOutputOmitsPrivateSentinels/],
   },

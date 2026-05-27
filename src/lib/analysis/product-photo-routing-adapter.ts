@@ -38,13 +38,13 @@ export type ProductPhotoAdapterReadinessInput =
   | {
       inputKind: "analysis-result";
       result: ProductPhotoEvidenceAnalysisResult;
-      evidenceType?: "product-photo" | "damage-photo";
+      evidenceType?: string;
       runtimeRequested?: boolean;
     }
   | {
       inputKind: "report-view-model";
       viewModel: ProductPhotoReportViewModel;
-      evidenceType?: "product-photo" | "damage-photo";
+      evidenceType?: string;
       runtimeRequested?: boolean;
     }
   | {
@@ -328,6 +328,10 @@ function nestedAnalysisEvidenceType(input: ProductPhotoAdapterReadinessInput): u
   return (input.result as { evidenceType?: unknown } | undefined)?.evidenceType;
 }
 
+function topLevelEvidenceTypeIsProductPhotoOrAbsent(input: ProductPhotoAdapterReadinessInput) {
+  return input.evidenceType === undefined || input.evidenceType === "product-photo";
+}
+
 function readinessFromAnalysisResult(result: ProductPhotoEvidenceAnalysisResult): ProductPhotoAdapterReadinessResult {
   const score = clampPercent(result.score);
   const signals = result.signals.slice(0, 6).map(readinessSignalFromShared);
@@ -441,6 +445,12 @@ export function prepareProductPhotoAdapterReadinessForDevOnlyBoundary(
 
   if (input.evidenceType === "damage-photo" || analysisEvidenceType === "damage-photo") {
     return legacyDamagePhotoQuarantineResult();
+  }
+
+  if (!topLevelEvidenceTypeIsProductPhotoOrAbsent(input)) {
+    return defaultReadinessResult("unsupported", {
+      limitations: ["Top-level evidence type did not match canonical product-photo adapter readiness"],
+    });
   }
 
   if (

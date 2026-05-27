@@ -138,6 +138,13 @@ const analysisReadinessResult = prepareProductPhotoAdapterReadinessForDevOnlyBou
   runtimeRequested: true,
 });
 
+const analysisReadinessOmittedTopLevelEvidenceTypeResult =
+  prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+    inputKind: "analysis-result",
+    result: canonicalAnalysisResult,
+    runtimeRequested: true,
+  });
+
 const viewModelReadinessResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
   inputKind: "report-view-model",
   viewModel: canonicalViewModel,
@@ -145,8 +152,71 @@ const viewModelReadinessResult = prepareProductPhotoAdapterReadinessForDevOnlyBo
   runtimeRequested: true,
 });
 
+const viewModelReadinessOmittedTopLevelEvidenceTypeResult =
+  prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+    inputKind: "report-view-model",
+    viewModel: canonicalViewModel,
+    runtimeRequested: true,
+  });
+
 const legacyDamagePhotoQuarantineResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
   inputKind: "legacy-compatibility",
+  evidenceType: "damage-photo",
+  runtimeRequested: true,
+});
+
+const topLevelReceiptAnalysisMismatchResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+  inputKind: "analysis-result",
+  result: canonicalAnalysisResult,
+  evidenceType: "receipt",
+  runtimeRequested: true,
+});
+
+const topLevelUnknownAnalysisMismatchResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+  inputKind: "analysis-result",
+  result: canonicalAnalysisResult,
+  evidenceType: "unknown",
+  runtimeRequested: true,
+});
+
+const topLevelUnsupportedAnalysisMismatchResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+  inputKind: "analysis-result",
+  result: canonicalAnalysisResult,
+  evidenceType: "unsupported",
+  runtimeRequested: true,
+});
+
+const topLevelDamagePhotoAnalysisMismatchResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+  inputKind: "analysis-result",
+  result: canonicalAnalysisResult,
+  evidenceType: "damage-photo",
+  runtimeRequested: true,
+});
+
+const topLevelReceiptViewModelMismatchResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+  inputKind: "report-view-model",
+  viewModel: canonicalViewModel,
+  evidenceType: "receipt",
+  runtimeRequested: true,
+});
+
+const topLevelUnknownViewModelMismatchResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+  inputKind: "report-view-model",
+  viewModel: canonicalViewModel,
+  evidenceType: "unknown",
+  runtimeRequested: true,
+});
+
+const topLevelUnsupportedViewModelMismatchResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+  inputKind: "report-view-model",
+  viewModel: canonicalViewModel,
+  evidenceType: "unsupported",
+  runtimeRequested: true,
+});
+
+const topLevelDamagePhotoViewModelMismatchResult = prepareProductPhotoAdapterReadinessForDevOnlyBoundary({
+  inputKind: "report-view-model",
+  viewModel: canonicalViewModel,
   evidenceType: "damage-photo",
   runtimeRequested: true,
 });
@@ -400,6 +470,9 @@ const typeChecks = {
 const shapeChecks = {
   analysisResultAccepted: analysisReadinessResult.readinessAccepted === true,
   viewModelAccepted: viewModelReadinessResult.readinessAccepted === true,
+  omittedTopLevelEvidenceTypeSafeInternalShapesAccepted:
+    analysisReadinessOmittedTopLevelEvidenceTypeResult.readinessAccepted === true &&
+    viewModelReadinessOmittedTopLevelEvidenceTypeResult.readinessAccepted === true,
   canonicalEvidenceTypeOnly: analysisReadinessResult.evidenceType === "product-photo",
   runtimeStaysNonLive:
     analysisReadinessResult.runtimeLive === false &&
@@ -462,6 +535,46 @@ const quarantineChecks = {
     hostileNestedDamagePhotoQuarantineResult.evidenceType === "product-photo" &&
     hostileNestedDamagePhotoQuarantineResult.runtimeLive === false &&
     hostileNestedDamagePhotoQuarantineResult.manualReviewOnly === true,
+  topLevelAnalysisEvidenceTypeMismatchesCollapsed:
+    topLevelReceiptAnalysisMismatchResult.readinessAccepted === false &&
+    topLevelUnknownAnalysisMismatchResult.readinessAccepted === false &&
+    topLevelUnsupportedAnalysisMismatchResult.readinessAccepted === false &&
+    topLevelReceiptAnalysisMismatchResult.inputKind === "unsupported" &&
+    topLevelUnknownAnalysisMismatchResult.inputKind === "unsupported" &&
+    topLevelUnsupportedAnalysisMismatchResult.inputKind === "unsupported",
+  topLevelReportViewModelEvidenceTypeMismatchesCollapsed:
+    topLevelReceiptViewModelMismatchResult.readinessAccepted === false &&
+    topLevelUnknownViewModelMismatchResult.readinessAccepted === false &&
+    topLevelUnsupportedViewModelMismatchResult.readinessAccepted === false &&
+    topLevelReceiptViewModelMismatchResult.inputKind === "unsupported" &&
+    topLevelUnknownViewModelMismatchResult.inputKind === "unsupported" &&
+    topLevelUnsupportedViewModelMismatchResult.inputKind === "unsupported",
+  topLevelDamagePhotoMismatchQuarantined:
+    topLevelDamagePhotoAnalysisMismatchResult.readinessAccepted === false &&
+    topLevelDamagePhotoViewModelMismatchResult.readinessAccepted === false &&
+    topLevelDamagePhotoAnalysisMismatchResult.inputKind === "legacy-quarantine" &&
+    topLevelDamagePhotoViewModelMismatchResult.inputKind === "legacy-quarantine" &&
+    topLevelDamagePhotoAnalysisMismatchResult.legacyCompatibility?.alias === "damage-photo" &&
+    topLevelDamagePhotoViewModelMismatchResult.legacyCompatibility?.alias === "damage-photo" &&
+    topLevelDamagePhotoAnalysisMismatchResult.legacyCompatibility.quarantined === true &&
+    topLevelDamagePhotoViewModelMismatchResult.legacyCompatibility.quarantined === true,
+  topLevelMismatchesStayNonLiveManualReviewOnly:
+    topLevelReceiptAnalysisMismatchResult.runtimeLive === false &&
+    topLevelReceiptAnalysisMismatchResult.manualReviewOnly === true &&
+    topLevelUnknownAnalysisMismatchResult.runtimeLive === false &&
+    topLevelUnknownAnalysisMismatchResult.manualReviewOnly === true &&
+    topLevelUnsupportedAnalysisMismatchResult.runtimeLive === false &&
+    topLevelUnsupportedAnalysisMismatchResult.manualReviewOnly === true &&
+    topLevelDamagePhotoAnalysisMismatchResult.runtimeLive === false &&
+    topLevelDamagePhotoAnalysisMismatchResult.manualReviewOnly === true &&
+    topLevelReceiptViewModelMismatchResult.runtimeLive === false &&
+    topLevelReceiptViewModelMismatchResult.manualReviewOnly === true &&
+    topLevelUnknownViewModelMismatchResult.runtimeLive === false &&
+    topLevelUnknownViewModelMismatchResult.manualReviewOnly === true &&
+    topLevelUnsupportedViewModelMismatchResult.runtimeLive === false &&
+    topLevelUnsupportedViewModelMismatchResult.manualReviewOnly === true &&
+    topLevelDamagePhotoViewModelMismatchResult.runtimeLive === false &&
+    topLevelDamagePhotoViewModelMismatchResult.manualReviewOnly === true,
   hostileUnsupportedNestedEvidenceTypesCollapsed:
     hostileNestedReceiptResult.readinessAccepted === false &&
     hostileNestedUnknownResult.readinessAccepted === false &&
@@ -544,12 +657,22 @@ assertProbeChecksPass("source boundaries", sourceBoundaryChecks);
 export const PRODUCT_PHOTO_ADAPTER_READINESS_DEVELOPER_PROBE = {
   cases: {
     analysisReadinessResult,
+    analysisReadinessOmittedTopLevelEvidenceTypeResult,
     viewModelReadinessResult,
+    viewModelReadinessOmittedTopLevelEvidenceTypeResult,
     hostileViewModelReadinessResult,
     lowScoreReadinessResult,
     mediumScoreReadinessResult,
     highScoreReadinessResult,
     legacyDamagePhotoQuarantineResult,
+    topLevelReceiptAnalysisMismatchResult,
+    topLevelUnknownAnalysisMismatchResult,
+    topLevelUnsupportedAnalysisMismatchResult,
+    topLevelDamagePhotoAnalysisMismatchResult,
+    topLevelReceiptViewModelMismatchResult,
+    topLevelUnknownViewModelMismatchResult,
+    topLevelUnsupportedViewModelMismatchResult,
+    topLevelDamagePhotoViewModelMismatchResult,
     hostileNestedDamagePhotoQuarantineResult,
     hostileNestedDamagePhotoOmittedTopLevelResult,
     hostileNestedReceiptResult,
@@ -563,6 +686,8 @@ export const PRODUCT_PHOTO_ADAPTER_READINESS_DEVELOPER_PROBE = {
       analysis: analysisReadinessResult.readinessAccepted,
       viewModel: viewModelReadinessResult.readinessAccepted,
       evidenceType: analysisReadinessResult.evidenceType,
+      omittedTopLevelAnalysis: analysisReadinessOmittedTopLevelEvidenceTypeResult.readinessAccepted,
+      omittedTopLevelViewModel: viewModelReadinessOmittedTopLevelEvidenceTypeResult.readinessAccepted,
     },
     legacyDamagePhotoQuarantine: {
       accepted: legacyDamagePhotoQuarantineResult.readinessAccepted,
@@ -577,6 +702,18 @@ export const PRODUCT_PHOTO_ADAPTER_READINESS_DEVELOPER_PROBE = {
       quarantined: hostileNestedDamagePhotoQuarantineResult.legacyCompatibility?.quarantined,
       runtimeLive: hostileNestedDamagePhotoQuarantineResult.runtimeLive,
       manualReviewOnly: hostileNestedDamagePhotoQuarantineResult.manualReviewOnly,
+    },
+    topLevelEvidenceTypeMismatches: {
+      analysisReceipt: topLevelReceiptAnalysisMismatchResult.inputKind,
+      analysisUnknown: topLevelUnknownAnalysisMismatchResult.inputKind,
+      analysisUnsupported: topLevelUnsupportedAnalysisMismatchResult.inputKind,
+      analysisDamagePhoto: topLevelDamagePhotoAnalysisMismatchResult.inputKind,
+      viewModelReceipt: topLevelReceiptViewModelMismatchResult.inputKind,
+      viewModelUnknown: topLevelUnknownViewModelMismatchResult.inputKind,
+      viewModelUnsupported: topLevelUnsupportedViewModelMismatchResult.inputKind,
+      viewModelDamagePhoto: topLevelDamagePhotoViewModelMismatchResult.inputKind,
+      runtimeLive: topLevelReceiptAnalysisMismatchResult.runtimeLive,
+      manualReviewOnly: topLevelReceiptAnalysisMismatchResult.manualReviewOnly,
     },
     hostileUnsupportedNestedEvidenceTypes: {
       receipt: hostileNestedReceiptResult.inputKind,
