@@ -324,7 +324,7 @@ const nonLiveBoundaryChecks = {
 } as const;
 
 const safetyChecks = {
-  reviewStatusClampedFromClear: productPhotoReportViewModel.reviewStatus === "Inconclusive",
+  reviewStatusClampedFromClear: productPhotoReportViewModel.reviewStatus === "Manual review recommended",
   scoreLabelIsEvidenceReliabilityScore:
     productPhotoReportViewModel.score.label === "Evidence Reliability Score",
   scoreScopeLocalOnly:
@@ -504,7 +504,7 @@ const displayChecks = {
   labelContextPresentRawValuesOmitted:
     productPhotoReportViewModel.productContext.labelContextSummary.includes("raw label values are omitted") &&
     !JSON.stringify(productPhotoReportViewModel).includes("RAW_LABEL_VALUE_SENTINEL"),
-  overconfidentClearLabelClamped: productPhotoReportViewModel.reviewStatus === "Inconclusive",
+  overconfidentClearLabelClamped: productPhotoReportViewModel.reviewStatus === "Manual review recommended",
 } as const;
 
 assertProbeChecksPass("shape", shapeChecks);

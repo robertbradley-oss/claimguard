@@ -355,6 +355,10 @@ function defaultProductPhotoReviewLabelFor(details: ProductPhotoAnalysisDetails)
   return details.reviewCompleteness.status === "complete" ? "Review recommended" : "Manual review recommended";
 }
 
+function productPhotoSourceKindFor(sourceKind: EvidenceSourceKind | undefined): EvidenceSourceKind {
+  return sourceKind === "synthetic-fixture" ? "synthetic-fixture" : "manual-review-context";
+}
+
 function buildProductPhotoFindingGroups(
   details: ProductPhotoAnalysisDetails,
   signals: SharedEvidenceSignal[],
@@ -487,7 +491,7 @@ export function prepareProductPhotoEvidenceAnalysisResultForDevOnlyBoundary(
     module: "productPhoto",
     evidenceType: "product-photo",
     evidenceLabel: "Product photo",
-    sourceKind: input.sourceKind ?? "manual-review-context",
+    sourceKind: productPhotoSourceKindFor(input.sourceKind),
     scoreLabel: "Evidence Reliability Score",
     evidenceReliabilityScore: {
       label: "Evidence Reliability Score",
@@ -505,7 +509,7 @@ export function prepareProductPhotoEvidenceAnalysisResultForDevOnlyBoundary(
     localSignalLevel: input.localSignalLevel ?? defaultProductPhotoSignalLevelFor(signals),
     reviewPriority: input.reviewPriority ?? defaultProductPhotoReviewPriorityFor(details),
     confidenceLevel: input.confidenceLevel ?? defaultProductPhotoConfidenceFor(details),
-    reviewLabel: input.reviewLabel ?? defaultProductPhotoReviewLabelFor(details),
+    reviewLabel: defaultProductPhotoReviewLabelFor(details),
     verificationStatus: {
       status: "Not externally verified",
       externalVerification: "Not performed",
@@ -515,9 +519,9 @@ export function prepareProductPhotoEvidenceAnalysisResultForDevOnlyBoundary(
     externalVerification: "Not performed",
     signals,
     findingGroups: buildProductPhotoFindingGroups(details, signals),
-    evidenceSummary: input.evidenceSummary ?? defaultProductPhotoEvidenceSummary(details, signals),
-    recommendedSupportAction: input.recommendedSupportAction ?? defaultProductPhotoSupportAction(details),
-    customerSafeWording: input.customerSafeWording ?? defaultProductPhotoCustomerSafeWording(details),
+    evidenceSummary: defaultProductPhotoEvidenceSummary(details, signals),
+    recommendedSupportAction: defaultProductPhotoSupportAction(details),
+    customerSafeWording: defaultProductPhotoCustomerSafeWording(details),
     privacySafeMetadataSummary: details.metadataContext.metadataSummary,
     moduleDetails: {
       module: "productPhoto",

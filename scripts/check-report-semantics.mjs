@@ -406,6 +406,34 @@ const requiredProductPhotoAnalyzerProbeSignals = [
     patterns: [/hostileInputAnalyzerResult/],
   },
   {
+    label: "analyzer probe direct-boundary hostile narrative case",
+    patterns: [/directBoundaryHostileNarrativeResult/],
+  },
+  {
+    label: "analyzer probe direct-boundary narrative omission",
+    patterns: [/directBoundaryHostileNarrativesOmitted/],
+  },
+  {
+    label: "analyzer probe direct-boundary canonical summary",
+    patterns: [/directBoundaryEvidenceSummaryCanonicalized/],
+  },
+  {
+    label: "analyzer probe direct-boundary canonical support action",
+    patterns: [/directBoundaryManualReviewActionCanonicalized/],
+  },
+  {
+    label: "analyzer probe direct-boundary canonical customer copy",
+    patterns: [/directBoundaryCustomerCopyCanonicalized/],
+  },
+  {
+    label: "analyzer probe direct-boundary review-label canonicalization",
+    patterns: [/directBoundaryReviewLabelCanonicalized/],
+  },
+  {
+    label: "analyzer probe direct-boundary source-kind canonicalization",
+    patterns: [/directBoundarySourceKindCanonicalized/],
+  },
+  {
     label: "analyzer probe confidence priority score separation",
     patterns: [/confidenceSeparateFromReviewPriority/, /scoreSeparateFromConfidence/, /confidenceIsReadinessNotFraudProbability/],
   },
@@ -881,6 +909,20 @@ if (
   )
 ) {
   failures.push("Product-photo analyzer privacy check failed: analyzer references forbidden raw/private output fields.");
+}
+
+const forbiddenProductPhotoAnalyzerOverridePatterns = [
+  /reviewLabel:\s*input\.reviewLabel/,
+  /evidenceSummary:\s*input\.evidenceSummary/,
+  /recommendedSupportAction:\s*input\.recommendedSupportAction/,
+  /customerSafeWording:\s*input\.customerSafeWording/,
+  /sourceKind:\s*input\.sourceKind/,
+];
+
+for (const pattern of forbiddenProductPhotoAnalyzerOverridePatterns) {
+  if (pattern.test(productPhotoAnalyzer)) {
+    failures.push(`Product-photo analyzer raw-result override check failed: direct caller override is propagated: ${pattern}`);
+  }
 }
 
 for (const signal of requiredProductPhotoAnalyzerSignals) {

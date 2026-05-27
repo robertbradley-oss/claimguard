@@ -4,8 +4,10 @@ import { join } from "node:path";
 import {
   analyzeProductPhotoEvidenceWithLocalHeuristics,
   buildProductPhotoAnalysisDetails,
+  prepareProductPhotoEvidenceAnalysisResultForDevOnlyBoundary,
   PRODUCT_PHOTO_LOCAL_HEURISTIC_ANALYZER_STATUS,
   PRODUCT_PHOTO_RESULT_BOUNDARY_STATUS,
+  type ProductPhotoEvidenceAnalysisResultInput,
   type ProductPhotoLocalHeuristicAnalyzerInput,
 } from "@/lib/analysis/product-photo-analyzer";
 import type {
@@ -318,6 +320,22 @@ const hostileInputAnalyzerResult = analyzeProductPhotoEvidenceWithLocalHeuristic
   reviewLabel: EvidenceReviewStatus;
 });
 
+const directBoundaryHostileNarrativeResult = prepareProductPhotoEvidenceAnalysisResultForDevOnlyBoundary({
+  evidenceLabel: rawFilenameSentinel,
+  sourceKind: "future-provider-signal",
+  subjectType: "full-product-context",
+  damageVisibility: "clearly-visible",
+  productContext: "complete",
+  metadataSummary: bucketedAvailableMetadata,
+  requestedAdditionalViews: [],
+  missingContext: [],
+  purchaseOrReceiptMatchNeeded: false,
+  reviewLabel: "Clear",
+  evidenceSummary: sentinelUnsafeText,
+  recommendedSupportAction: sentinelUnsafeText,
+  customerSafeWording: sentinelUnsafeText,
+} satisfies ProductPhotoEvidenceAnalysisResultInput);
+
 const directDetailsProbe = buildProductPhotoAnalysisDetails({
   subjectType: "damage-close-up",
   damageVisibility: "inconclusive",
@@ -441,6 +459,21 @@ const safetyChecks = {
     completeContextAnalyzerResult.scoreMeaning.safetyNote.toLowerCase().includes("does not prove"),
   noClearReviewLabelFromLocalAnalyzer:
     completeContextAnalyzerResult.reviewLabel !== "Clear" && hostileInputAnalyzerResult.reviewLabel !== "Clear",
+  directBoundaryReviewLabelCanonicalized: directBoundaryHostileNarrativeResult.reviewLabel !== "Clear",
+  directBoundaryEvidenceSummaryCanonicalized:
+    directBoundaryHostileNarrativeResult.evidenceSummary.includes("local review context only"),
+  directBoundaryManualReviewActionCanonicalized: directBoundaryHostileNarrativeResult.recommendedSupportAction
+    .toLowerCase()
+    .includes("manual review recommended"),
+  directBoundaryCustomerCopyCanonicalized:
+    directBoundaryHostileNarrativeResult.customerSafeWording.startsWith("Thanks for the photo."),
+  directBoundaryHostileNarrativesOmitted: resultTextOmitsValues(
+    directBoundaryHostileNarrativeResult,
+    sentinelUnsafeText.split(" | "),
+  ),
+  directBoundaryExternalVerificationStillNotPerformed:
+    directBoundaryHostileNarrativeResult.externalVerification === "Not performed",
+  directBoundarySourceKindCanonicalized: directBoundaryHostileNarrativeResult.sourceKind === "manual-review-context",
   manualReviewOnlyAction:
     missingWiderViewAnalyzerResult.recommendedSupportAction.toLowerCase().includes("manual review recommended"),
   unsafeCallerCopyNotPropagated: resultHasNoUnsafeSentinelCopy(hostileInputAnalyzerResult),
@@ -585,6 +618,7 @@ export const PRODUCT_PHOTO_ANALYZER_DEVELOPER_PROBE = {
     serialLabelContext: serialLabelContextAnalyzerResult,
     privacySentinel: privacySentinelAnalyzerResult,
     hostileInputSanitized: hostileInputAnalyzerResult,
+    directBoundaryHostileNarrative: directBoundaryHostileNarrativeResult,
   },
   expectations: {
     shape: shapeChecks,
