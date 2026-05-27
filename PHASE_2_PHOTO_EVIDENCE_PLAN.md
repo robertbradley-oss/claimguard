@@ -2,11 +2,11 @@
 
 This document defines Phase 2 before runtime implementation. It is planning guidance only.
 
-Phase 1 Receipt Intelligence is closed, pushed, deployed, and production-smoked. Phase 2.0 scaffold work is closed. Phase 2.1 Product Photo Local Heuristic Design is reviewed and closed. Phase 2.2 Product Photo Boundary and Display Readiness is closed after non-live helper, result, routing, view-model, display, synthetic render-host, semantic/privacy guard, and desktop/mobile browser-QA work. Phase 2.3 is open as a narrow, unwired local heuristic analyzer slice; the first analyzer slice, Phase 2.3.1 probe refinement, Phase 2.3.3 raw-result override sanitizer, and Phase 2.3.5 readiness hardening are closed locally once committed. Phase 2.3.5 keeps product-photo non-live while deriving structured readiness fields, strengthening runtime canonicalization, adding executable product-photo probe coverage, and documenting the legacy `damage-photo` quarantine boundary.
+Phase 1 Receipt Intelligence is closed, pushed, deployed, and production-smoked. Phase 2.0 scaffold work is closed. Phase 2.1 Product Photo Local Heuristic Design is reviewed and closed. Phase 2.2 Product Photo Boundary and Display Readiness is closed after non-live helper, result, routing, view-model, display, synthetic render-host, semantic/privacy guard, and desktop/mobile browser-QA work. Phase 2.3 Product Photo Local Heuristic Analyzer hardening is closed after the no-live-wiring readiness closeout. Phase 2.4 is open as guarded non-live product-photo adapter readiness planning only. The durable Phase 2.4 plan lives in `PRODUCT_PHOTO_ADAPTER_READINESS_PLAN.md`.
 
 Phase 2.2 did not make product-photo runtime live. `analyzeEvidenceFile` remains the live receipt analyzer entrypoint, `LocalAnalysisResult` remains receipt-shaped, receipt UI/report behavior remains unchanged, and product-photo remains out of upload routing, live report adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, and case queues.
 
-Phase 2.3.5 did not make product-photo runtime live. Canonical `product-photo` remains the only Phase 2 product-photo concept. Legacy `damage-photo` remains a receipt-era/mock compatibility alias and must not be treated as live canonical product-photo support without a separate approved quarantine/routing slice.
+Phase 2.3.5 and Phase 2.3.6 did not make product-photo runtime live. Canonical `product-photo` remains the only Phase 2 product-photo concept. Legacy `damage-photo` remains a receipt-era/mock compatibility alias and must not be treated as live canonical product-photo support without a separate authorized quarantine/routing slice.
 
 ClaimGuard is a fraud-risk screening and evidence intelligence platform for support and warranty teams. Receipt analysis is one evidence module inside that broader system. Phase 2 should add photo evidence readiness without turning ClaimGuard into a toy image checker, a generic AI chatbot, a generic SaaS dashboard, or an automatic decision system.
 
@@ -605,6 +605,44 @@ Visual QA should verify:
 The future host files must be added to `scripts/check-report-semantics.mjs` as product-photo display surfaces. Semantic checks should deny forbidden imports, raw/private field names, URL/path patterns, private identifiers, realistic customer/order data, unsafe outcome wording, and any permission to wire the host into the live workflow.
 
 Stop if the host touches `ClaimReviewWorkflow`, `/`, `/test-evidence`, upload routing, `analyzeEvidenceFile`, analyzer routing, live report mapping, scoring, parser behavior, fixtures, providers, storage, integrations, case queues, receipt UI/report behavior, `LocalAnalysisResult`, or product-photo runtime behavior.
+
+## 16C. Product-Photo Adapter Readiness Gate
+
+Phase 2.4 plans the future non-live adapter contract before any adapter implementation. The complete adapter readiness plan is maintained in `PRODUCT_PHOTO_ADAPTER_READINESS_PLAN.md`.
+
+The adapter readiness gate means:
+
+- A future adapter contract may be implemented only as a dev/probe-only boundary.
+- The future adapter may accept sanitized `ProductPhotoEvidenceAnalysisResult` or `ProductPhotoReportViewModel` shaped data only.
+- The future adapter must derive or canonicalize score, confidence, review priority, local signal level, source kind, review status, evidence summary, recommended support action, customer-safe wording, limitations, signals, external-verification status, privacy posture, and non-live boundary flags.
+- The future adapter must not accept raw files, image bytes, image buffers, object URLs, image URLs, raw EXIF, raw metadata, original filenames, precise timestamps, GPS coordinates, raw labels, provider output, storage handles, integration handles, case queue handles, or customer/case identifiers.
+- The future adapter must not require `LocalAnalysisResult`, `MockAnalysisReport`, receipt OCR fields, receipt parser fields, receipt score breakdown, receipt report adapter output, or receipt fixtures.
+- The future adapter must keep all product-photo findings manual-review-only and must not imply proof, customer wrongdoing, final claim outcome, automatic handling, external verification, approval, rejection, denial, or policy disposition.
+
+Legacy `damage-photo` handling remains quarantine-only:
+
+- New adapter/readiness files should use canonical `product-photo`.
+- `damage-photo` may appear in future probes only as a compatibility/quarantine scenario.
+- The adapter must not treat `damage-photo` as canonical runtime support.
+- Future live routing must handle legacy `damage-photo` quarantine in a separate authorized slice before product-photo runtime support.
+
+Before any Phase 2.4.1 adapter contract implementation, the future prompt must preserve:
+
+- `analyzeEvidenceFile` as the live receipt analyzer entrypoint.
+- `LocalAnalysisResult` as receipt-shaped.
+- `mapLocalAnalysisToReport(result: LocalAnalysisResult)` as receipt-only.
+- `ClaimReviewWorkflow`, upload, live report mapping, receipt scoring/parser/fixtures, providers, storage, integrations, case queues, real photos, and real metadata fixtures as blocked.
+
+Required future gates:
+
+- `npm.cmd run check:report-semantics`.
+- `npm.cmd run check:product-photo-probes`.
+- Adapter-specific probe registration if a new probe module is added.
+- Semantic coverage for every new adapter/readiness file.
+- Protected import/coupling scans.
+- Unsafe wording checks.
+- Raw metadata/privacy sentinel checks.
+- Receipt preservation checks.
 
 ## 17. Phase 2.1 First-Pass Local Heuristic Signals
 

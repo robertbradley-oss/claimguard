@@ -51,7 +51,7 @@ Explicitly deferred from Phase 1:
 
 ## Phase 2: Photo Evidence
 
-Status: Phase 2.0 scaffold work, Phase 2.1 Product Photo Local Heuristic Design, and Phase 2.2 Product Photo Boundary and Display Readiness are closed. Phase 2.3 is open as a narrow, unwired local heuristic analyzer slice; the first analyzer slice, Phase 2.3.1 probe refinement, Phase 2.3.3 raw-result override sanitizer, and Phase 2.3.5 readiness hardening are closed locally once committed. Product-photo runtime analyzer behavior is still not live.
+Status: Phase 2.0 scaffold work, Phase 2.1 Product Photo Local Heuristic Design, Phase 2.2 Product Photo Boundary and Display Readiness, and Phase 2.3 Product Photo Local Heuristic Analyzer hardening are closed. Phase 2.4 is open as guarded non-live product-photo adapter readiness planning only. Product-photo runtime analyzer behavior is still not live.
 
 Meaning:
 
@@ -67,7 +67,8 @@ Current implementation boundary:
 - Shared evidence model types and product-photo scaffold/defaults exist.
 - Phase 2.1 defined the first product-photo heuristic signal categories and future implementation order in planning docs.
 - Phase 2.2 added non-live product-photo helper boundaries, guarded routing decisions, shared result shape readiness, a product-photo report view-model, an isolated `ProductPhotoReviewPanel`, a production-disabled synthetic render host, semantic/privacy guards, and desktop/mobile browser QA.
-- Phase 2.3 added the first unwired local product-photo heuristic analyzer plus probe refinements for low-quality buckets, context gaps, privacy-safe metadata and label summaries, manual-review-only wording, raw-result override sanitization, and non-live isolation.
+- Phase 2.3 added and hardened the first unwired local product-photo heuristic analyzer plus probe refinements for low-quality buckets, context gaps, privacy-safe metadata and label summaries, manual-review-only wording, raw-result override sanitization, structured readiness derivation, executable product-photo probes, and non-live isolation.
+- Phase 2.4 defines guarded non-live adapter readiness before any adapter implementation. The durable plan lives in `PRODUCT_PHOTO_ADAPTER_READINESS_PLAN.md` and covers future adapter contract boundaries, legacy `damage-photo` quarantine, semantic/probe gates, blocked live runtime gates, allowed/protected future files, and Phase 2.4.1 pass/fail criteria.
 - No product-photo analyzer behavior is live yet.
 - No runtime analyzer, upload, UI, report, scoring, parser, fixture, storage, integration, or external provider behavior is live for Phase 2 yet.
 - `product-photo` is canonical.
