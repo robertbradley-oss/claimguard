@@ -1,4 +1,5 @@
 import type { EvidenceType } from "@/lib/claim-data";
+import { getEvidenceTypeFromFile } from "@/lib/analysis/analyzer-classifier";
 import { inspectImageHeuristics } from "@/lib/analysis/image-heuristics";
 import { inspectMetadata } from "@/lib/analysis/metadata-service";
 import { extractOcr } from "@/lib/analysis/ocr-service";
@@ -6,33 +7,7 @@ import { parseReceiptText } from "@/lib/analysis/receipt-parser";
 import { buildReviewSignals, scoreAnalysis } from "@/lib/analysis/scoring";
 import type { FindingGroup, FindingStatus, LocalAnalysisResult, OcrExtraction, ReceiptFieldReliability, ReviewSignal } from "@/lib/analysis/types";
 
-export function getEvidenceTypeFromFile(file: File | null): EvidenceType {
-  if (!file) {
-    return "receipt";
-  }
-
-  const name = file.name.toLowerCase();
-
-  if (file.type === "application/pdf" || name.endsWith(".pdf")) {
-    return "pdf";
-  }
-
-  if (name.includes("screenshot") || name.includes("screen")) {
-    return "screenshot";
-  }
-
-  if (
-    file.type.startsWith("image/") &&
-    (name.includes("damage") ||
-      name.includes("photo") ||
-      name.includes("crack") ||
-      name.includes("product"))
-  ) {
-    return "damage-photo";
-  }
-
-  return "receipt";
-}
+export { getEvidenceTypeFromFile, LEGACY_DAMAGE_PHOTO_CLASSIFIER_QUARANTINE } from "@/lib/analysis/analyzer-classifier";
 
 function labelFor(evidenceType: EvidenceType) {
   return evidenceType === "pdf"

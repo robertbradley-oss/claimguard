@@ -45,6 +45,14 @@ registerTypescriptExtension(".tsx");
 
 const probeModules = [
   {
+    path: "src/lib/analysis/analyzer-classifier.probe.ts",
+    exportName: "ANALYZER_CLASSIFIER_QUARANTINE_DEVELOPER_PROBE",
+  },
+  {
+    path: "src/lib/analysis/analyzer-routing.probe.ts",
+    exportName: "ANALYZER_ROUTING_GUARD_DEVELOPER_PROBE",
+  },
+  {
     path: "src/lib/analysis/product-photo-heuristics.probe.ts",
     exportName: "PRODUCT_PHOTO_HEURISTICS_DEVELOPER_PROBE",
   },

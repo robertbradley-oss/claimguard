@@ -6,6 +6,8 @@ Product-photo runtime remains non-live. `runtimeLive` remains false, `manualRevi
 
 This plan does not implement code, routes, components, upload behavior, analyzer runtime behavior, live report adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, case queues, real photos, real metadata fixtures, deployment, or push work.
 
+Phase 2.4.6 implementation note: the planned no-live classifier quarantine hardening is complete. The live classifier boundary now lives in `src/lib/analysis/analyzer-classifier.ts`, and legacy damage/product/photo/crack image filename cues collapse to the existing receipt/default path instead of returning `damage-photo`. This is classifier-label hardening only; a true pre-OCR/pre-metadata unsupported/quarantine boundary remains separate future work.
+
 ## 1. Supervisor Decision
 
 The safest first future boundary to harden is the live filename/evidence-type classification boundary before the receipt-shaped analyzer path proceeds.
@@ -150,15 +152,17 @@ Stop immediately if:
 
 Recommended next milestone: Phase 2.4.6 no-live legacy `damage-photo` classifier quarantine hardening.
 
-This should be a no-live implementation slice, not another docs-only plan, unless the future prompt discovers ambiguity that requires planning first.
+Status: complete. The implementation stayed no-live and did not make product-photo runtime active.
 
-Allowed files for Phase 2.4.6 should be narrow and explicitly named in the prompt. Likely candidates:
+Files used for Phase 2.4.6 hardening:
 
-- `src/lib/analysis/analyzer.ts`, only for the live filename/evidence-type classification boundary and only if the prompt explicitly permits it.
-- A new or existing narrow probe file for classifier quarantine coverage, if the future prompt names it.
-- `scripts/check-report-semantics.mjs`, only to add legacy classifier quarantine markers and protected-boundary scans.
-- `scripts/run-product-photo-probes.cjs`, only if registering an already-safe guard/probe module is explicitly included.
-- `NEXT_STEPS.md`, `PHASE_2_PHOTO_EVIDENCE_PLAN.md`, `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`, `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`, and `AGENT_LOG.md` for status updates.
+- `src/lib/analysis/analyzer-classifier.ts`.
+- `src/lib/analysis/analyzer-classifier.probe.ts`.
+- `src/lib/analysis/analyzer.ts`, only to use and re-export the classifier boundary while preserving `analyzeEvidenceFile`.
+- `src/lib/analysis/analyzer-routing.probe.ts`, only to make the existing guard probe active and report failures clearly.
+- `scripts/check-report-semantics.mjs`.
+- `scripts/run-product-photo-probes.cjs`.
+- Status docs and `AGENT_LOG.md`.
 
 Protected files for Phase 2.4.6 unless separately approved:
 
@@ -183,10 +187,18 @@ Phase 2.4.6 pass criteria:
 - `LocalAnalysisResult` remains unchanged and receipt-shaped.
 - `mapLocalAnalysisToReport(result: LocalAnalysisResult)` remains receipt-only.
 - Upload/UI/live report/scoring/parser/fixtures remain untouched unless explicitly approved.
-- Semantic and probe gates prove quarantine, receipt preservation, no live product-photo routing, and no private evidence exposure.
+- Semantic and probe gates prove classifier-label quarantine, receipt classification preservation, no live product-photo routing, analyzer-routing import isolation, and no new private evidence fixtures or probe data.
+
+Phase 2.4.6 pass status:
+
+- Product-photo runtime remains non-live.
+- `damage-photo` no longer reaches the live receipt-era analyzer path as a filename-classifier output; product-photo-like filenames still follow the existing receipt/default analyzer path until a separate unsupported/quarantine boundary is authorized.
+- PDF, screenshot, null/default, normal receipt image, and legacy product-photo-like filename cue classification are covered by `ANALYZER_CLASSIFIER_QUARANTINE_DEVELOPER_PROBE`.
+- Analyzer-routing guard coverage is now active in `check:product-photo-probes`, and semantic guards now scan `analyzer-routing.ts` for forbidden live/runtime imports.
+- `analyzeEvidenceFile`, `LocalAnalysisResult`, upload, UI, live report mapping, scoring, parser, fixtures, providers, storage, integrations, and case queues remain protected.
 
 Suggested next prompt:
 
 ```text
-/claimguardagent run Phase 2.4.6 as a no-live legacy damage-photo classifier quarantine hardening slice: harden only the filename/evidence-type classification boundary so legacy damage-photo cannot become canonical product-photo runtime or flow into the live receipt-shaped analyzer as product-photo support; preserve receipt/PDF/screenshot behavior; do not change analyzeEvidenceFile runtime behavior beyond the explicitly approved classifier boundary, do not change LocalAnalysisResult, upload/UI/live report adapter/scoring/parser/fixtures/providers/storage/integrations/case queues, and do not add real photos or real metadata fixtures; add semantic/probe coverage for the classifier quarantine and receipt preservation; run lint, build, check:report-semantics, check:product-photo-probes, git diff --check, and final status; commit if safe; do not push
+/claimguardagent run Phase 2.4.7 as a review-only classifier quarantine closeout: inspect the Phase 2.4.6 classifier quarantine patch, confirm legacy damage-photo filename cues collapse away from canonical product-photo runtime, confirm this remains classifier-label hardening only and not a pre-OCR/pre-metadata unsupported boundary, confirm analyzeEvidenceFile remains the receipt analyzer entrypoint, LocalAnalysisResult is unchanged, receipt/PDF/screenshot behavior is preserved, product-photo remains non-live and unwired, active semantic/probe coverage includes the classifier quarantine and analyzer-routing guard probes plus source-backed analyzer-routing forbidden-import coverage, and no upload/UI/live report adapter/scoring/parser/fixtures/providers/storage/integrations/case queues/real photos/real metadata fixtures/deployment work appeared; run lint, build, check:report-semantics, check:product-photo-probes, git diff --check, and final status; commit docs-only status if needed; do not push
 ```

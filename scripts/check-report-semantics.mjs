@@ -9,6 +9,10 @@ const filesToCheck = [
   "src/app/dev/product-photo-review-panel/page.tsx",
   "src/app/dev/product-photo-review-panel/render-cases.ts",
   "src/lib/analysis/analyzer.ts",
+  "src/lib/analysis/analyzer-classifier.ts",
+  "src/lib/analysis/analyzer-classifier.probe.ts",
+  "src/lib/analysis/analyzer-routing.ts",
+  "src/lib/analysis/analyzer-routing.probe.ts",
   "src/lib/analysis/report-adapter.ts",
   "src/lib/analysis/scoring.ts",
   "src/lib/analysis/types.ts",
@@ -266,7 +270,12 @@ const productPhotoAdapterReadinessProbe =
   fileContents.get("src/lib/analysis/product-photo-adapter-readiness.probe.ts") ?? "";
 const productPhotoReportViewModelProbe =
   fileContents.get("src/lib/analysis/product-photo-report-view-model.probe.ts") ?? "";
+const analyzer = fileContents.get("src/lib/analysis/analyzer.ts") ?? "";
+const analyzerClassifierProbe = fileContents.get("src/lib/analysis/analyzer-classifier.probe.ts") ?? "";
+const analyzerRouting = fileContents.get("src/lib/analysis/analyzer-routing.ts") ?? "";
+const analyzerRoutingProbe = fileContents.get("src/lib/analysis/analyzer-routing.probe.ts") ?? "";
 const productPhotoProbeRunner = fileContents.get("scripts/run-product-photo-probes.cjs") ?? "";
+const analyzerClassifier = fileContents.get("src/lib/analysis/analyzer-classifier.ts") ?? "";
 const packageJson = fileContents.get("package.json") ?? "";
 const productPhotoReviewPanel = fileContents.get("src/components/ProductPhotoReviewPanel.tsx") ?? "";
 const productPhotoReviewPanelProbe = fileContents.get("src/components/ProductPhotoReviewPanel.probe.tsx") ?? "";
@@ -320,6 +329,22 @@ const forbiddenProductPhotoAnalyzerImports = [
   "@/lib/analysis/report-adapter",
   "@/lib/analysis/scoring",
   "@/lib/analysis/receipt-parser",
+  "@/lib/test-evidence",
+  "@/components/",
+  "@/lib/claim-data",
+];
+const forbiddenAnalyzerRoutingImports = [
+  "@/lib/analysis/analyzer",
+  "@/lib/analysis/analyzer-classifier",
+  "@/lib/analysis/product-photo-analyzer",
+  "@/lib/analysis/product-photo-routing-adapter",
+  "@/lib/analysis/product-photo-report-view-model",
+  "@/lib/analysis/report-adapter",
+  "@/lib/analysis/scoring",
+  "@/lib/analysis/receipt-parser",
+  "@/lib/analysis/metadata-service",
+  "@/lib/analysis/ocr-service",
+  "@/lib/analysis/image-heuristics",
   "@/lib/test-evidence",
   "@/components/",
   "@/lib/claim-data",
@@ -1080,6 +1105,8 @@ for (const signal of requiredProductPhotoAdapterReadinessSignals) {
 }
 
 const requiredProductPhotoProbeRunnerSignals = [
+  /ANALYZER_CLASSIFIER_QUARANTINE_DEVELOPER_PROBE/,
+  /ANALYZER_ROUTING_GUARD_DEVELOPER_PROBE/,
   /PRODUCT_PHOTO_HEURISTICS_DEVELOPER_PROBE/,
   /PRODUCT_PHOTO_RESULT_BOUNDARY_DEVELOPER_PROBE/,
   /SHARED_RESULT_DEVELOPER_PROBE/,
@@ -1097,6 +1124,77 @@ if (!/"check:product-photo-probes"\s*:\s*"node scripts\/run-product-photo-probes
 for (const pattern of requiredProductPhotoProbeRunnerSignals) {
   if (!pattern.test(productPhotoProbeRunner)) {
     failures.push(`Product-photo probe execution check failed: runner does not import ${pattern}.`);
+  }
+}
+
+const requiredAnalyzerClassifierQuarantineSignals = [
+  {
+    label: "classifier quarantine marker",
+    patterns: [/LEGACY_DAMAGE_PHOTO_CLASSIFIER_QUARANTINE/],
+  },
+  {
+    label: "classifier quarantine collapse target",
+    patterns: [/collapseTarget:\s*"receipt"/],
+  },
+  {
+    label: "classifier product-photo runtime non-live marker",
+    patterns: [/productPhotoRuntimeLive:\s*false/],
+  },
+  {
+    label: "classifier damage-photo non-canonical marker",
+    patterns: [/damagePhotoCanonicalRuntime:\s*false/],
+  },
+  {
+    label: "classifier analyzeEvidenceFile product-photo runtime marker",
+    patterns: [/analyzeEvidenceFileProductPhotoRuntime:\s*false/],
+  },
+  {
+    label: "classifier active probe export",
+    patterns: [/ANALYZER_CLASSIFIER_QUARANTINE_DEVELOPER_PROBE/],
+  },
+  {
+    label: "classifier active probe assertion",
+    patterns: [/assertProbeChecksPass\("classifier quarantine", classifierQuarantineChecks\)/],
+  },
+  {
+    label: "legacy filename cues collapse to receipt",
+    patterns: [/legacyDamagePhotoFilenameCuesCollapseToReceipt/],
+  },
+  {
+    label: "legacy filename cues do not return damage-photo",
+    patterns: [/legacyDamagePhotoFilenameCuesNeverReturnDamagePhoto/],
+  },
+  {
+    label: "legacy filename cues do not return product-photo",
+    patterns: [/legacyDamagePhotoFilenameCuesNeverReturnProductPhoto/],
+  },
+];
+
+for (const signal of requiredAnalyzerClassifierQuarantineSignals) {
+  const classifierCorpus = `${analyzerClassifier}\n${analyzerClassifierProbe}`;
+  if (!signal.patterns.some((pattern) => pattern.test(classifierCorpus))) {
+    failures.push(`Analyzer classifier quarantine check failed: missing ${signal.label}`);
+  }
+}
+
+if (/return\s+"damage-photo"/.test(`${analyzer}\n${analyzerClassifier}`)) {
+  failures.push("Analyzer classifier quarantine check failed: live classifier still returns damage-photo.");
+}
+
+if (!/ENABLE_PRODUCT_PHOTO_RUNTIME_ROUTING(?::\s*boolean)?\s*=\s*false/.test(analyzerRouting)) {
+  failures.push("Analyzer routing guard check failed: product-photo runtime routing flag is not false.");
+}
+
+if (!/ANALYZER_ROUTING_GUARD_DEVELOPER_PROBE/.test(analyzerRoutingProbe)) {
+  failures.push("Analyzer routing guard check failed: routing guard probe is missing from semantic coverage.");
+}
+
+for (const importPath of forbiddenAnalyzerRoutingImports) {
+  const doubleQuotedImport = `from "${importPath}"`;
+  const singleQuotedImport = `from '${importPath}'`;
+
+  if (analyzerRouting.includes(doubleQuotedImport) || analyzerRouting.includes(singleQuotedImport)) {
+    failures.push(`Analyzer routing guard check failed: analyzer-routing imports forbidden path ${importPath}`);
   }
 }
 

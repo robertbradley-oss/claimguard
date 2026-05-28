@@ -17,6 +17,7 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 - Phase 2.4.3 is a docs-only dev-only adapter review harness plan in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`. It plans a future synthetic-only display surface for adapter readiness outputs only; it does not implement a route, component, harness, runtime adapter execution, upload path, UI insertion, report mapping, provider, storage, integration, case queue, real photo, or real metadata fixture.
 - Phase 2.4.4 closes adapter readiness planning as complete enough for the non-live checkpoint and records the next runtime blockers in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`. The main blocker is the legacy live receipt-era `damage-photo` filename classification path, which must be quarantined or migrated before any product-photo runtime, upload, UI, live report mapping, `analyzeEvidenceFile`, `LocalAnalysisResult`, provider, storage, integration, or case workflow work.
 - Phase 2.4.5 is complete as a docs-only legacy `damage-photo` quarantine/migration plan in `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`. It chooses the safest first future hardening boundary: filename/evidence-type classification before the live receipt-shaped analyzer path proceeds. The plan keeps `product-photo` canonical, treats `damage-photo` as legacy receipt-era/mock compatibility only, preserves receipt behavior, and defines allowed/protected files, semantic/probe/browser/privacy gates, stop conditions, and the recommended Phase 2.4.6 milestone.
+- Phase 2.4.6 is complete as a no-live legacy `damage-photo` classifier quarantine hardening slice. The live classifier now lives in `src/lib/analysis/analyzer-classifier.ts`; product/damage/photo/crack image filename cues collapse to the existing receipt/default path instead of returning `damage-photo`; this is classifier-label hardening, not a pre-OCR/pre-metadata privacy boundary; `analyzeEvidenceFile` still uses the receipt-shaped analyzer body; `LocalAnalysisResult` remains unchanged; receipt/PDF/screenshot classification is covered by `src/lib/analysis/analyzer-classifier.probe.ts`; and `check:product-photo-probes` now actively imports 10 modules, including the classifier quarantine probe and analyzer-routing guard probe.
 - Completed pushed Phase 2.2 work includes:
   - `44d09f0` added unwired product-photo signal builders.
   - `50f8284` added unwired product-photo file summary, review completeness, and local review signal helpers.
@@ -78,17 +79,16 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 
 ## Next Safe Tasks
 
-1. Run Phase 2.4.6 as no-live legacy `damage-photo` classifier quarantine hardening only if Robert explicitly opens that implementation slice; harden the filename/evidence-type classification boundary before live analyzer execution, preserve receipt/PDF/screenshot behavior, and do not start product-photo runtime.
-2. Require semantic/probe coverage for classifier quarantine, receipt preservation, canonical `product-photo` separation, and active or equivalent analyzer-routing guard coverage before any runtime-facing hardening.
-3. Keep the decision-only public analyzer routing wrapper out of live UI/upload/report/scoring/parser paths until a separate live-routing plan is explicitly opened.
-4. Keep the dev-only routing adapter and adapter-readiness boundary out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
-5. Keep `recognizeProductPhotoEvidence` out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
-6. Keep the analyzer routing guard and optional file-aware boundary out of the live UI/upload flow until a separate live-routing plan is explicitly opened.
-7. Keep `LocalAnalysisResult` receipt-path shaped until a separate shared-result migration slice is explicitly opened.
-8. Keep image-consistency uncertainty dormant until a future explicitly opened provider, validated local-metrics, and QA-evidence slice.
-9. Keep the product-photo helpers, analyzer builder, probes, recognition boundary, routing adapter, adapter-readiness boundary, analyzer routing guard, optional file-aware boundary, preservation probe, public wrapper, report view-model, review panel, and visual host unwired from runtime analyzer, upload, UI insertion, live report mapping, scoring, parser, metadata extraction, and fixture behavior.
-10. Keep the shipped receipt module stable unless Robert explicitly requests maintenance.
-11. Preserve a clean operational queue after each completed agent task.
+1. Run Phase 2.4.7 as a review-only classifier quarantine closeout; verify the no-live classifier hardening remains isolated, receipt/PDF/screenshot behavior is preserved, active probes/semantic guards cover the new boundary, analyzer-routing forbidden-import coverage remains source-backed, and no product-photo runtime, upload/UI/report/scoring/parser/fixture/provider/storage/integration/case-queue work appeared. Keep any true pre-OCR/pre-metadata unsupported/quarantine boundary as a separate authorized task.
+2. Keep the decision-only public analyzer routing wrapper out of live UI/upload/report/scoring/parser paths until a separate live-routing plan is explicitly opened.
+3. Keep the dev-only routing adapter and adapter-readiness boundary out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
+4. Keep `recognizeProductPhotoEvidence` out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
+5. Keep the analyzer routing guard and optional file-aware boundary out of the live UI/upload flow until a separate live-routing plan is explicitly opened.
+6. Keep `LocalAnalysisResult` receipt-path shaped until a separate shared-result migration slice is explicitly opened.
+7. Keep image-consistency uncertainty dormant until a future explicitly opened provider, validated local-metrics, and QA-evidence slice.
+8. Keep the product-photo helpers, analyzer builder, probes, recognition boundary, routing adapter, adapter-readiness boundary, analyzer routing guard, optional file-aware boundary, preservation probe, public wrapper, report view-model, review panel, and visual host unwired from runtime analyzer, upload, UI insertion, live report mapping, scoring, parser, metadata extraction, and fixture behavior.
+9. Keep the shipped receipt module stable unless Robert explicitly requests maintenance.
+10. Preserve a clean operational queue after each completed agent task.
 
 ## Phase 2.3 Entry Criteria And Boundaries
 
@@ -771,5 +771,5 @@ Robert wants the eventual result screen to feel like an evidence triage workspac
 ## Current Recommended Next Prompt
 
 ```text
-/claimguardagent run Phase 2.4.6 as a no-live legacy damage-photo classifier quarantine hardening slice: harden only the filename/evidence-type classification boundary so legacy damage-photo cannot become canonical product-photo runtime or flow into the live receipt-shaped analyzer as product-photo support; preserve receipt/PDF/screenshot behavior; do not change analyzeEvidenceFile runtime behavior beyond the explicitly approved classifier boundary, do not change LocalAnalysisResult, upload/UI/live report adapter/scoring/parser/fixtures/providers/storage/integrations/case queues, and do not add real photos or real metadata fixtures; add semantic/probe coverage for the classifier quarantine and receipt preservation; run lint, build, check:report-semantics, check:product-photo-probes, git diff --check, and final status; commit if safe; do not push
+/claimguardagent run Phase 2.4.7 as a review-only classifier quarantine closeout: inspect the Phase 2.4.6 classifier quarantine patch, confirm legacy damage-photo filename cues collapse away from canonical product-photo runtime, confirm this remains classifier-label hardening only and not a pre-OCR/pre-metadata unsupported boundary, confirm analyzeEvidenceFile remains the receipt analyzer entrypoint, LocalAnalysisResult is unchanged, receipt/PDF/screenshot behavior is preserved, product-photo remains non-live and unwired, active semantic/probe coverage includes the classifier quarantine and analyzer-routing guard probes plus source-backed analyzer-routing forbidden-import coverage, and no upload/UI/live report adapter/scoring/parser/fixtures/providers/storage/integrations/case queues/real photos/real metadata fixtures/deployment work appeared; run lint, build, check:report-semantics, check:product-photo-probes, git diff --check, and final status; commit docs-only status if needed; do not push
 ```

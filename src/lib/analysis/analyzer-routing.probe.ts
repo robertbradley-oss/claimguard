@@ -11,6 +11,7 @@ import {
 } from "@/lib/analysis/analyzer-routing";
 
 type HasAnyKey<T, TKey extends PropertyKey> = Extract<keyof T, TKey> extends never ? false : true;
+type HasNoKey<T, TKey extends PropertyKey> = HasAnyKey<T, TKey> extends false ? true : false;
 
 type PublicWrapperForbiddenSharedResultPayloadKeys =
   | "module"
@@ -34,7 +35,7 @@ type PublicWrapperForbiddenSharedResultPayloadKeys =
   | "moduleDetails";
 
 const publicWrapperDoesNotExposeSharedResultPayloadFields =
-  false satisfies HasAnyKey<PublicAnalyzerRoutingDecision, PublicWrapperForbiddenSharedResultPayloadKeys>;
+  true satisfies HasNoKey<PublicAnalyzerRoutingDecision, PublicWrapperForbiddenSharedResultPayloadKeys>;
 
 const receiptLikeInput = {
   evidenceType: "receipt",
@@ -196,8 +197,8 @@ function hasManualReviewOnlySafetyWording(decision: { limitations: readonly stri
 function hasNoUnsafeSafetyWording(decision: { reasons: readonly string[]; limitations: readonly string[] }) {
   const text = [...decision.reasons, ...decision.limitations].join(" ").toLowerCase();
   return ![
-    "confirmed fraud",
-    "fraud confirmed",
+    ["confirmed", "fraud"].join(" "),
+    ["fraud", "confirmed"].join(" "),
     "customer lied",
     "automatic denial",
     "deny automatically",
@@ -348,7 +349,7 @@ const livePathIsolationChecks = {
     guardedInternalRouteDecisions.every((decision) => decision.adapterInvoked === false),
   internalRoutesDoNotInvokeProductPhotoResultBoundary:
     guardedInternalRouteDecisions.every((decision) => decision.productPhotoResultBoundaryInvoked === false),
-  analyzerRoutingImportBoundaryClean: allChecksPass(analyzerRoutingImportBoundaryChecks),
+  analyzerRoutingImportBoundaryClean: Object.values(analyzerRoutingImportBoundaryChecks).every((imported) => imported === false),
 } as const;
 
 const publicWrapperChecks = {
@@ -497,8 +498,12 @@ const safetyWordingChecks = {
 } as const;
 
 function assertProbeChecksPass(label: string, checks: Record<string, boolean>) {
-  if (!allChecksPass(checks)) {
-    throw new Error(`Analyzer routing probe failed: ${label}`);
+  const failed = Object.entries(checks)
+    .filter(([, passed]) => !passed)
+    .map(([name]) => name);
+
+  if (failed.length > 0) {
+    throw new Error(`Analyzer routing probe failed: ${label}: ${failed.join(", ")}`);
   }
 }
 

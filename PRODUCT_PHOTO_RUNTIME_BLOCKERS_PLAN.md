@@ -8,6 +8,8 @@ Product-photo runtime remains non-live. `runtimeLive` remains false, `manualRevi
 
 Phase 2.4.5 note: the docs-only legacy `damage-photo` quarantine/migration plan now lives in `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`. It chooses filename/evidence-type classification before live analyzer execution as the safest first future hardening boundary and recommends Phase 2.4.6 as a no-live classifier quarantine hardening slice.
 
+Phase 2.4.6 note: no-live legacy classifier quarantine hardening is complete. The live filename/evidence-type classifier now lives in `src/lib/analysis/analyzer-classifier.ts` and collapses legacy damage/product/photo/crack image filename cues to the existing receipt/default path instead of returning `damage-photo`.
+
 ## Adapter Readiness Closeout
 
 Complete:
@@ -16,7 +18,7 @@ Complete:
 - Product-photo report view-model boundary exists.
 - Guarded non-live adapter contract exists.
 - Dev-only adapter review harness plan exists.
-- `check:product-photo-probes` exists and passes with 8 imported analysis probe modules.
+- `check:product-photo-probes` exists and passes with 10 imported analysis probe modules, including classifier quarantine and analyzer-routing guard probes.
 - Adapter readiness quarantines legacy `damage-photo` at top-level input, nested analysis-result input, and nested report-view-model input.
 - The dev routing adapter refuses to build product-photo details for the legacy alias.
 - The adapter readiness output keeps `runtimeLive: false`, `manualReviewOnly: true`, canonical `product-photo`, privacy omission flags, isolation flags, and safe support wording.
@@ -47,8 +49,8 @@ Do not infer live readiness from passing adapter probes. Passing probes mean the
 
 The remaining pre-runtime blockers are:
 
-- Legacy live receipt-era `damage-photo` filename classification still exists in `getEvidenceTypeFromFile`.
-- Legacy `damage-photo` can still enter the live receipt-shaped analyzer path through `analyzeEvidenceFile`.
+- Legacy live receipt-era `damage-photo` filename classification has been hardened in `getEvidenceTypeFromFile`.
+- Legacy `damage-photo` no longer enters the live receipt-shaped analyzer path as the classifier output; product-photo-like filenames still follow the existing receipt/default analyzer path until a separate unsupported/quarantine boundary is authorized.
 - Recognition, analyzer-routing decisions, and adapter-readiness quarantine do not yet use one uniform first-boundary rule for legacy `damage-photo`.
 - `readinessAccepted` and `inputKind` consumer gating is not implemented in a live consumer and must not be treated as live routing permission.
 - Dev-only adapter review harness is planned but not implemented.
@@ -57,7 +59,7 @@ The remaining pre-runtime blockers are:
 - Product-photo `LocalAnalysisResult` migration is not implemented and remains blocked.
 - Real photo fixtures and real metadata fixtures are not approved.
 - Provider, storage, integration, and case workflow data flows are not approved.
-- The existing `check:product-photo-probes` runner imports 8 analysis probe modules only; unregistered component, route, or analyzer-routing probes must not be assumed to be active coverage.
+- The existing `check:product-photo-probes` runner now imports 10 analysis probe modules. Component and route probes must still not be assumed active unless registered separately.
 - Phase 2.4 planning docs are not currently part of `check:report-semantics`; future docs-safety coverage must be explicit.
 - Existing live receipt metadata internals can contain raw-ish metadata such as original filename, exact size, exact modified time, exact dimensions, and EXIF. Future product-photo surfaces must not expose those fields.
 - Existing synthetic visual host/browser QA is not a substitute for any future adapter harness browser QA.
@@ -68,7 +70,7 @@ Legacy `damage-photo` is receipt-era/mock compatibility. It is not canonical pro
 
 Known legacy areas:
 
-- Live filename classification can return `damage-photo` for image filenames containing product-photo-like cues.
+- Live filename classification now collapses product-photo-like image filename cues away from `damage-photo`.
 - The active workflow can pass selected files to `analyzeEvidenceFile`, which still returns `LocalAnalysisResult`.
 - Receipt scoring contains special-case behavior for `damage-photo`.
 - Mock/demo claim data may still contain `damage-photo` cases and product-photo-like wording.
@@ -77,14 +79,14 @@ Known legacy areas:
 
 Why this matters:
 
-- A product-photo-looking filename can still be processed by the live receipt-shaped analyzer.
+- A product-photo-looking filename no longer reaches the live receipt-shaped analyzer as `damage-photo`; it still follows the existing receipt/default classification path until a separately authorized unsupported/quarantine boundary or product-photo runtime plan changes that behavior.
 - A live UI may label the evidence as product damage while showing receipt OCR/source-classification behavior.
 - This can confuse legacy mock support with canonical `product-photo`.
 - It creates a privacy risk if product-photo-like evidence flows through receipt metadata internals before a product-photo privacy model is approved.
 
-A future quarantine/migration task should decide one first-boundary rule:
+Any future broader quarantine/migration task should decide one first-boundary rule:
 
-- Either stop returning `damage-photo` from the live file classifier and collapse the legacy path to receipt/unknown/unsupported receipt-era behavior.
+- Either keep the live file classifier from returning `damage-photo` and collapse the legacy path to receipt/unknown/unsupported receipt-era behavior.
 - Or preserve a clearly guarded, non-live legacy quarantine result before `analyzeEvidenceFile` performs receipt OCR/parsing/scoring.
 - Or document a staged migration from receipt-era `damage-photo` to canonical `product-photo` only after a separate runtime-routing plan is approved.
 
@@ -168,6 +170,7 @@ Before product-photo UI display:
 Before upload classification:
 
 - Legacy `damage-photo` classification is quarantined or migrated.
+- Classifier quarantine remains covered by the active analyzer-classifier probe.
 - Product-photo classification is explicitly planned as non-live or live with Robert approval.
 - Upload mechanics, accepted file types, privacy posture, and reviewer copy are reviewed.
 
@@ -213,7 +216,7 @@ Stop future work if:
 - Browser QA is required but cannot be run.
 - Worktree status shows unexpected runtime/code/component/route changes during docs-only work.
 
-## Phase 2.4.5 Decision And Recommended Phase 2.4.6
+## Phase 2.4.5 Decision, Phase 2.4.6 Hardening, And Recommended Phase 2.4.7
 
 Phase 2.4.5 is complete as the docs-only legacy `damage-photo` quarantine/migration plan in `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`.
 
@@ -225,23 +228,31 @@ Decision:
 - The safest first future hardening boundary is live filename/evidence-type classification before `analyzeEvidenceFile` proceeds through receipt-shaped OCR, parsing, scoring, and report mapping.
 - Future `damage-photo` handling must quarantine, collapse unsupported, or migrate to `product-photo` only through explicit gated conversion.
 
-The safest next milestone is Phase 2.4.6: no-live legacy `damage-photo` classifier quarantine hardening. Do not start dev-only adapter harness implementation, product-photo upload classification, live report mapping, `analyzeEvidenceFile` integration, `LocalAnalysisResult` migration, provider work, storage, integrations, or case workflow before the classifier ambiguity is hardened or explicitly re-planned.
+Phase 2.4.6 is complete as no-live legacy `damage-photo` classifier quarantine hardening:
 
-Likely allowed files for Phase 2.4.6 must be named by the future prompt and should stay narrow:
+- The live classifier boundary was isolated in `src/lib/analysis/analyzer-classifier.ts`.
+- Legacy damage/product/photo/crack image filename cues collapse to the existing receipt/default path instead of returning `damage-photo`.
+- This is classifier-label hardening only, not a pre-OCR/pre-metadata product-photo privacy boundary.
+- `src/lib/analysis/analyzer.ts` still owns the receipt-shaped `analyzeEvidenceFile` body and does not run product-photo analysis.
+- `src/lib/analysis/analyzer-classifier.probe.ts` covers classifier quarantine and receipt/PDF/screenshot preservation.
+- `check:product-photo-probes` imports 10 modules, including classifier quarantine and analyzer-routing guard probes.
+- `check:report-semantics` covers the classifier quarantine markers, analyzer-routing forbidden imports, and active probe registrations.
 
-- `src/lib/analysis/analyzer.ts`, only for the filename/evidence-type classification boundary and only if explicitly approved.
-- A narrow classifier or analyzer-routing probe file, if explicitly named.
-- `scripts/check-report-semantics.mjs`, only for quarantine markers and protected-boundary scans.
-- `scripts/run-product-photo-probes.cjs`, only if registering a safe guard/probe module is explicitly in scope.
+The safest next milestone is Phase 2.4.7: review-only classifier quarantine closeout. Do not start dev-only adapter harness implementation, product-photo upload classification, live report mapping, `analyzeEvidenceFile` integration, `LocalAnalysisResult` migration, provider work, storage, integrations, or case workflow before this hardening is reviewed.
+
+Likely allowed files for Phase 2.4.7 review-only status updates must be named by the future prompt and should stay narrow:
+
 - `NEXT_STEPS.md`.
 - `PHASE_2_PHOTO_EVIDENCE_PLAN.md`.
 - `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`.
 - `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`.
 - `AGENT_LOG.md`.
 
-Protected files for Phase 2.4.6 unless separately approved:
+Protected files for Phase 2.4.7 unless separately authorized:
 
 - The `analyzeEvidenceFile` runtime body and returned `LocalAnalysisResult` shape.
+- `src/lib/analysis/analyzer-classifier.ts`.
+- `src/lib/analysis/analyzer-classifier.probe.ts`.
 - `src/lib/analysis/types.ts`.
 - `src/lib/analysis/report-adapter.ts`.
 - `src/lib/analysis/scoring.ts`, unless receipt-era score cleanup is explicitly opened.
@@ -252,4 +263,4 @@ Protected files for Phase 2.4.6 unless separately approved:
 - `src/components/TestEvidenceHarness.tsx`.
 - Routes, upload files, receipt fixtures, package dependencies, providers, storage, integrations, case queues, databases, auth, background jobs, deployment files, real photos, and real metadata fixtures.
 
-If Robert later opens no-live code hardening, that prompt should require lint, build, report semantics, product-photo probes, diff check, final status, and explicit receipt-preservation/quarantine proof before commit.
+If Robert later opens more no-live code hardening, that prompt should require lint, build, report semantics, product-photo probes, diff check, final status, and explicit receipt-preservation/quarantine proof before commit.
