@@ -240,7 +240,17 @@ Phase 2.4.6 is complete as no-live legacy `damage-photo` classifier quarantine h
 
 Phase 2.4.8 review confirms the classifier quarantine is complete enough for its intended no-live scope. It is acceptable only short-term that product-photo-like filenames collapse into the existing receipt/default analyzer flow. The remaining risk is that those files still reach OCR and metadata processing before a true unsupported boundary exists.
 
-The safest next milestone is Phase 2.4.9: docs-only pre-OCR/pre-metadata unsupported boundary planning. Do not start dev-only adapter harness implementation, product-photo upload classification, live report mapping, `analyzeEvidenceFile` integration, `LocalAnalysisResult` migration, provider work, storage, integrations, or case workflow before that boundary is planned.
+Phase 2.4.9 is complete as docs-only pre-OCR/pre-metadata unsupported boundary planning in `PRODUCT_PHOTO_UNSUPPORTED_BOUNDARY_PLAN.md`.
+
+Decision:
+
+- The future boundary should be named `pre-analysis-evidence-gate`.
+- It should run conceptually before OCR, metadata inspection, receipt parsing, scoring, and live report mapping.
+- It should stop product-photo-like synthetic filename/type hints with decision-only unsupported or quarantine output.
+- It should preserve receipt image, PDF receipt, order screenshot, null/default, `analyzeEvidenceFile`, `LocalAnalysisResult`, live report adapter, receipt parser, receipt scoring, and receipt fixtures.
+- It should not call product-photo analyzer/runtime routing, upload/UI, providers, storage, integrations, or case queues.
+
+The safest next milestone is Phase 2.4.10: no-live `pre-analysis-evidence-gate` contract/probe implementation. Do not start dev-only adapter harness implementation, product-photo upload classification, live report mapping, `analyzeEvidenceFile` integration, `LocalAnalysisResult` migration, provider work, storage, integrations, or case workflow before that gate contract/probe exists and passes.
 
 Likely allowed files for Phase 2.4.9 docs-only status/planning updates must be named by the future prompt and should stay narrow:
 
@@ -265,4 +275,4 @@ Protected files for Phase 2.4.9 unless separately authorized:
 - `src/components/TestEvidenceHarness.tsx`.
 - Routes, upload files, receipt fixtures, package dependencies, providers, storage, integrations, case queues, databases, auth, background jobs, deployment files, real photos, and real metadata fixtures.
 
-If Robert later opens more no-live code hardening, that prompt should require lint, build, report semantics, product-photo probes, diff check, final status, and explicit receipt-preservation/quarantine proof before commit.
+If Robert later opens Phase 2.4.10 no-live code hardening, that prompt should allow only `src/lib/analysis/pre-analysis-evidence-gate.ts`, `src/lib/analysis/pre-analysis-evidence-gate.probe.ts`, probe registration, semantic/import/privacy guards, and status docs unless he explicitly names more files. It should require lint, build, report semantics, product-photo probes, diff check, final status, and explicit receipt-preservation/quarantine proof before commit.

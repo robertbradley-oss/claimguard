@@ -692,6 +692,13 @@ Phase 2.4.6 implementation status:
 - `scripts/check-report-semantics.mjs` now covers classifier quarantine markers, the non-live analyzer-routing guard, and the active probe registrations.
 - Product-photo runtime remains non-live and unwired from upload, UI, live report mapping, scoring, parser, fixtures, providers, storage, integrations, and case queues.
 
+Phase 2.4.9 planning status:
+
+- The docs-only pre-OCR/pre-metadata unsupported-boundary plan now lives in `PRODUCT_PHOTO_UNSUPPORTED_BOUNDARY_PLAN.md`.
+- The future boundary should be named `pre-analysis-evidence-gate` because it must run before OCR and metadata-heavy receipt processing.
+- Future no-live implementation should add a decision-only contract/probe that stops product-photo-like synthetic filename/type hints before OCR/metadata while preserving receipt image, PDF receipt, order screenshot, null/default, `analyzeEvidenceFile`, `LocalAnalysisResult`, report adapter, receipt parser, receipt scoring, and receipt fixtures.
+- Product-photo runtime remains non-live; `damage-photo` remains legacy/non-canonical; dev-only adapter harness work should wait until this gate exists and passes.
+
 ## 17. Phase 2.1 First-Pass Local Heuristic Signals
 
 Phase 2.1 starts with a small signal catalog only. These signals are manual-review support language and future implementation guidance; they do not run in `analyzeEvidenceFile`, do not change `LocalAnalysisResult`, do not affect scoring, and do not change upload, UI, report mapping, fixtures, receipt parsing, metadata extraction behavior, routing, storage, integrations, or case queues.

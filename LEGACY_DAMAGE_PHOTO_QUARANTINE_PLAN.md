@@ -203,8 +203,16 @@ Phase 2.4.8 review status:
 - Product-photo-like filenames still follow the existing receipt/default analyzer path after classifier collapse, so a true pre-OCR/pre-metadata unsupported boundary remains future work.
 - Dev-only adapter harness work should wait until that unsupported-boundary plan is written.
 
+Phase 2.4.9 planning status:
+
+- The docs-only unsupported-boundary plan now lives in `PRODUCT_PHOTO_UNSUPPORTED_BOUNDARY_PLAN.md`.
+- The recommended future boundary name is `pre-analysis-evidence-gate`.
+- Future no-live implementation should stop product-photo-like synthetic filename/type hints before OCR/metadata processing while preserving receipt/PDF/screenshot behavior.
+- Legacy `damage-photo` remains quarantine-only and non-canonical.
+- Dev-only adapter harness work should continue to wait until the pre-analysis gate contract/probe exists and passes.
+
 Suggested next prompt:
 
 ```text
-/claimguardagent plan Phase 2.4.9 as docs-only pre-OCR/pre-metadata unsupported boundary readiness: define how product-photo-like files should be stopped before OCR/metadata without changing receipt behavior; name exact allowed/protected files, required probes/scans/checks, privacy gates, and stop conditions; do not implement code, routes, UI, upload, analyzer runtime changes, report adapter mapping, LocalAnalysisResult migration, scoring, parser, fixtures, providers, storage, integrations, case queues, real photos, metadata fixtures, deployment, commit, push, or runtime work.
+/claimguardagent run Phase 2.4.10 as a no-live pre-analysis-evidence-gate contract/probe implementation: add only src/lib/analysis/pre-analysis-evidence-gate.ts, src/lib/analysis/pre-analysis-evidence-gate.probe.ts, probe registration, semantic/import/privacy guards, and status docs; stop product-photo-like synthetic filename/type hints before OCR/metadata in a decision-only boundary without wiring it into analyzeEvidenceFile, upload, UI, live report adapter, LocalAnalysisResult, parser, scoring, fixtures, providers, storage, integrations, case queues, real photos, real metadata fixtures, deployment, or push.
 ```

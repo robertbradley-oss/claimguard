@@ -141,6 +141,8 @@ The following gates must stay closed:
 
 The legacy live receipt-era `damage-photo` filename classification path remains a pre-runtime blocker. It must be quarantined or migrated in a separate authorized slice before any live product-photo runtime support can be considered. The adapter readiness quarantine does not by itself clean up that legacy live receipt-shaped path.
 
+Phase 2.4.9 update: the classifier-label blocker is quarantined, but a broader residual risk remains because product-photo-like filenames can still collapse into the receipt/default OCR and metadata path. `PRODUCT_PHOTO_UNSUPPORTED_BOUNDARY_PLAN.md` defines the future no-live `pre-analysis-evidence-gate` plan. Dev-only adapter harness work remains appropriate later, but it should wait until the pre-analysis gate contract/probe exists and passes.
+
 ## Semantic And Probe Requirements
 
 Before or during any future harness implementation:
