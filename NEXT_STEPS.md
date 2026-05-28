@@ -13,6 +13,8 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 - Phase 2.2 Product Photo Boundary and Display Readiness is closed. It produced small, local-only, manual-review-support-only, intentionally unwired helper, boundary, probe, display, and visual QA surfaces without making product-photo runtime live.
 - Phase 2.3 analyzer hardening is closed after the no-live-wiring readiness closeout. Latest pushed checkpoint remains `89b694d` (`fix: harden product photo analyzer readiness boundaries`).
 - Phase 2.4.1 guarded non-live product-photo adapter contract/probe implementation adds only a dev/probe-only adapter readiness boundary inside the isolated product-photo adapter module plus active probes/semantic guards; it does not add product-photo runtime routing, upload wiring, `ClaimReviewWorkflow` insertion, live report adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, case queues, real photos, or real metadata fixtures.
+- Phase 2.4.2 is complete, review-only, and clean. Product-photo runtime remains non-live; `runtimeLive` remains false; `manualReviewOnly` remains true; `analyzeEvidenceFile` remains the live receipt analyzer entrypoint; `LocalAnalysisResult` remains receipt-shaped; receipt behavior remains unchanged.
+- Phase 2.4.3 is a docs-only dev-only adapter review harness plan in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`. It plans a future synthetic-only display surface for adapter readiness outputs only; it does not implement a route, component, harness, runtime adapter execution, upload path, UI insertion, report mapping, provider, storage, integration, case queue, real photo, or real metadata fixture.
 - Completed pushed Phase 2.2 work includes:
   - `44d09f0` added unwired product-photo signal builders.
   - `50f8284` added unwired product-photo file summary, review completeness, and local review signal helpers.
@@ -74,7 +76,7 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 
 ## Next Safe Tasks
 
-1. Run a Phase 2.4.1 final closeout review after the nested report-view-model damage-photo quarantine patch, with no new implementation unless Robert explicitly opens another slice.
+1. Run Phase 2.4.4 as a docs-only adapter readiness closeout and next-runtime-blockers planning pass; do not implement a harness, route, runtime adapter execution, upload wiring, UI insertion, live report mapping, `LocalAnalysisResult` migration, provider/storage/integration/case queue work, real photos, real metadata fixtures, or deployment.
 2. Keep the decision-only public analyzer routing wrapper out of live UI/upload/report/scoring/parser paths until a separate live-routing plan is explicitly opened.
 3. Keep the dev-only routing adapter and adapter-readiness boundary out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
 4. Keep `recognizeProductPhotoEvidence` out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
@@ -766,5 +768,5 @@ Robert wants the eventual result screen to feel like an evidence triage workspac
 ## Current Recommended Next Prompt
 
 ```text
-/claimguardagent perform a Phase 2.4.1 final closeout review after the nested report-view-model damage-photo quarantine patch: verify the adapter-readiness boundary remains dev/probe-only and unwired, top-level receipt/unknown/unsupported analysis-result and report-view-model adapter inputs collapse safely, nested analysis-result and report-view-model legacy damage-photo remain quarantine-only, unsupported nested analysis-result evidence types collapse safely, analyzeEvidenceFile/LocalAnalysisResult/ClaimReviewWorkflow/report-adapter/upload/scoring/parser/fixtures/providers/storage/integrations/case queues are untouched, lint/build/report-semantics/product-photo-probes/diff-check/boundary scans pass, and decide whether the local Phase 2.4.1 stack is safe to push; do not push
+/claimguardagent run Phase 2.4.4 as a docs-only adapter readiness closeout and next-runtime-blockers planning pass: reconcile Phase 2.4 status after the completed Phase 2.4.1 implementation/patch stack, Phase 2.4.2 review-only closeout, and Phase 2.4.3 dev-only harness plan; identify pre-runtime blockers including the legacy live receipt-era damage-photo classification path; keep product-photo runtime non-live, analyzeEvidenceFile and LocalAnalysisResult unchanged, receipt behavior unchanged, and upload/UI/live report adapter/scoring/parser/fixtures/providers/storage/integrations/case queues untouched; run lint, build, report-semantics, product-photo-probes, git diff --check, and final git status; commit docs-only changes if safe; do not push
 ```

@@ -6,6 +6,8 @@ Phase 2.3 analyzer hardening is closed. Product-photo analyzer, result, report v
 
 Phase 2.4.1 implementation note: the first guarded non-live adapter readiness boundary now exists inside `src/lib/analysis/product-photo-routing-adapter.ts` as `prepareProductPhotoAdapterReadinessForDevOnlyBoundary`, with active probe coverage in `src/lib/analysis/product-photo-adapter-readiness.probe.ts`. It remains dev/probe-only and does not open live product-photo routing.
 
+Phase 2.4.2 is complete, review-only, and clean. Phase 2.4.3 is a docs-only dev-only adapter review harness plan in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`; it does not implement a harness, route, component, runtime adapter execution, upload path, live report mapping, provider, storage, integration, case queue, real photo, or real metadata fixture.
+
 ## 1. Phase 2.4 Objective
 
 Phase 2.4 prepares a future non-live adapter contract before any adapter implementation.
@@ -238,3 +240,22 @@ Suggested Phase 2.4.1 prompt:
 ```text
 /claimguardagent implement the Phase 2.4.1 guarded non-live product-photo adapter contract/probe only: create a probe/dev-only adapter readiness boundary that accepts sanitized product-photo result or report-view-model data, derives/canonicalizes score, confidence, review priority, local signal level, source kind, summary, support action, customer wording, limitations, and signals, quarantines legacy damage-photo as compatibility-only, and proves no LocalAnalysisResult, analyzeEvidenceFile, upload, ClaimReviewWorkflow, live report adapter, receipt scoring/parser/fixtures, providers, storage, integrations, case queues, real photos, or real metadata fixtures are touched; add semantic/probe coverage; run lint, build, report-semantics, product-photo-probes, diff check, and boundary scans; commit if safe; do not push
 ```
+
+## 12. Phase 2.4.3 Dev Harness Planning Gate
+
+The Phase 2.4.3 dev harness planning gate is intentionally separate from the adapter boundary implementation.
+
+A future dev-only adapter review harness may display only literal synthetic adapter-readiness cases. It must not call `prepareProductPhotoAdapterReadinessForDevOnlyBoundary` from a route or component, because route-level adapter execution could blur a developer review surface into runtime adapter behavior. At most, future render cases may use type-only imports for the adapter readiness output shape.
+
+The complete harness plan lives in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md` and defines:
+
+- Safe purpose and non-live scope.
+- Synthetic readiness cases.
+- Fields that may display.
+- Hard blocked inputs, imports, and live gates.
+- Semantic/probe requirements.
+- Browser QA criteria.
+- Stop conditions.
+- Exact future allowed and protected files.
+
+Phase 2.4.4 should remain docs-only and focus on adapter readiness closeout plus next-runtime-blockers planning, especially the legacy live receipt-era `damage-photo` classification path that must be quarantined or migrated before any live product-photo runtime support.

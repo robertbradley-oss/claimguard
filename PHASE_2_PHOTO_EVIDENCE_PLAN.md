@@ -2,7 +2,7 @@
 
 This document defines Phase 2 before runtime implementation. It is planning guidance only.
 
-Phase 1 Receipt Intelligence is closed, pushed, deployed, and production-smoked. Phase 2.0 scaffold work is closed. Phase 2.1 Product Photo Local Heuristic Design is reviewed and closed. Phase 2.2 Product Photo Boundary and Display Readiness is closed after non-live helper, result, routing, view-model, display, synthetic render-host, semantic/privacy guard, and desktop/mobile browser-QA work. Phase 2.3 Product Photo Local Heuristic Analyzer hardening is closed after the no-live-wiring readiness closeout. Phase 2.4 is open as guarded non-live product-photo adapter readiness planning only. The durable Phase 2.4 plan lives in `PRODUCT_PHOTO_ADAPTER_READINESS_PLAN.md`.
+Phase 1 Receipt Intelligence is closed, pushed, deployed, and production-smoked. Phase 2.0 scaffold work is closed. Phase 2.1 Product Photo Local Heuristic Design is reviewed and closed. Phase 2.2 Product Photo Boundary and Display Readiness is closed after non-live helper, result, routing, view-model, display, synthetic render-host, semantic/privacy guard, and desktop/mobile browser-QA work. Phase 2.3 Product Photo Local Heuristic Analyzer hardening is closed after the no-live-wiring readiness closeout. Phase 2.4 is open as guarded non-live product-photo adapter readiness and dev-harness planning only. The durable Phase 2.4 adapter readiness plan lives in `PRODUCT_PHOTO_ADAPTER_READINESS_PLAN.md`; the Phase 2.4.3 dev-only adapter review harness plan lives in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`.
 
 Phase 2.2 did not make product-photo runtime live. `analyzeEvidenceFile` remains the live receipt analyzer entrypoint, `LocalAnalysisResult` remains receipt-shaped, receipt UI/report behavior remains unchanged, and product-photo remains out of upload routing, live report adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, and case queues.
 
@@ -651,6 +651,18 @@ Required future gates:
 - Unsafe wording checks.
 - Raw metadata/privacy sentinel checks.
 - Receipt preservation checks.
+
+### Phase 2.4.3 Dev-Only Adapter Review Harness Plan
+
+Phase 2.4.3 is docs-only. It defines a possible future dev-only adapter review harness in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md` without implementing a route, component, harness, runtime adapter execution path, upload path, live report mapping, provider, storage, integration, case queue, real photo fixture, or real metadata fixture.
+
+The planned harness may review only literal synthetic adapter-readiness outputs. It should be display-only and must not call `prepareProductPhotoAdapterReadinessForDevOnlyBoundary` from a route or component. A rendered harness, if later approved, should use static synthetic cases that make `readinessAccepted`, `inputKind`, `runtimeLive: false`, `manualReviewOnly: true`, unsupported collapse, and legacy `damage-photo` quarantine visible.
+
+The harness must not accept uploads, files, real photos, raw EXIF, raw metadata, filenames, object URLs, image URLs, provider output, storage handles, integration handles, case queue handles, customer identifiers, ticket/order/customer data, or browser storage. It must not import analyzer, analyzer routing, upload files, `ClaimReviewWorkflow`, `TestEvidenceHarness`, live report adapter mapping, scoring, parser, fixtures, providers, storage, integrations, or case queues.
+
+Future implementation must add harness-specific semantic/privacy/import guards before or during the slice. Browser QA must verify the dev-only banner, no upload controls, no file input, no network/provider calls, visually distinct unsupported/quarantine states, visible readiness gates, mobile layout, no duplicate ARIA IDs, and no copy implying approval, rejection, verification, confirmed wrongdoing, proof, or final outcome.
+
+The legacy live receipt-era `damage-photo` filename classification path remains a pre-runtime blocker. It must be quarantined or migrated in a separate authorized slice before product-photo runtime support can be considered; the adapter readiness quarantine does not by itself make product-photo runtime safe.
 
 ## 17. Phase 2.1 First-Pass Local Heuristic Signals
 
