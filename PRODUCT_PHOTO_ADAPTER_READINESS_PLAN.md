@@ -6,7 +6,7 @@ Phase 2.3 analyzer hardening is closed. Product-photo analyzer, result, report v
 
 Phase 2.4.1 implementation note: the first guarded non-live adapter readiness boundary now exists inside `src/lib/analysis/product-photo-routing-adapter.ts` as `prepareProductPhotoAdapterReadinessForDevOnlyBoundary`, with active probe coverage in `src/lib/analysis/product-photo-adapter-readiness.probe.ts`. It remains dev/probe-only and does not open live product-photo routing.
 
-Phase 2.4.2 is complete, review-only, and clean. Phase 2.4.3 is a docs-only dev-only adapter review harness plan in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`; it does not implement a harness, route, component, runtime adapter execution, upload path, live report mapping, provider, storage, integration, case queue, real photo, or real metadata fixture.
+Phase 2.4.2 is complete, review-only, and clean. Phase 2.4.3 is a docs-only dev-only adapter review harness plan in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`; it does not implement a harness, route, component, runtime adapter execution, upload path, live report mapping, provider, storage, integration, case queue, real photo, or real metadata fixture. Phase 2.4.4 closes adapter readiness planning as complete enough for the non-live checkpoint and records next runtime blockers in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`.
 
 ## 1. Phase 2.4 Objective
 
@@ -22,9 +22,9 @@ Phase 2.4 must preserve these rules:
 - Future adapter work must be probe/dev-only until a separate runtime slice is explicitly opened.
 - A future adapter must support review readiness, not evidence truth, customer intent, policy disposition, or final claim outcome.
 
-## 2. Safest Next Milestone
+## 2. Adapter Readiness Closeout
 
-The safest next non-live milestone is Phase 2.4.1: add a probe-only product-photo adapter contract boundary that consumes sanitized product-photo readiness data and returns an adapter-readiness summary.
+Phase 2.4.1 completed the non-live milestone: a probe-only product-photo adapter contract boundary consumes sanitized product-photo readiness data and returns an adapter-readiness summary.
 
 Phase 2.4.1 should not route files, call analyzers from the live app, render UI, change report mapping, or migrate receipt result types. It should only prove the future adapter contract can:
 
@@ -34,7 +34,7 @@ Phase 2.4.1 should not route files, call analyzers from the live app, render UI,
 - Prove receipt behavior is untouched through import and signature checks.
 - Prove raw/private-bearing data and provider/storage/integration/case handles cannot cross the adapter boundary.
 
-If any implementation detail requires live file routing, upload state, `ClaimReviewWorkflow`, `mapLocalAnalysisToReport`, `LocalAnalysisResult`, receipt scoring/parser/fixtures, providers, storage, integrations, case queues, real photos, or real metadata fixtures, Phase 2.4.1 must stop and return to docs-only planning.
+If any future implementation detail requires live file routing, upload state, `ClaimReviewWorkflow`, `mapLocalAnalysisToReport`, `LocalAnalysisResult`, receipt scoring/parser/fixtures, providers, storage, integrations, case queues, real photos, or real metadata fixtures, it must stop and return to docs-only planning or an explicitly approved runtime slice.
 
 ## 3. Future Adapter Contract Boundaries
 
@@ -259,3 +259,19 @@ The complete harness plan lives in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md` and defin
 - Exact future allowed and protected files.
 
 Phase 2.4.4 should remain docs-only and focus on adapter readiness closeout plus next-runtime-blockers planning, especially the legacy live receipt-era `damage-photo` classification path that must be quarantined or migrated before any live product-photo runtime support.
+
+## 13. Phase 2.4.4 Closeout Decision
+
+Phase 2.4 adapter readiness planning is closed for the non-live checkpoint.
+
+Closeout means:
+
+- The adapter readiness boundary is sufficient as a dev/probe-only contract.
+- Adapter readiness output remains non-live and manual-review-only.
+- Legacy `damage-photo` is quarantined at the adapter-readiness boundary.
+- Passing adapter probes cannot be inferred as live product-photo readiness.
+- `readinessAccepted` means contract/shape accepted, not runtime-ready.
+
+Remaining blockers have moved to `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`.
+
+The safest next task is Phase 2.4.5 docs-only legacy `damage-photo` quarantine/migration planning. Do not start with implementation until the first-boundary rule, allowed files, protected files, receipt preservation criteria, and semantic/probe gates are documented.

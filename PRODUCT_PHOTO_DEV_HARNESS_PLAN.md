@@ -235,7 +235,7 @@ The following files must remain protected for any future harness implementation 
 
 ## Phase 2.4.4 Recommendation
 
-Phase 2.4.4 should be docs-only: adapter readiness closeout and next-runtime-blockers planning.
+Phase 2.4.4 is docs-only: adapter readiness closeout and next-runtime-blockers planning. The closeout and blocker inventory live in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`.
 
 The Phase 2.4.4 task should:
 
@@ -245,3 +245,9 @@ The Phase 2.4.4 task should:
 - Identify pre-runtime blockers, especially the legacy live receipt-era `damage-photo` classification path.
 - Decide whether the next safe task is another docs-only closeout or a narrowly scoped quarantine/migration plan.
 - Keep all live product-photo routing, upload, UI, report adapter, `LocalAnalysisResult`, receipt behavior, providers, storage, integrations, case queues, and deployment blocked.
+
+Phase 2.4.4 decision:
+
+- Adapter readiness planning is complete enough to close the non-live checkpoint.
+- The dev-only harness remains planned only and unimplemented.
+- The next safest milestone is Phase 2.4.5 docs-only legacy `damage-photo` quarantine/migration planning.

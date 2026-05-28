@@ -2,7 +2,7 @@
 
 This document defines Phase 2 before runtime implementation. It is planning guidance only.
 
-Phase 1 Receipt Intelligence is closed, pushed, deployed, and production-smoked. Phase 2.0 scaffold work is closed. Phase 2.1 Product Photo Local Heuristic Design is reviewed and closed. Phase 2.2 Product Photo Boundary and Display Readiness is closed after non-live helper, result, routing, view-model, display, synthetic render-host, semantic/privacy guard, and desktop/mobile browser-QA work. Phase 2.3 Product Photo Local Heuristic Analyzer hardening is closed after the no-live-wiring readiness closeout. Phase 2.4 is open as guarded non-live product-photo adapter readiness and dev-harness planning only. The durable Phase 2.4 adapter readiness plan lives in `PRODUCT_PHOTO_ADAPTER_READINESS_PLAN.md`; the Phase 2.4.3 dev-only adapter review harness plan lives in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`.
+Phase 1 Receipt Intelligence is closed, pushed, deployed, and production-smoked. Phase 2.0 scaffold work is closed. Phase 2.1 Product Photo Local Heuristic Design is reviewed and closed. Phase 2.2 Product Photo Boundary and Display Readiness is closed after non-live helper, result, routing, view-model, display, synthetic render-host, semantic/privacy guard, and desktop/mobile browser-QA work. Phase 2.3 Product Photo Local Heuristic Analyzer hardening is closed after the no-live-wiring readiness closeout. Phase 2.4 adapter readiness planning is closed for the non-live checkpoint. The durable Phase 2.4 adapter readiness plan lives in `PRODUCT_PHOTO_ADAPTER_READINESS_PLAN.md`; the Phase 2.4.3 dev-only adapter review harness plan lives in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`; the Phase 2.4.4 runtime blockers plan lives in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`.
 
 Phase 2.2 did not make product-photo runtime live. `analyzeEvidenceFile` remains the live receipt analyzer entrypoint, `LocalAnalysisResult` remains receipt-shaped, receipt UI/report behavior remains unchanged, and product-photo remains out of upload routing, live report adapter mapping, scoring, parser behavior, fixtures, providers, storage, integrations, and case queues.
 
@@ -663,6 +663,16 @@ The harness must not accept uploads, files, real photos, raw EXIF, raw metadata,
 Future implementation must add harness-specific semantic/privacy/import guards before or during the slice. Browser QA must verify the dev-only banner, no upload controls, no file input, no network/provider calls, visually distinct unsupported/quarantine states, visible readiness gates, mobile layout, no duplicate ARIA IDs, and no copy implying approval, rejection, verification, confirmed wrongdoing, proof, or final outcome.
 
 The legacy live receipt-era `damage-photo` filename classification path remains a pre-runtime blocker. It must be quarantined or migrated in a separate authorized slice before product-photo runtime support can be considered; the adapter readiness quarantine does not by itself make product-photo runtime safe.
+
+### Phase 2.4.4 Adapter Readiness Closeout And Runtime Blockers
+
+Phase 2.4.4 closes adapter readiness planning as complete enough for the non-live checkpoint. The closeout decision means the adapter readiness boundary, active adapter readiness probe, dev-only harness plan, and current semantic/probe guards are sufficient to preserve non-live adapter readiness. It does not mean product-photo runtime support is ready.
+
+The remaining runtime blockers are tracked in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`. The first blocker is the legacy live receipt-era `damage-photo` filename classification path. That path is separate from adapter readiness quarantine and must be planned, quarantined, or migrated before any product-photo runtime, upload classification, UI display, live report adapter mapping, `analyzeEvidenceFile` integration, `LocalAnalysisResult` migration, provider, storage, integration, or case workflow work.
+
+Future agents must treat `readinessAccepted` as contract/shape acceptance only. It must not be described as runtime readiness, support-decision readiness, external verification, or production product-photo support.
+
+Phase 2.4.5 should be docs-only legacy `damage-photo` quarantine/migration planning. It should choose the intended first-boundary rule before any code hardening and define exact allowed/protected files, receipt preservation criteria, semantic/probe gates, browser/privacy gates, and stop conditions.
 
 ## 17. Phase 2.1 First-Pass Local Heuristic Signals
 
