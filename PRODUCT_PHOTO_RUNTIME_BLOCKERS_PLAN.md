@@ -6,6 +6,8 @@ Phase 2.4 adapter readiness planning is complete enough to close the adapter-rea
 
 Product-photo runtime remains non-live. `runtimeLive` remains false, `manualReviewOnly` remains true, `analyzeEvidenceFile` remains the live receipt analyzer entrypoint, `LocalAnalysisResult` remains receipt-shaped, and receipt behavior remains unchanged.
 
+Phase 2.4.5 note: the docs-only legacy `damage-photo` quarantine/migration plan now lives in `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`. It chooses filename/evidence-type classification before live analyzer execution as the safest first future hardening boundary and recommends Phase 2.4.6 as a no-live classifier quarantine hardening slice.
+
 ## Adapter Readiness Closeout
 
 Complete:
@@ -211,29 +213,43 @@ Stop future work if:
 - Browser QA is required but cannot be run.
 - Worktree status shows unexpected runtime/code/component/route changes during docs-only work.
 
-## Recommended Phase 2.4.5
+## Phase 2.4.5 Decision And Recommended Phase 2.4.6
 
-The safest next milestone is Phase 2.4.5: docs-only legacy `damage-photo` quarantine/migration plan.
+Phase 2.4.5 is complete as the docs-only legacy `damage-photo` quarantine/migration plan in `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`.
 
-Do not start with no-live code hardening yet. The next task should first choose and document the intended first-boundary rule for legacy `damage-photo`, exact allowed/protected files for a later hardening slice, receipt preservation criteria, semantic/probe requirements, and stop conditions.
+Decision:
 
-Recommended future allowed docs files:
+- `product-photo` is the only canonical Phase 2 photo evidence type.
+- `damage-photo` is legacy receipt-era/mock compatibility terminology only.
+- Future product-photo runtime must not accept `damage-photo` as canonical input.
+- The safest first future hardening boundary is live filename/evidence-type classification before `analyzeEvidenceFile` proceeds through receipt-shaped OCR, parsing, scoring, and report mapping.
+- Future `damage-photo` handling must quarantine, collapse unsupported, or migrate to `product-photo` only through explicit gated conversion.
 
-- `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md` or this runtime blockers plan.
+The safest next milestone is Phase 2.4.6: no-live legacy `damage-photo` classifier quarantine hardening. Do not start dev-only adapter harness implementation, product-photo upload classification, live report mapping, `analyzeEvidenceFile` integration, `LocalAnalysisResult` migration, provider work, storage, integrations, or case workflow before the classifier ambiguity is hardened or explicitly re-planned.
+
+Likely allowed files for Phase 2.4.6 must be named by the future prompt and should stay narrow:
+
+- `src/lib/analysis/analyzer.ts`, only for the filename/evidence-type classification boundary and only if explicitly approved.
+- A narrow classifier or analyzer-routing probe file, if explicitly named.
+- `scripts/check-report-semantics.mjs`, only for quarantine markers and protected-boundary scans.
+- `scripts/run-product-photo-probes.cjs`, only if registering a safe guard/probe module is explicitly in scope.
 - `NEXT_STEPS.md`.
-- `ROADMAP.md`.
 - `PHASE_2_PHOTO_EVIDENCE_PLAN.md`.
-- `PRODUCT_PHOTO_ADAPTER_READINESS_PLAN.md`.
 - `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`.
+- `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`.
 - `AGENT_LOG.md`.
 
-Likely protected files for Phase 2.4.5 docs-only planning:
+Protected files for Phase 2.4.6 unless separately approved:
 
-- All `src/` files.
-- `scripts/check-report-semantics.mjs`.
-- `scripts/run-product-photo-probes.cjs`.
-- `package.json`.
-- Receipt fixtures and test-evidence files.
-- Provider, storage, integration, case queue, database, auth, and deployment files.
+- The `analyzeEvidenceFile` runtime body and returned `LocalAnalysisResult` shape.
+- `src/lib/analysis/types.ts`.
+- `src/lib/analysis/report-adapter.ts`.
+- `src/lib/analysis/scoring.ts`, unless receipt-era score cleanup is explicitly opened.
+- `src/lib/analysis/receipt-parser.ts`.
+- `src/lib/claim-data.ts`, unless a mock-data migration slice is explicitly opened.
+- `src/components/ClaimReviewWorkflow.tsx`.
+- `src/components/UploadPanel.tsx`.
+- `src/components/TestEvidenceHarness.tsx`.
+- Routes, upload files, receipt fixtures, package dependencies, providers, storage, integrations, case queues, databases, auth, background jobs, deployment files, real photos, and real metadata fixtures.
 
-If Robert later opens no-live code hardening after the docs plan, that prompt should name exact code files and expected probes before any edits.
+If Robert later opens no-live code hardening, that prompt should require lint, build, report semantics, product-photo probes, diff check, final status, and explicit receipt-preservation/quarantine proof before commit.

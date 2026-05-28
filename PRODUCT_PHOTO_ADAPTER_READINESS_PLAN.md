@@ -6,7 +6,7 @@ Phase 2.3 analyzer hardening is closed. Product-photo analyzer, result, report v
 
 Phase 2.4.1 implementation note: the first guarded non-live adapter readiness boundary now exists inside `src/lib/analysis/product-photo-routing-adapter.ts` as `prepareProductPhotoAdapterReadinessForDevOnlyBoundary`, with active probe coverage in `src/lib/analysis/product-photo-adapter-readiness.probe.ts`. It remains dev/probe-only and does not open live product-photo routing.
 
-Phase 2.4.2 is complete, review-only, and clean. Phase 2.4.3 is a docs-only dev-only adapter review harness plan in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`; it does not implement a harness, route, component, runtime adapter execution, upload path, live report mapping, provider, storage, integration, case queue, real photo, or real metadata fixture. Phase 2.4.4 closes adapter readiness planning as complete enough for the non-live checkpoint and records next runtime blockers in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`.
+Phase 2.4.2 is complete, review-only, and clean. Phase 2.4.3 is a docs-only dev-only adapter review harness plan in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`; it does not implement a harness, route, component, runtime adapter execution, upload path, live report mapping, provider, storage, integration, case queue, real photo, or real metadata fixture. Phase 2.4.4 closes adapter readiness planning as complete enough for the non-live checkpoint and records next runtime blockers in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`. Phase 2.4.5 documents the legacy `damage-photo` quarantine/migration decision in `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`.
 
 ## 1. Phase 2.4 Objective
 
@@ -274,4 +274,4 @@ Closeout means:
 
 Remaining blockers have moved to `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`.
 
-The safest next task is Phase 2.4.5 docs-only legacy `damage-photo` quarantine/migration planning. Do not start with implementation until the first-boundary rule, allowed files, protected files, receipt preservation criteria, and semantic/probe gates are documented.
+Phase 2.4.5 is complete as docs-only legacy `damage-photo` quarantine/migration planning. The documented first-boundary rule is filename/evidence-type classification before live analyzer execution. The safest next task is Phase 2.4.6 no-live classifier quarantine hardening; do not start dev-only adapter harness implementation or runtime-facing product-photo work until that classifier ambiguity is hardened or explicitly re-planned.

@@ -51,7 +51,7 @@ Explicitly deferred from Phase 1:
 
 ## Phase 2: Photo Evidence
 
-Status: Phase 2.0 scaffold work, Phase 2.1 Product Photo Local Heuristic Design, Phase 2.2 Product Photo Boundary and Display Readiness, Phase 2.3 Product Photo Local Heuristic Analyzer hardening, and Phase 2.4 adapter readiness planning are closed for non-live readiness. Product-photo runtime analyzer behavior is still not live. The next Phase 2.4 blocker is legacy live receipt-era `damage-photo` filename classification planning.
+Status: Phase 2.0 scaffold work, Phase 2.1 Product Photo Local Heuristic Design, Phase 2.2 Product Photo Boundary and Display Readiness, Phase 2.3 Product Photo Local Heuristic Analyzer hardening, Phase 2.4 adapter readiness planning, and Phase 2.4.5 legacy `damage-photo` quarantine/migration planning are closed for non-live readiness. Product-photo runtime analyzer behavior is still not live. The next Phase 2.4 blocker is no-live legacy `damage-photo` filename classification hardening.
 
 Meaning:
 
@@ -68,11 +68,11 @@ Current implementation boundary:
 - Phase 2.1 defined the first product-photo heuristic signal categories and future implementation order in planning docs.
 - Phase 2.2 added non-live product-photo helper boundaries, guarded routing decisions, shared result shape readiness, a product-photo report view-model, an isolated `ProductPhotoReviewPanel`, a production-disabled synthetic render host, semantic/privacy guards, and desktop/mobile browser QA.
 - Phase 2.3 added and hardened the first unwired local product-photo heuristic analyzer plus probe refinements for low-quality buckets, context gaps, privacy-safe metadata and label summaries, manual-review-only wording, raw-result override sanitization, structured readiness derivation, executable product-photo probes, and non-live isolation.
-- Phase 2.4 defines guarded non-live adapter readiness. Phase 2.4.1 now adds a dev/probe-only adapter readiness boundary that consumes sanitized product-photo result/view-model data, derives readiness fields, quarantines legacy `damage-photo`, and strengthens executable probes/semantic guards while staying outside live runtime paths. Phase 2.4.3 adds a docs-only plan for a future dev-only synthetic adapter review harness in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`. Phase 2.4.4 closes adapter readiness planning and records runtime blockers in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`.
+- Phase 2.4 defines guarded non-live adapter readiness. Phase 2.4.1 now adds a dev/probe-only adapter readiness boundary that consumes sanitized product-photo result/view-model data, derives readiness fields, quarantines legacy `damage-photo`, and strengthens executable probes/semantic guards while staying outside live runtime paths. Phase 2.4.3 adds a docs-only plan for a future dev-only synthetic adapter review harness in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`. Phase 2.4.4 closes adapter readiness planning and records runtime blockers in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`. Phase 2.4.5 adds `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`, which chooses filename/evidence-type classification before live analyzer execution as the safest first future hardening boundary.
 - No product-photo analyzer behavior is live yet.
 - No runtime analyzer, upload, UI, report, scoring, parser, fixture, storage, integration, or external provider behavior is live for Phase 2 yet.
 - `product-photo` is canonical.
-- `damage-photo` remains receipt-era/mock compatibility, not canonical product-photo runtime. The adapter readiness boundary quarantines it, but legacy live filename classification must still be planned and quarantined before any runtime-facing product-photo work.
+- `damage-photo` remains receipt-era/mock compatibility, not canonical product-photo runtime. The adapter readiness boundary quarantines it, and Phase 2.4.5 now documents that live filename classification must be hardened before any runtime-facing product-photo work.
 
 Deferred until Robert explicitly opens a later Phase 2 runtime slice:
 

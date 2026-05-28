@@ -16,6 +16,7 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 - Phase 2.4.2 is complete, review-only, and clean. Product-photo runtime remains non-live; `runtimeLive` remains false; `manualReviewOnly` remains true; `analyzeEvidenceFile` remains the live receipt analyzer entrypoint; `LocalAnalysisResult` remains receipt-shaped; receipt behavior remains unchanged.
 - Phase 2.4.3 is a docs-only dev-only adapter review harness plan in `PRODUCT_PHOTO_DEV_HARNESS_PLAN.md`. It plans a future synthetic-only display surface for adapter readiness outputs only; it does not implement a route, component, harness, runtime adapter execution, upload path, UI insertion, report mapping, provider, storage, integration, case queue, real photo, or real metadata fixture.
 - Phase 2.4.4 closes adapter readiness planning as complete enough for the non-live checkpoint and records the next runtime blockers in `PRODUCT_PHOTO_RUNTIME_BLOCKERS_PLAN.md`. The main blocker is the legacy live receipt-era `damage-photo` filename classification path, which must be quarantined or migrated before any product-photo runtime, upload, UI, live report mapping, `analyzeEvidenceFile`, `LocalAnalysisResult`, provider, storage, integration, or case workflow work.
+- Phase 2.4.5 is complete as a docs-only legacy `damage-photo` quarantine/migration plan in `LEGACY_DAMAGE_PHOTO_QUARANTINE_PLAN.md`. It chooses the safest first future hardening boundary: filename/evidence-type classification before the live receipt-shaped analyzer path proceeds. The plan keeps `product-photo` canonical, treats `damage-photo` as legacy receipt-era/mock compatibility only, preserves receipt behavior, and defines allowed/protected files, semantic/probe/browser/privacy gates, stop conditions, and the recommended Phase 2.4.6 milestone.
 - Completed pushed Phase 2.2 work includes:
   - `44d09f0` added unwired product-photo signal builders.
   - `50f8284` added unwired product-photo file summary, review completeness, and local review signal helpers.
@@ -77,16 +78,17 @@ Use `ROADMAP.md` for durable product roadmap, future modules, and phase definiti
 
 ## Next Safe Tasks
 
-1. Run Phase 2.4.5 as a docs-only legacy `damage-photo` quarantine/migration plan; do not implement code, do not change the live classifier, do not touch upload/UI/report/scoring/parser/fixtures, and do not start product-photo runtime.
-2. Keep the decision-only public analyzer routing wrapper out of live UI/upload/report/scoring/parser paths until a separate live-routing plan is explicitly opened.
-3. Keep the dev-only routing adapter and adapter-readiness boundary out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
-4. Keep `recognizeProductPhotoEvidence` out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
-5. Keep the analyzer routing guard and optional file-aware boundary out of the live UI/upload flow until a separate live-routing plan is explicitly opened.
-6. Keep `LocalAnalysisResult` receipt-path shaped until a separate shared-result migration slice is explicitly opened.
-7. Keep image-consistency uncertainty dormant until a future explicitly opened provider, validated local-metrics, and QA-evidence slice.
-8. Keep the product-photo helpers, analyzer builder, probes, recognition boundary, routing adapter, adapter-readiness boundary, analyzer routing guard, optional file-aware boundary, preservation probe, public wrapper, report view-model, review panel, and visual host unwired from runtime analyzer, upload, UI insertion, live report mapping, scoring, parser, metadata extraction, and fixture behavior.
-9. Keep the shipped receipt module stable unless Robert explicitly requests maintenance.
-10. Preserve a clean operational queue after each completed agent task.
+1. Run Phase 2.4.6 as no-live legacy `damage-photo` classifier quarantine hardening only if Robert explicitly opens that implementation slice; harden the filename/evidence-type classification boundary before live analyzer execution, preserve receipt/PDF/screenshot behavior, and do not start product-photo runtime.
+2. Require semantic/probe coverage for classifier quarantine, receipt preservation, canonical `product-photo` separation, and active or equivalent analyzer-routing guard coverage before any runtime-facing hardening.
+3. Keep the decision-only public analyzer routing wrapper out of live UI/upload/report/scoring/parser paths until a separate live-routing plan is explicitly opened.
+4. Keep the dev-only routing adapter and adapter-readiness boundary out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
+5. Keep `recognizeProductPhotoEvidence` out of `analyzeEvidenceFile` until Robert explicitly opens a runtime-routing slice.
+6. Keep the analyzer routing guard and optional file-aware boundary out of the live UI/upload flow until a separate live-routing plan is explicitly opened.
+7. Keep `LocalAnalysisResult` receipt-path shaped until a separate shared-result migration slice is explicitly opened.
+8. Keep image-consistency uncertainty dormant until a future explicitly opened provider, validated local-metrics, and QA-evidence slice.
+9. Keep the product-photo helpers, analyzer builder, probes, recognition boundary, routing adapter, adapter-readiness boundary, analyzer routing guard, optional file-aware boundary, preservation probe, public wrapper, report view-model, review panel, and visual host unwired from runtime analyzer, upload, UI insertion, live report mapping, scoring, parser, metadata extraction, and fixture behavior.
+10. Keep the shipped receipt module stable unless Robert explicitly requests maintenance.
+11. Preserve a clean operational queue after each completed agent task.
 
 ## Phase 2.3 Entry Criteria And Boundaries
 
@@ -769,5 +771,5 @@ Robert wants the eventual result screen to feel like an evidence triage workspac
 ## Current Recommended Next Prompt
 
 ```text
-/claimguardagent run Phase 2.4.5 as a docs-only legacy damage-photo quarantine/migration plan: inspect the live receipt-era damage-photo filename classification path, product-photo recognition/routing quarantine behavior, adapter-readiness quarantine behavior, and protected receipt runtime boundaries; decide the safest future first-boundary rule for legacy damage-photo before any runtime work; define exact allowed/protected files, receipt-preservation criteria, semantic/probe gates, browser/privacy gates, and stop conditions for a later no-live hardening slice; do not implement code, do not edit routes/components/analyzer/upload/report/scoring/parser/fixtures/providers/storage/integrations/case queues, do not add real photos or real metadata fixtures, do not deploy, and do not push
+/claimguardagent run Phase 2.4.6 as a no-live legacy damage-photo classifier quarantine hardening slice: harden only the filename/evidence-type classification boundary so legacy damage-photo cannot become canonical product-photo runtime or flow into the live receipt-shaped analyzer as product-photo support; preserve receipt/PDF/screenshot behavior; do not change analyzeEvidenceFile runtime behavior beyond the explicitly approved classifier boundary, do not change LocalAnalysisResult, upload/UI/live report adapter/scoring/parser/fixtures/providers/storage/integrations/case queues, and do not add real photos or real metadata fixtures; add semantic/probe coverage for the classifier quarantine and receipt preservation; run lint, build, check:report-semantics, check:product-photo-probes, git diff --check, and final status; commit if safe; do not push
 ```
