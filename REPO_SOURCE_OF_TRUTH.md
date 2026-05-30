@@ -17,14 +17,21 @@ The OneDrive Documents path may exist as a shell starting point, but it is not t
 ## Phase-Aware Workflow
 
 - Phase 1 Receipt Intelligence is closed, deployed, and production-smoked.
-- Phase 2.0 implementation has officially started.
-- Current Phase 2.0 state is scaffold-only, local-heuristics-only, provider-ready, and intentionally unwired.
-- Shared evidence model types and product-photo scaffold/defaults exist.
-- No product-photo analyzer behavior is live yet.
-- No runtime analyzer, upload, UI, report, scoring, parser, or fixture behavior changed during the overnight Phase 2 scaffold.
+- Phase 2 Photo Evidence remains planning/readiness-only; the latest closed slice is Phase 2.4.10.
+- Phase 2.4 adapter-readiness and runtime-blocker planning is complete.
+- A guarded, non-live product-photo adapter contract exists and is pushed.
+- A pre-analysis evidence gate exists and is pushed, but remains decision-only and unwired. Latest pushed commit: `f5564b4` (`feat: add pre-analysis evidence gate contract`).
+- Product-photo runtime remains non-live; no product-photo analyzer behavior is live yet.
+- `analyzeEvidenceFile` remains the live receipt analyzer entrypoint.
+- `LocalAnalysisResult` remains unchanged and receipt-shaped.
+- Receipt behavior remains unchanged.
+- UI, upload, live report adapter mapping, scoring, parser, and fixtures remain untouched by product-photo runtime.
+- No providers, storage, integrations, case queues, real photos, or real metadata fixtures were added.
 - `product-photo` is canonical.
-- `damage-photo` remains only a compatibility alias to `product-photo` / `damage-close-up`.
-- Do not start Phase 2.1 until Robert/ChatGPT explicitly confirms the scaffold review is complete.
+- `damage-photo` remains legacy/non-canonical and only a compatibility alias to `product-photo` / `damage-close-up`.
+- Dev-only adapter/harness work is a future no-live milestone and is not part of Phase 2.4 closeout unless Robert explicitly opens it later.
+- Phase 2.4 closeout review should be the next step.
+- Do not start product-photo runtime, UI/upload wiring, analyzer routing, live report mapping, provider, storage, integration, or case-queue work until Robert explicitly opens that slice.
 - Future-phase planning is allowed when requested.
 - Future-phase implementation requires explicit approval from Robert.
 - Use `ROADMAP.md` for durable phase definitions.
@@ -50,7 +57,7 @@ Stop and report before continuing when:
 - Unexpected app-code, analyzer, parser, scoring, report, privacy, fixture, package, script, or upload-mechanics diffs appear.
 - Real customer evidence, private customer data, raw OCR, copied private JSON, or credentials appear in files or logs.
 - Unsafe wrongdoing-confirming language, customer-accusation language, or automatic-denial language appears.
-- Phase 2.1 runtime behavior, UI/upload wiring, analyzer routing, scoring/report/parser/fixture changes, or provider work appears before Robert/ChatGPT explicitly confirms the Phase 2.0 scaffold review is complete.
+- Product-photo runtime behavior, UI/upload wiring, analyzer routing, live report mapping, scoring/report/parser/fixture changes, or provider/storage/integration/case-queue work appears before Robert explicitly opens that runtime slice.
 - A required check fails or cannot run.
 
 ## Check Guidance
