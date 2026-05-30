@@ -8,6 +8,8 @@ const filesToCheck = [
   "src/app/layout.tsx",
   "src/app/dev/product-photo-review-panel/page.tsx",
   "src/app/dev/product-photo-review-panel/render-cases.ts",
+  "src/app/dev/pre-analysis-evidence-gate/page.tsx",
+  "src/app/dev/pre-analysis-evidence-gate/render-cases.ts",
   "src/lib/analysis/analyzer.ts",
   "src/lib/analysis/analyzer-classifier.ts",
   "src/lib/analysis/analyzer-classifier.probe.ts",
@@ -1513,6 +1515,183 @@ for (const signal of requiredPreAnalysisEvidenceGateProbeSignals) {
   if (!signal.patterns.some((pattern) => pattern.test(preAnalysisEvidenceGateProbe))) {
     failures.push(`Pre-analysis evidence gate probe check failed: missing ${signal.label}`);
   }
+}
+
+const preAnalysisGateHostPage = fileContents.get("src/app/dev/pre-analysis-evidence-gate/page.tsx") ?? "";
+const preAnalysisGateRenderCases =
+  fileContents.get("src/app/dev/pre-analysis-evidence-gate/render-cases.ts") ?? "";
+const preAnalysisGateHostCorpus = `${preAnalysisGateHostPage}\n${preAnalysisGateRenderCases}`;
+
+const requiredPreAnalysisGateHostPageSignals = [
+  {
+    label: "gate host imports notFound production guard",
+    patterns: [/import \{ notFound \} from "next\/navigation";/],
+  },
+  {
+    label: "gate host imports colocated render cases",
+    patterns: [/import \{ preAnalysisEvidenceGateReviewCases \} from "\.\/render-cases";/],
+  },
+  {
+    label: "gate host production-disabled by default",
+    patterns: [/process\.env\.NODE_ENV !== "production"/],
+  },
+  {
+    label: "gate host returns notFound when disabled",
+    patterns: [/notFound\(\)/],
+  },
+  {
+    label: "gate host non-live banner",
+    patterns: [/Synthetic non-live developer gate review/],
+  },
+  {
+    label: "gate host manual-review-only label",
+    patterns: [/Manual review only/],
+  },
+  {
+    label: "gate host runtime non-live label",
+    patterns: [/Runtime live: No/],
+  },
+  {
+    label: "gate host type-only decision import",
+    patterns: [
+      /import type \{ PreAnalysisEvidenceGateDecision \} from "@\/lib\/analysis\/pre-analysis-evidence-gate";/,
+    ],
+  },
+];
+
+const requiredPreAnalysisGateRenderCaseSignals = [
+  {
+    label: "render cases type-only decision import",
+    patterns: [
+      /import type \{ PreAnalysisEvidenceGateDecision \} from "@\/lib\/analysis\/pre-analysis-evidence-gate";/,
+    ],
+  },
+  {
+    label: "render cases typed decision field",
+    patterns: [/decision: PreAnalysisEvidenceGateDecision/],
+  },
+  {
+    label: "render cases readonly review-case array",
+    patterns: [/readonly PreAnalysisEvidenceGateReviewCase\[\]/],
+  },
+  {
+    label: "render cases allow outcome",
+    patterns: [/"allow-receipt-default-path"/],
+  },
+  {
+    label: "render cases unsupported outcome",
+    patterns: [/"unsupported-evidence"/],
+  },
+  {
+    label: "render cases legacy quarantine outcome",
+    patterns: [/"legacy-damage-photo-quarantine"/],
+  },
+  {
+    label: "render cases product-photo-like outcome",
+    patterns: [/"product-photo-like-unsupported"/],
+  },
+  {
+    label: "render cases unknown outcome",
+    patterns: [/"unknown-inconclusive"/],
+  },
+  {
+    label: "render cases runtime non-live marker",
+    patterns: [/runtimeLive: false/],
+  },
+  {
+    label: "render cases manual-review-only marker",
+    patterns: [/manualReviewOnly: true/],
+  },
+  {
+    label: "render cases no-ocr marker",
+    patterns: [/ocrInvoked: false/],
+  },
+  {
+    label: "render cases no-metadata marker",
+    patterns: [/metadataInvoked: false/],
+  },
+  {
+    label: "render cases provider/storage/integration/case-queue isolation marker",
+    patterns: [/providersStorageIntegrationsCaseQueuesInvoked: false/],
+  },
+];
+
+const forbiddenPreAnalysisGateHostImports = [
+  "@/components/ClaimReviewWorkflow",
+  "@/components/TestEvidenceHarness",
+  "@/components/UploadPanel",
+  "@/components/AnalysisReport",
+  "@/components/AuthenticityResultCard",
+  "@/components/ProductPhotoReviewPanel",
+  "@/lib/analysis/analyzer",
+  "@/lib/analysis/analyzer-routing",
+  "@/lib/analysis/report-adapter",
+  "@/lib/analysis/scoring",
+  "@/lib/analysis/receipt-parser",
+  "@/lib/analysis/product-photo-analyzer",
+  "@/lib/analysis/product-photo-routing-adapter",
+  "@/lib/test-evidence",
+  "@/lib/claim-data",
+  "next/image",
+];
+
+const forbiddenPreAnalysisGateHostPatterns = [
+  /buildPreAnalysisEvidenceGateDecision/,
+  /analyzeEvidenceFile/,
+  /LocalAnalysisResult/,
+  /<img\b/i,
+  /createObjectURL/,
+  /\bobjectUrl\b/,
+  /\bimageUrl\b/,
+  /\bdataUrl\b/,
+  /\bBlob\b/,
+  /type=["']file["']/i,
+  /\bfetch\s*\(/,
+  /localStorage/,
+  /sessionStorage/,
+  /routeParams|searchParams/,
+  /rawExif/,
+  /rawMetadata/,
+  /originalFilename/,
+  /rawLabelValue/,
+  /providerOutput|providerHandle|storageHandle|integrationHandle|caseQueueHandle/,
+  /\b(?:case|claim|ticket|evidence|provider|storage|integration)[-_ ]?id\b/i,
+  /\border\s*(?:number|id|#)\b/i,
+  /https?:\/\//i,
+  /[A-Za-z]:\\/,
+  /\b[A-Z]{2,}-\d{3,}\b/,
+];
+
+for (const signal of requiredPreAnalysisGateHostPageSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(preAnalysisGateHostPage))) {
+    failures.push(`Pre-analysis gate host check failed: missing ${signal.label}`);
+  }
+}
+
+for (const signal of requiredPreAnalysisGateRenderCaseSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(preAnalysisGateRenderCases))) {
+    failures.push(`Pre-analysis gate render-case check failed: missing ${signal.label}`);
+  }
+}
+
+for (const importPath of forbiddenPreAnalysisGateHostImports) {
+  if (preAnalysisGateHostCorpus.includes(importPath)) {
+    failures.push(`Pre-analysis gate host boundary check failed: host imports forbidden path ${importPath}`);
+  }
+}
+
+for (const pattern of forbiddenPreAnalysisGateHostPatterns) {
+  if (pattern.test(preAnalysisGateHostCorpus)) {
+    failures.push(`Pre-analysis gate host privacy/import check failed: host uses forbidden pattern ${pattern}`);
+  }
+}
+
+if (
+  [appPage, appLayout, testEvidenceHarness, claimReviewWorkflow, reportAdapter].some((source) =>
+    source.includes("/dev/pre-analysis-evidence-gate"),
+  )
+) {
+  failures.push("Pre-analysis gate host boundary check failed: host route is linked from live app files.");
 }
 
 if (failures.length > 0) {
