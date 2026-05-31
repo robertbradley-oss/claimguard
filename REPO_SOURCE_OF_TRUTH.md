@@ -31,7 +31,8 @@ The OneDrive Documents path may exist as a shell starting point, but it is not t
 - `damage-photo` remains legacy/non-canonical and only a compatibility alias to `product-photo` / `damage-close-up`.
 - Dev-only adapter/gate harness work is closed as Phase 2.5 and remains no-live, synthetic-only, unlinked, and production-disabled.
 - Phase 2.6 closed with product-photo runtime non-live, `analyzeEvidenceFile` unchanged, `LocalAnalysisResult` unchanged, receipt behavior unchanged, UI/upload/live report adapter mapping/scoring/parser/fixtures untouched, no ProductPhotoReviewPanel routing added by `6f3170a`, no providers/storage/integrations/case queues, no OCR/metadata processing, and no deployment.
-- The next safest task is a Robert-approved review-only or docs-only next-phase scope decision. Do not start the next phase, wire the wrapper into live callers, or change runtime/UI/upload/report behavior without explicit approval.
+- Phase 2.7.0 is docs-only planning for live-opt-in readiness of the default-off wrapper and unsupported-evidence reviewer state. It does not authorize implementation.
+- The next safest task is review/commit of the Phase 2.7.0 docs-only plan, followed by a separate Robert-approved docs-only unsupported-evidence reviewer state contract. Do not wire the wrapper into live callers or change runtime/UI/upload/report behavior without explicit approval.
 - Do not start product-photo runtime, UI/upload wiring, analyzer routing, live report mapping, provider, storage, integration, or case-queue work until Robert explicitly opens that slice.
 - Future-phase planning is allowed when requested.
 - Future-phase implementation requires explicit approval from Robert.
