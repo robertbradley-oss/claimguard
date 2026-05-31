@@ -113,6 +113,9 @@ const phase411MockProviderAdapterPlan = readRequiredFile("PHASE_4_11_MOCK_PROVID
 const phase413MockProviderSafetyCheckpoint = readRequiredFile(
   "PHASE_4_13_MOCK_PROVIDER_ADAPTER_SAFETY_READINESS_CHECKPOINT.md",
 );
+const phase414MockProviderDeveloperUsage = readRequiredFile(
+  "PHASE_4_14_MOCK_PROVIDER_ADAPTER_DEVELOPER_USAGE.md",
+);
 
 const requiredSemanticSignals = [
   {
@@ -768,6 +771,65 @@ const forbiddenPhase413MockProviderSafetyPatterns = [
   /automatic (?:deny|approval|rejection|refund|disposition) (?:is|will be|should be) (?:enabled|allowed|performed)/i,
 ];
 
+const requiredPhase414MockProviderDeveloperUsageSignals = [
+  {
+    label: "Phase 4.14 developer usage marker",
+    patterns: [/Phase 4\.14 documents how developers may use the Phase 4\.12 mock provider adapter/],
+  },
+  {
+    label: "no route or live behavior scope",
+    patterns: [/does not add route integration or live behavior/, /not production analysis/, /not live OCR/],
+  },
+  {
+    label: "adapter functions and synthetic input shape",
+    patterns: [/runMockOcrProvider/, /runMockVisionProvider/, /providerMode: MOCK_PROVIDER_MODE/, /fixtureKey/],
+  },
+  {
+    label: "safe usage examples",
+    patterns: [/Mock OCR Success/, /Mock Vision Success/, /Timeout Failure/, /Unsupported Evidence/],
+  },
+  {
+    label: "all failure examples",
+    patterns: [/Unavailable Failure/, /Malformed Response Failure/, /Empty Output/, /Rate Or Cost Limit/, /Redaction Failure/, /Safety Refusal/, /Normalization Failure/],
+  },
+  {
+    label: "disallowed usage boundary",
+    patterns: [/Real receipts/, /Real product photos/, /Base64 images/, /Object URLs/, /Provider payloads/, /UI upload flow objects/],
+  },
+  {
+    label: "output interpretation",
+    patterns: [/Mock OCR confidence is a review signal only/, /Mock vision confidence is a review signal only/, /synthetic altered-or-AI-generated-image uncertainty placeholder/],
+  },
+  {
+    label: "route and contract relationship",
+    patterns: [/The existing `POST \/api\/analysis\/ocr` route remains exact fixture-key only/, /The existing route is not wired to the mock adapter/, /`analyzeEvidenceFile` and `LocalAnalysisResult` remain unchanged/],
+  },
+  {
+    label: "developer stop conditions",
+    patterns: [/Route integration is added without explicit milestone approval/, /SDK, credential, environment variable/, /Output wording uses accusation/],
+  },
+  {
+    label: "Phase 4.15 safe next options",
+    patterns: [/Option A: Phase 4\.15 mock adapter route integration planning only/, /Option B: Phase 4\.15 OpenAI Vision sandbox planning only/, /Option C: Phase 4\.15 OCR provider abstraction skeleton planning only/],
+  },
+];
+
+const forbiddenPhase414MockProviderDeveloperUsagePatterns = [
+  /npm\s+(?:install|add)\s+(?:openai|@aws-sdk|@google-cloud)/i,
+  /OPENAI_API_KEY|GOOGLE_APPLICATION_CREDENTIALS|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY/,
+  /process\.env\.(?:OPENAI|GOOGLE|AWS|OCR|VISION)/i,
+  /import\s+.*\s+from\s+["'](?:openai|@aws-sdk|@google-cloud)/i,
+  /multipart\/form-data\s+is\s+accepted/i,
+  /raw provider payloads? (?:will|should) be logged/i,
+  /raw real OCR (?:will|should) be retained/i,
+  /real evidence processing (?:is|will be) enabled/i,
+  /(?:This milestone|Phase 4\.14) (?:wires|wired|will wire) .*mock adapter/i,
+  /live OpenAI Vision implementation (?:is|was|will be) added/i,
+  /automatic (?:deny|approval|rejection|refund|disposition) (?:is|will be|should be) (?:enabled|allowed|performed)/i,
+  /confidence (?:proves|confirms|verifies)/i,
+  /uncertainty value (?:proves|confirms|verifies)/i,
+];
+
 const forbiddenOcrRouteImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/types",
@@ -870,6 +932,12 @@ for (const signal of requiredPhase413MockProviderSafetySignals) {
   }
 }
 
+for (const signal of requiredPhase414MockProviderDeveloperUsageSignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(phase414MockProviderDeveloperUsage))) {
+    failures.push(`Missing Phase 4.14 mock-provider developer usage signal: ${signal.label}`);
+  }
+}
+
 for (const bannedPhrase of guardedBannedPhrases) {
   if (bannedPhrase.test(corpus)) {
     failures.push(`Unsafe report, fixture, or QA wording found: ${bannedPhrase}`);
@@ -951,6 +1019,12 @@ for (const pattern of forbiddenPhase411MockProviderAdapterPatterns) {
 for (const pattern of forbiddenPhase413MockProviderSafetyPatterns) {
   if (pattern.test(phase413MockProviderSafetyCheckpoint)) {
     failures.push(`Phase 4.13 mock-provider safety checkpoint failed: forbidden implementation/privacy pattern ${pattern}`);
+  }
+}
+
+for (const pattern of forbiddenPhase414MockProviderDeveloperUsagePatterns) {
+  if (pattern.test(phase414MockProviderDeveloperUsage)) {
+    failures.push(`Phase 4.14 mock-provider developer usage failed: forbidden implementation/privacy pattern ${pattern}`);
   }
 }
 
