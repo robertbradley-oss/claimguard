@@ -130,7 +130,7 @@ Deferred after Phase 3 closure until explicitly reopened or approved in a future
 
 ## Phase 4: Stronger OCR and AI Integrations
 
-Status: Phase 4.0 planning-only real AI/OCR/photo intelligence readiness is documented in `PHASE_4_0_AI_OCR_PHOTO_INTELLIGENCE_READINESS.md`. Phase 4.1 docs-only OCR/provider architecture planning is documented in `PHASE_4_1_OCR_PROVIDER_ARCHITECTURE_PLAN.md`. Phase 4 implementation has not started, and no real AI/OCR/photo analysis should be implemented until a later explicitly approved implementation slice.
+Status: Phase 4.0 planning-only real AI/OCR/photo intelligence readiness is documented in `PHASE_4_0_AI_OCR_PHOTO_INTELLIGENCE_READINESS.md`. Phase 4.1 docs-only OCR/provider architecture planning is documented in `PHASE_4_1_OCR_PROVIDER_ARCHITECTURE_PLAN.md`. Phase 4.2 adds a non-live synthetic OCR fixture harness in `src/lib/analysis/ocr-fixture-harness.ts` with probe coverage in `src/lib/analysis/ocr-fixture-harness.probe.ts`. Real AI/OCR/photo analysis has not started, and no real provider-backed analysis should be implemented until a later explicitly approved implementation slice.
 
 Meaning:
 
@@ -157,6 +157,15 @@ Phase 4.1 OCR/provider architecture decision:
 - Browser-local OCR remains the privacy-preserving default when sufficient. Server-side OCR may be needed later for multi-page PDFs, layout/table reconstruction, preprocessing, reliability, timeout/cost controls, or provider-backed extraction, but API keys must live server-side and no storage should exist by default.
 - OCR results should become evidence review signals with confidence and limitations. Do not create a fraud score, migrate `LocalAnalysisResult`, change receipt report semantics, or imply external verification.
 - The next safe task is Phase 4.2 synthetic OCR fixture harness work before any real provider, route, SDK, credential, env var, upload, storage, or live scoring work.
+
+Phase 4.2 synthetic OCR fixture harness decision:
+
+- The synthetic OCR fixture harness is non-live, fixture-only, provider-free, route-free, UI-free, upload-free, storage-free, and real-evidence-free.
+- The harness defines synthetic OCR-like text blocks, expected structured receipt fields, field confidence, extraction confidence, manual-review drivers, limitations, safe summaries, unsupported states, provider-unavailable synthetic failure states, empty OCR output, and receipt-regression safety markers.
+- Fixture coverage includes clean receipt OCR, Amazon-like order OCR, missing total, missing merchant, conflicting date/total cues, noisy OCR text, receipt-like incomplete text, unsupported non-receipt text, ambiguous marketplace/order-screen text, synthetic provider timeout, and empty OCR output.
+- The probe proves the harness remains isolated from `analyzeEvidenceFile`, live report mapping, `ClaimReviewWorkflow`, `ProductPhotoReviewPanel`, upload, providers, storage, integrations, case queues, and real evidence.
+- Phase 4.2 does not change receipt behavior, does not migrate `LocalAnalysisResult`, does not add OCR providers/SDKs/env vars/routes/components, and does not process real evidence.
+- The next safe task is Phase 4.3 provider-neutral OCR extraction contract implementation, non-live and unwired, only after the synthetic fixture harness remains green.
 
 Deferred until a later Phase 4 implementation slice is explicitly opened:
 

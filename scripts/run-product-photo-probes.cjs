@@ -100,6 +100,10 @@ const probeModules = [
     path: "src/lib/analysis/workflow-pre-analysis-gate-boundary.probe.ts",
     exportName: "WORKFLOW_PRE_ANALYSIS_GATE_BOUNDARY_DEVELOPER_PROBE",
   },
+  {
+    path: "src/lib/analysis/ocr-fixture-harness.probe.ts",
+    exportName: "OCR_FIXTURE_HARNESS_DEVELOPER_PROBE",
+  },
 ];
 
 async function runProductPhotoProbes() {
@@ -112,7 +116,7 @@ async function runProductPhotoProbes() {
     }
   }
 
-  console.log(`Product-photo probe execution passed (${probeModules.length} modules imported).`);
+  console.log(`Non-live analysis probe execution passed (${probeModules.length} modules imported).`);
 }
 
 runProductPhotoProbes().catch((error) => {

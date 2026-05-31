@@ -44,6 +44,8 @@ const filesToCheck = [
   "src/lib/analysis/unsupported-evidence-review-state.probe.ts",
   "src/lib/analysis/workflow-pre-analysis-gate-boundary.ts",
   "src/lib/analysis/workflow-pre-analysis-gate-boundary.probe.ts",
+  "src/lib/analysis/ocr-fixture-harness.ts",
+  "src/lib/analysis/ocr-fixture-harness.probe.ts",
   "src/components/ProductPhotoReviewPanel.tsx",
   "src/components/ProductPhotoReviewPanel.probe.tsx",
   "src/components/CaseReviewCommandCenter.tsx",
@@ -86,6 +88,9 @@ const productPhotoCorpus = [...fileContents]
   )
   .map(([, contents]) => contents)
   .join("\n");
+const ocrFixtureHarness = fileContents.get("src/lib/analysis/ocr-fixture-harness.ts") ?? "";
+const ocrFixtureProbe = fileContents.get("src/lib/analysis/ocr-fixture-harness.probe.ts") ?? "";
+const ocrFixtureCorpus = `${ocrFixtureHarness}\n${ocrFixtureProbe}`;
 
 const requiredSemanticSignals = [
   {
@@ -195,6 +200,107 @@ const productPhotoBannedPhrases = [
   /automatic\s+(?:outcome|decision|disposition)/i,
 ];
 
+const requiredOcrFixtureHarnessSignals = [
+  {
+    label: "Phase 4.2 harness marker",
+    patterns: [/phase-4\.2-synthetic-ocr-fixture-harness/],
+  },
+  {
+    label: "OCR fixture cases export",
+    patterns: [/SYNTHETIC_OCR_FIXTURE_CASES/],
+  },
+  {
+    label: "clean receipt OCR fixture",
+    patterns: [/clean-receipt-ocr/],
+  },
+  {
+    label: "Amazon-like OCR fixture",
+    patterns: [/amazon-like-order-ocr/],
+  },
+  {
+    label: "missing total OCR fixture",
+    patterns: [/missing-total-ocr/],
+  },
+  {
+    label: "missing merchant OCR fixture",
+    patterns: [/missing-merchant-ocr/],
+  },
+  {
+    label: "conflicting date and total OCR fixture",
+    patterns: [/conflicting-date-total-ocr/],
+  },
+  {
+    label: "noisy OCR fixture",
+    patterns: [/noisy-ocr-text/],
+  },
+  {
+    label: "unsupported non-receipt OCR fixture",
+    patterns: [/unsupported-non-receipt-text/],
+  },
+  {
+    label: "ambiguous marketplace OCR fixture",
+    patterns: [/ambiguous-marketplace-screen-ocr/],
+  },
+  {
+    label: "provider unavailable synthetic fixture",
+    patterns: [/provider-timeout-synthetic-failure/],
+  },
+  {
+    label: "empty OCR output fixture",
+    patterns: [/empty-ocr-output/],
+  },
+  {
+    label: "provider calls disabled",
+    patterns: [/providerCallsAllowed: false/],
+  },
+  {
+    label: "live runtime disabled",
+    patterns: [/liveRuntimeAllowed: false/],
+  },
+  {
+    label: "manual review drivers",
+    patterns: [/manualReviewDrivers/],
+  },
+  {
+    label: "confidence as review signal",
+    patterns: [/OCR confidence is a review signal, not proof or a final decision/],
+  },
+  {
+    label: "receipt regression safety markers",
+    patterns: [/analyzeEvidenceFileUnchanged: true/, /localAnalysisResultUnchanged: true/],
+  },
+];
+
+const forbiddenOcrFixtureHarnessImports = [
+  "@/lib/analysis/analyzer",
+  "@/lib/analysis/ocr-service",
+  "@/lib/analysis/receipt-parser",
+  "@/lib/analysis/report-adapter",
+  "@/lib/analysis/scoring",
+  "@/lib/analysis/types",
+  "@/components/ClaimReviewWorkflow",
+  "@/components/ProductPhotoReviewPanel",
+  "@/components/UploadPanel",
+  "@/lib/test-evidence",
+];
+
+const forbiddenOcrFixtureHarnessPatterns = [
+  /\bFile\b/,
+  /\bBlob\b/,
+  /createObjectURL/,
+  /\bobjectUrl\b/,
+  /\bimageUrl\b/,
+  /\bdataUrl\b/,
+  /\bfetch\s*\(/,
+  /localStorage/,
+  /sessionStorage/,
+  /process\.env/,
+  /providerPayload|providerResponse|providerRequestId/,
+  /storageHandle|integrationHandle|caseQueueHandle/,
+  /customerId|ticketId|claimId|caseId|evidenceId/,
+  /claimOutcome|automaticDisposition|externalDecision/,
+];
+
 const unsafeHighScoreProofPattern = /High score(?![^.]*does not prove)[^.]*\b(?:proves?|confirms?|verifies?|authentic|real)\b/i;
 const unsafeExternalVerificationPatterns = [
   /externalVerification\s*:\s*["'`](?!Not performed)/i,
@@ -219,6 +325,12 @@ for (const signal of requiredProductPhotoSemanticSignals) {
   }
 }
 
+for (const signal of requiredOcrFixtureHarnessSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(ocrFixtureCorpus))) {
+    failures.push(`Missing synthetic OCR fixture harness signal: ${signal.label}`);
+  }
+}
+
 for (const bannedPhrase of guardedBannedPhrases) {
   if (bannedPhrase.test(corpus)) {
     failures.push(`Unsafe report, fixture, or QA wording found: ${bannedPhrase}`);
@@ -228,6 +340,18 @@ for (const bannedPhrase of guardedBannedPhrases) {
 for (const bannedPhrase of productPhotoBannedPhrases) {
   if (bannedPhrase.test(productPhotoCorpus)) {
     failures.push(`Unsafe product-photo wording found: ${bannedPhrase}`);
+  }
+}
+
+for (const importPath of forbiddenOcrFixtureHarnessImports) {
+  if (ocrFixtureHarness.includes(importPath)) {
+    failures.push(`Synthetic OCR fixture harness boundary check failed: harness imports forbidden path ${importPath}`);
+  }
+}
+
+for (const pattern of forbiddenOcrFixtureHarnessPatterns) {
+  if (pattern.test(ocrFixtureHarness)) {
+    failures.push(`Synthetic OCR fixture harness privacy/import check failed: harness uses forbidden pattern ${pattern}`);
   }
 }
 
