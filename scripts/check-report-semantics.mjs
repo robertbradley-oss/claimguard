@@ -127,6 +127,9 @@ const phase415MockAdapterRouteIntegrationPlan = readRequiredFile(
 const phase417MockProviderRouteSafetyCheckpoint = readRequiredFile(
   "PHASE_4_17_MOCK_PROVIDER_ROUTE_SAFETY_READINESS_CHECKPOINT.md",
 );
+const phase418MockProviderRouteDeveloperUsage = readRequiredFile(
+  "PHASE_4_18_MOCK_PROVIDER_ROUTE_DEVELOPER_USAGE.md",
+);
 
 const requiredSemanticSignals = [
   {
@@ -1037,6 +1040,129 @@ const forbiddenPhase417MockProviderRouteSafetyPatterns = [
   /uncertainty (?:proves|confirms|verifies)/i,
 ];
 
+const requiredPhase418MockProviderRouteDeveloperUsageSignals = [
+  {
+    label: "Phase 4.18 developer documentation marker",
+    patterns: [/Phase 4\.18 documents how developers may safely call/, /does not add route behavior/],
+  },
+  {
+    label: "mock provider route purpose and scope",
+    patterns: [
+      /developer-boundary testing/,
+      /not live OCR/,
+      /not OpenAI Vision/,
+      /not connected to uploads, UI, storage, persistence, live receipt behavior/,
+    ],
+  },
+  {
+    label: "safe synthetic request examples",
+    patterns: [
+      /"providerType": "mock-ocr"/,
+      /"providerType": "mock-vision"/,
+      /"behavior": "timeout"/,
+      /"behavior": "unavailable"/,
+      /"behavior": "malformed-response"/,
+      /"behavior": "unsupported-evidence"/,
+      /"behavior": "empty-output"/,
+      /"behavior": "rate-cost-limit"/,
+      /"behavior": "redaction-failure"/,
+      /"behavior": "safety-refusal"/,
+      /"behavior": "internal-normalization-error"/,
+    ],
+  },
+  {
+    label: "validation failure examples",
+    patterns: [
+      /UNSUPPORTED_CONTENT_TYPE/,
+      /MALFORMED_JSON/,
+      /MISSING_PROVIDER_TYPE/,
+      /UNKNOWN_PROVIDER_TYPE/,
+      /MISSING_SYNTHETIC_BEHAVIOR/,
+      /UNKNOWN_SYNTHETIC_BEHAVIOR/,
+      /MISSING_FIXTURE_KEY/,
+      /UNKNOWN_FIXTURE_KEY/,
+      /UNSUPPORTED_INPUT_BOUNDARY/,
+    ],
+  },
+  {
+    label: "expected response interpretation",
+    patterns: [
+      /`ok: true` means synthetic mock execution succeeded/,
+      /`ok: false` means either route validation failed or the synthetic mock provider returned a simulated failure/,
+      /Mock OCR confidence is a review signal only/,
+      /Mock vision confidence is a review signal only/,
+      /Altered-or-AI-generated-image uncertainty is synthetic and review-only/,
+    ],
+  },
+  {
+    label: "privacy and retention flags",
+    patterns: [
+      /`fileRetained: false`/,
+      /`rawOcrRetained: false`/,
+      /`providerPayloadRetained: false`/,
+      /`providerPayloadLogged: false`/,
+      /`externalNetworkCalled: false`/,
+      /`storageUsed: false`/,
+      /`envUsed: false`/,
+      /No real customer data accepted/,
+      /No real evidence accepted/,
+    ],
+  },
+  {
+    label: "relationship to OCR route and contract",
+    patterns: [
+      /existing `POST \/api\/analysis\/ocr` route remains exact `fixtureKey` only/,
+      /not wired to the mock-provider route/,
+      /`ocr-extraction-contract` remains the OCR normalization boundary/,
+      /Mock vision remains separate from receipt scoring/,
+      /`analyzeEvidenceFile` and `LocalAnalysisResult` remain unchanged/,
+    ],
+  },
+  {
+    label: "developer stop conditions",
+    patterns: [
+      /Live provider work appears/,
+      /Existing OCR route behavior changes/,
+      /begins accepting binary input, multipart input, URLs, or storage handles/,
+      /`analyzeEvidenceFile` or `LocalAnalysisResult` changes/,
+    ],
+  },
+  {
+    label: "Phase 4.19 safe options",
+    patterns: [
+      /Option A: Phase 4\.19 OpenAI Vision sandbox planning only/,
+      /Option B: Phase 4\.19 provider abstraction interface skeleton planning only/,
+      /Option C: Phase 4\.19 mock-provider route access guard planning only/,
+    ],
+  },
+];
+
+const forbiddenPhase418MockProviderRouteDeveloperUsagePatterns = [
+  /npm\s+(?:install|add)\s+(?:openai|@aws-sdk|@google-cloud)/i,
+  /OPENAI_API_KEY|GOOGLE_APPLICATION_CREDENTIALS|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY/,
+  /process\.env\.(?:OPENAI|GOOGLE|AWS|OCR|VISION)/i,
+  /import\s+.*\s+from\s+["'](?:openai|@aws-sdk|@google-cloud)/i,
+  /curl\s+/i,
+  /\bfetch\s*\(/,
+  /multipart\/form-data\s+is\s+accepted/i,
+  /raw provider payloads? (?:will|should) be logged/i,
+  /raw real OCR (?:will|should) be retained/i,
+  /real evidence processing (?:is|will be) enabled/i,
+  /live OpenAI Vision implementation (?:is|was|will be) added/i,
+  /(?:This milestone|Phase 4\.18) (?:adds|added|implements|implemented|wires|wired) (?:live|real|provider|upload|storage)/i,
+  /(?:ClaimReviewWorkflow|ProductPhotoReviewPanel) (?:is|was|will be) (?:wired|routed)/i,
+  /(?:analyzeEvidenceFile|LocalAnalysisResult) (?:is|was|will be) (?:changed|migrated|updated)/i,
+  /automatic (?:deny|approval|rejection|refund|disposition) (?:is|will be|should be) (?:enabled|allowed|performed)/i,
+  /confidence (?:proves|confirms|verifies)/i,
+  /uncertainty (?:proves|confirms|verifies)/i,
+  /https?:\/\//i,
+  /blob:|data:|file:/i,
+  /[A-Za-z]:\\/,
+  /\b[A-Z]{2,}-\d{3,}\b/,
+  /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i,
+  /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/,
+];
+
 const forbiddenOcrRouteImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/types",
@@ -1163,6 +1289,12 @@ for (const signal of requiredPhase417MockProviderRouteSafetySignals) {
   }
 }
 
+for (const signal of requiredPhase418MockProviderRouteDeveloperUsageSignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(phase418MockProviderRouteDeveloperUsage))) {
+    failures.push(`Missing Phase 4.18 mock-provider route developer usage signal: ${signal.label}`);
+  }
+}
+
 for (const bannedPhrase of guardedBannedPhrases) {
   if (bannedPhrase.test(corpus)) {
     failures.push(`Unsafe report, fixture, or QA wording found: ${bannedPhrase}`);
@@ -1274,6 +1406,12 @@ for (const pattern of forbiddenPhase415MockAdapterRouteIntegrationPatterns) {
 for (const pattern of forbiddenPhase417MockProviderRouteSafetyPatterns) {
   if (pattern.test(phase417MockProviderRouteSafetyCheckpoint)) {
     failures.push(`Phase 4.17 mock-provider route safety checkpoint failed: forbidden implementation/privacy pattern ${pattern}`);
+  }
+}
+
+for (const pattern of forbiddenPhase418MockProviderRouteDeveloperUsagePatterns) {
+  if (pattern.test(phase418MockProviderRouteDeveloperUsage)) {
+    failures.push(`Phase 4.18 mock-provider route developer usage failed: forbidden implementation/privacy pattern ${pattern}`);
   }
 }
 
