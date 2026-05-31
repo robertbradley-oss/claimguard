@@ -130,7 +130,7 @@ Deferred after Phase 3 closure until explicitly reopened or approved in a future
 
 ## Phase 4: Stronger OCR and AI Integrations
 
-Status: Phase 4.0 planning-only real AI/OCR/photo intelligence readiness is documented in `PHASE_4_0_AI_OCR_PHOTO_INTELLIGENCE_READINESS.md`. Phase 4 implementation has not started, and no real AI/OCR/photo analysis should be implemented until a later explicitly approved implementation slice.
+Status: Phase 4.0 planning-only real AI/OCR/photo intelligence readiness is documented in `PHASE_4_0_AI_OCR_PHOTO_INTELLIGENCE_READINESS.md`. Phase 4.1 docs-only OCR/provider architecture planning is documented in `PHASE_4_1_OCR_PROVIDER_ARCHITECTURE_PLAN.md`. Phase 4 implementation has not started, and no real AI/OCR/photo analysis should be implemented until a later explicitly approved implementation slice.
 
 Meaning:
 
@@ -148,6 +148,15 @@ Phase 4.0 planning decision:
 - Product-photo intelligence should remain careful signal planning for damage visibility, context completeness, possible reuse/duplicate signals, compression/editing/artifact uncertainty, metadata context, and AI-generated-image uncertainty without "fake photo" or fraud-confirmation wording.
 - Real evidence handling requires a privacy/data-flow, retention, deletion, provider logging, metadata, and storage plan before implementation.
 - The current off-white/parchment evidence workspace direction remains the product direction; Phase 4 is intelligence readiness, not another Command Center redesign.
+
+Phase 4.1 OCR/provider architecture decision:
+
+- Future stronger OCR should be introduced behind a provider-neutral boundary that can normalize browser-local, server-local, mocked, or future provider output without locking ClaimGuard to one SDK or provider.
+- The future OCR contract should separate input policy, text blocks, structured receipt fields, field confidence, provider metadata summaries, failure states, unsupported-file states, and raw OCR availability policy.
+- Amazon receipt/order-page validation should remain structure and consistency readiness only: order/date/total cues, section presence, payment/shipping redaction considerations, marketplace limitations, and safe uncertainty wording. It must not produce automated fraud conclusions.
+- Browser-local OCR remains the privacy-preserving default when sufficient. Server-side OCR may be needed later for multi-page PDFs, layout/table reconstruction, preprocessing, reliability, timeout/cost controls, or provider-backed extraction, but API keys must live server-side and no storage should exist by default.
+- OCR results should become evidence review signals with confidence and limitations. Do not create a fraud score, migrate `LocalAnalysisResult`, change receipt report semantics, or imply external verification.
+- The next safe task is Phase 4.2 synthetic OCR fixture harness work before any real provider, route, SDK, credential, env var, upload, storage, or live scoring work.
 
 Deferred until a later Phase 4 implementation slice is explicitly opened:
 
