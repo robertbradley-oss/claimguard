@@ -204,20 +204,22 @@ Phase 3 should inherit these Phase 2 decisions:
 
 ## Phase 2 Closeout Recommendation
 
-Phase 2 can close after one final review-only closeout checkpoint if this Phase 2.9.0 plan is reviewed, committed, and pushed without blockers.
+Phase 2.9.1 review-only closeout passed after this Phase 2.9.0 plan was reviewed, committed, and pushed. Phase 2 is closed as non-live unsupported/product-photo readiness.
 
-Recommended final closeout scope:
+The final closeout confirmed:
 
-- Confirm `main` is clean and synced.
-- Confirm Phase 2 remains non-live.
-- Confirm dev-only routes remain unlinked and production-blocked.
-- Confirm `ClaimReviewWorkflow` is unwired.
-- Confirm `analyzeEvidenceFile`, `LocalAnalysisResult`, receipt report mapping, upload, parser, scoring, fixtures, providers/storage/integrations/case queues, OCR/metadata, and receipt behavior are unchanged.
-- Confirm semantic/privacy checks and product-photo probes pass.
-- Confirm no deployment occurred.
-- Decide that Phase 3 may begin as planning-only case workflow readiness, not implementation, unless Robert explicitly opens implementation.
+- `main` was clean and synced at `095fd18`.
+- Phase 2 remains non-live.
+- Dev-only routes remain unlinked and production-blocked, including `/dev/unsupported-evidence-review` returning 404 under `next start`.
+- `ClaimReviewWorkflow` remains unwired.
+- Unsupported-evidence live UI does not exist.
+- `ProductPhotoReviewPanel` remains unrouted.
+- `analyzeEvidenceFile`, `LocalAnalysisResult`, receipt report mapping, upload, parser, scoring, fixtures, providers/storage/integrations/case queues, OCR/metadata, and receipt behavior are unchanged.
+- Semantic/privacy checks, product-photo probes, build, protected-path scans, and dev/prod bridge verification passed.
+- No deployment occurred.
+- Phase 3 has not started and may begin only as planning-only case workflow readiness unless Robert explicitly opens implementation.
 
-If that final closeout finds no blocker, no further Phase 2 planning checkpoint is needed.
+No further Phase 2 planning checkpoint is needed before moving to Phase 3.0 planning-only case workflow readiness.
 
 ## Stop Conditions
 
@@ -236,10 +238,10 @@ Stop any future implementation if:
 
 ## Recommended Next Task
 
-After this docs-only plan is reviewed, checked, committed, and pushed, run a review-only Phase 2.9.1 / Phase 2 closeout.
+After Phase 2.9.1 closeout, run Phase 3.0 planning-only case workflow readiness.
 
-Recommended closeout prompt:
+Recommended planning prompt:
 
 ```text
-/claimguardagent run review-only Phase 2.9.1 closeout for Phase 2 non-live readiness after the Phase 2.9.0 plan; verify main is clean and synced, Phase 2 remains non-live, dev-only routes remain unlinked and production-blocked, ClaimReviewWorkflow remains unwired, analyzeEvidenceFile and LocalAnalysisResult remain receipt-only/receipt-shaped, receipt behavior is unchanged, product-photo/unsupported-evidence runtime remains non-live, no upload/report/parser/scoring/fixture/provider/storage/integration/case-queue/OCR/metadata/deployment changes occurred, checks pass, and decide whether Phase 2 can close; do not edit, commit, push, deploy, wire runtime, add live UI, or start Phase 3 implementation
+/claimguardagent run Phase 3.0 planning-only case workflow readiness after Phase 2 closed as non-live unsupported/product-photo readiness; define case review states, audit/history needs, reviewer actions, privacy/retention boundaries, and handoff requirements; do not implement Phase 3 code, wire ClaimReviewWorkflow, add live unsupported-evidence UI, route ProductPhotoReviewPanel, change upload/report/parser/scoring/fixtures, change receipt behavior, connect providers/storage/integrations/case queues/OCR/metadata, deploy, or push
 ```
