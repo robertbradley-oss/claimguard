@@ -314,8 +314,8 @@ const requiredCaseCommandCenterSignals = [
     patterns: [/import \{ CaseReviewCommandCenter \} from "@\/components\/CaseReviewCommandCenter";/],
   },
   {
-    label: "phase 3.7 evidence detail polish shell label",
-    patterns: [/Phase 3\.7 evidence detail polish/],
+    label: "phase 3.8 case header polish shell label",
+    patterns: [/Phase 3\.8 case header polish/],
   },
   {
     label: "mock local data only label",
@@ -324,6 +324,30 @@ const requiredCaseCommandCenterSignals = [
   {
     label: "case review command center heading",
     patterns: [/Case Review Command Center/],
+  },
+  {
+    label: "phase 3.8 synthetic case title",
+    patterns: [/Synthetic warranty review case/],
+  },
+  {
+    label: "phase 3.8 review posture strip",
+    patterns: [/Review posture strip/, /Review posture: compare local evidence summaries with support policy/],
+  },
+  {
+    label: "phase 3.8 summary chips",
+    patterns: [/Evidence and review summary chips/, /Customer-safe wording/, /Timeline events/],
+  },
+  {
+    label: "phase 3.8 static command bar",
+    patterns: [/Static command\/status bar/, /Orientation labels only/],
+  },
+  {
+    label: "phase 3.8 no live command boundary",
+    patterns: [/Nothing here is live, saved, sent, exported, synced, persisted, or connected to a ticket system/],
+  },
+  {
+    label: "phase 3.8 local safety badges",
+    patterns: [/Local shell/, /Synthetic case/, /Not persisted/, /No live actions/],
   },
   {
     label: "selected evidence bench structure",

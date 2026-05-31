@@ -142,11 +142,39 @@ export type CaseReviewSummary = {
   recommendedSupportAction: string;
 };
 
+export type CaseHeaderSummaryChip = {
+  label: string;
+  value: string;
+  detail: string;
+};
+
+export type CaseCommandBarItem = {
+  key: string;
+  label: string;
+  status: string;
+  detail: string;
+};
+
+export type CaseHeaderContext = {
+  caseTitle: string;
+  caseType: string;
+  queueContext: string;
+  priorityLabel: string;
+  statusNarrative: string;
+  reviewPosture: string;
+  safeNextPosture: string;
+  localOnlyBoundary: string;
+  privacyBadges: readonly string[];
+  summaryChips: readonly CaseHeaderSummaryChip[];
+  commandBarItems: readonly CaseCommandBarItem[];
+};
+
 export type ClaimGuardLocalCase = {
   caseRef: string;
   workflowStatus: CaseWorkflowStatus;
   attentionLevel: CaseAttentionLevel;
   privacyPosture: string;
+  headerContext: CaseHeaderContext;
   customerClaimSummary: string;
   evidenceItems: readonly CaseEvidenceItem[];
   reviewSummary: CaseReviewSummary;
@@ -160,6 +188,86 @@ export const phase32MockCase: ClaimGuardLocalCase = {
   workflowStatus: "Manual review",
   attentionLevel: "Manual review recommended",
   privacyPosture: "Synthetic local review state only. No customer evidence is stored by this shell.",
+  headerContext: {
+    caseTitle: "Synthetic warranty review case",
+    caseType: "Warranty review",
+    queueContext: "Static local command center shell",
+    priorityLabel: "Needs policy check",
+    statusNarrative:
+      "Mock status is manual review because the case combines eligible receipt context, redacted screenshot context, and unsupported product-photo-like evidence.",
+    reviewPosture:
+      "Review posture: compare local evidence summaries with support policy before asking for clearer eligible evidence.",
+    safeNextPosture:
+      "Safe next posture: keep the case in manual review, request clearer eligible evidence only if policy requires it, and avoid any final support outcome language.",
+    localOnlyBoundary:
+      "Static command/status labels only. Nothing here is live, saved, sent, exported, synced, persisted, or connected to a ticket system.",
+    privacyBadges: [
+      "Local shell",
+      "Synthetic case",
+      "Not persisted",
+      "No live actions",
+      "No external verification",
+    ],
+    summaryChips: [
+      {
+        label: "Evidence items",
+        value: "4",
+        detail: "Receipt, order context, unsupported product-photo-like evidence, and customer context summaries.",
+      },
+      {
+        label: "Review state",
+        value: "Manual review",
+        detail: "Reviewer-entered support decision is still required.",
+      },
+      {
+        label: "Manual review needed",
+        value: "Yes",
+        detail: "Mixed evidence and unsupported evidence require a policy check.",
+      },
+      {
+        label: "Customer-safe wording",
+        value: "Prepared locally",
+        detail: "Draft wording is static, not sent, and not saved.",
+      },
+      {
+        label: "Timeline events",
+        value: "9",
+        detail: "Synthetic audit structure only; no stored audit record exists.",
+      },
+    ],
+    commandBarItems: [
+      {
+        key: "case-context",
+        label: "Case context",
+        status: "Warranty review",
+        detail: "Orient reviewer to a synthetic shipment-support concern.",
+      },
+      {
+        key: "review-posture",
+        label: "Review posture",
+        status: "Manual policy check",
+        detail: "Compare evidence summaries before any support response.",
+      },
+      {
+        key: "evidence-summary",
+        label: "Evidence summary",
+        status: "4 local items",
+        detail: "Shows static evidence counts and review-state indicators only.",
+      },
+      {
+        key: "customer-wording",
+        label: "Customer-safe wording",
+        status: "Prepared locally",
+        detail: "Available as review guidance only; not sent or saved.",
+      },
+      {
+        key: "local-boundary",
+        label: "Local-only boundary",
+        status: "No live actions",
+        detail: "No persistence, export, ticket writeback, upload, or integration.",
+      },
+    ],
+  },
   customerClaimSummary:
     "Customer reports a shipment concern and submitted mixed evidence for support review. Details are intentionally redacted in this local shell.",
   evidenceItems: [

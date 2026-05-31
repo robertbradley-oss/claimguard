@@ -281,6 +281,105 @@ function FieldTile({ label, value }: { label: string; value: string }) {
   );
 }
 
+function HeaderSummaryChip({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return (
+    <div className="min-h-[112px] rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.74)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--cg-text-subtle)]">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-[var(--cg-text)]">{value}</p>
+      <p className="mt-2 text-xs leading-5 text-[var(--cg-text-muted)]">{detail}</p>
+    </div>
+  );
+}
+
+function CaseHeaderOrientation() {
+  const header = phase32MockCase.headerContext;
+
+  return (
+    <header className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.74)] p-4 shadow-[0_18px_42px_rgba(77,62,36,0.08),inset_0_1px_0_rgba(255,255,255,0.72)]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge label="Phase 3.8 case header polish" tone="bronze" />
+            <StatusBadge label={phase32MockCase.workflowStatus} tone="amber" />
+            <StatusBadge label="Mock/local data only" />
+            <StatusBadge label={header.priorityLabel} tone="amber" />
+          </div>
+          <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[var(--cg-text-subtle)]">
+            Case Review Command Center / {header.caseType}
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-normal text-[var(--cg-text)] sm:text-3xl">
+            {header.caseTitle}
+          </h1>
+          <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--cg-text-muted)]">
+            {phase32MockCase.caseRef}. {phase32MockCase.customerClaimSummary}
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <FieldTile label="Mock status" value={phase32MockCase.workflowStatus} />
+            <FieldTile label="Queue context" value={header.queueContext} />
+            <FieldTile label="Review priority" value={header.priorityLabel} />
+          </div>
+        </div>
+
+        <aside className="rounded-lg border border-[rgba(26,31,39,0.28)] bg-[var(--cg-bg-panel)] p-4 shadow-[0_18px_42px_rgba(77,62,36,0.12),inset_0_1px_0_rgba(255,255,255,0.06)]">
+          <SectionLabel icon={ShieldCheck} label="Local privacy posture" tone="dark" />
+          <p className="mt-3 text-sm leading-6 text-[var(--cg-dark-muted)]">{phase32MockCase.privacyPosture}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {header.privacyBadges.map((badge) => (
+              <StatusBadge key={badge} label={badge} tone="dark" />
+            ))}
+          </div>
+        </aside>
+      </div>
+
+      <section className="mt-4 rounded-lg border border-[rgba(184,133,24,0.24)] bg-[rgba(246,241,232,0.66)] p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <SectionLabel icon={ClipboardList} label="Review posture strip" />
+            <p className="mt-2 text-sm leading-6 text-[var(--cg-text)]">{header.reviewPosture}</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--cg-text-muted)]">{header.safeNextPosture}</p>
+          </div>
+          <span className={`rounded-md border px-2.5 py-1 text-xs font-medium ${attentionTone[phase32MockCase.attentionLevel]}`}>
+            {phase32MockCase.attentionLevel}
+          </span>
+        </div>
+        <p className="mt-3 rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.68)] p-3 text-xs leading-5 text-[var(--cg-text-subtle)]">
+          {header.localOnlyBoundary}
+        </p>
+      </section>
+
+      <section className="mt-4">
+        <SectionLabel icon={ListChecks} label="Evidence and review summary chips" />
+        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {header.summaryChips.map((chip) => (
+            <HeaderSummaryChip key={chip.label} label={chip.label} value={chip.value} detail={chip.detail} />
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-4 rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.64)] p-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <SectionLabel icon={CircleDot} label="Static command/status bar" />
+          <StatusBadge label="Orientation labels only" />
+        </div>
+        <div className="mt-3 grid gap-2 lg:grid-cols-5">
+          {header.commandBarItems.map((item) => (
+            <div
+              className="min-h-[112px] rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.58)] p-3"
+              key={item.key}
+            >
+              <p className="text-xs font-semibold text-[var(--cg-text)]">{item.label}</p>
+              <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--cg-amber)]">{item.status}</p>
+              <p className="mt-2 text-xs leading-5 text-[var(--cg-text-muted)]">{item.detail}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <p className="mt-4 text-sm leading-6 text-[var(--cg-text-muted)]">{header.statusNarrative}</p>
+    </header>
+  );
+}
+
 function TimelineAuditTrail({ selectedEvidence }: { selectedEvidence: CaseEvidenceItem }) {
   const selectedEvidenceEvents = phase32MockCase.timeline.filter((event) =>
     event.relatedEvidenceKeys.includes(selectedEvidence.key),
@@ -757,29 +856,7 @@ export function CaseReviewCommandCenter() {
   return (
     <main className="min-h-screen bg-[var(--cg-bg)] text-[var(--cg-text)]">
       <div className="mx-auto flex min-h-screen max-w-[1540px] flex-col gap-4 px-4 py-4 sm:px-6">
-        <header className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.70)] px-4 py-4 shadow-[0_18px_42px_rgba(77,62,36,0.08),inset_0_1px_0_rgba(255,255,255,0.72)]">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge label="Phase 3.7 evidence detail polish" tone="bronze" />
-                <StatusBadge label={phase32MockCase.workflowStatus} tone="amber" />
-                <StatusBadge label="Mock/local data only" />
-              </div>
-              <h1 className="mt-3 text-2xl font-semibold tracking-normal text-[var(--cg-text)] sm:text-3xl">Case Review Command Center</h1>
-              <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--cg-text-muted)]">
-                {phase32MockCase.caseRef}. {phase32MockCase.customerClaimSummary}
-              </p>
-            </div>
-            <div className="grid min-w-[260px] gap-2 text-sm">
-              <div className={`rounded-md border px-3 py-2 font-medium ${attentionTone[phase32MockCase.attentionLevel]}`}>
-                {phase32MockCase.attentionLevel}
-              </div>
-              <div className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.66)] px-3 py-2 text-[var(--cg-text-muted)]">
-                {phase32MockCase.privacyPosture}
-              </div>
-            </div>
-          </div>
-        </header>
+        <CaseHeaderOrientation />
 
         <div className="grid flex-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)_390px]">
           <EvidenceSidebar selectedEvidence={selectedEvidence} onSelect={setSelectedKey} />
