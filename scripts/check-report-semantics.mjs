@@ -314,8 +314,8 @@ const requiredCaseCommandCenterSignals = [
     patterns: [/import \{ CaseReviewCommandCenter \} from "@\/components\/CaseReviewCommandCenter";/],
   },
   {
-    label: "phase 3.6 customer-safe wording polish shell label",
-    patterns: [/Phase 3\.6 customer-safe wording polish/],
+    label: "phase 3.7 evidence detail polish shell label",
+    patterns: [/Phase 3\.7 evidence detail polish/],
   },
   {
     label: "mock local data only label",
@@ -328,6 +328,38 @@ const requiredCaseCommandCenterSignals = [
   {
     label: "selected evidence bench structure",
     patterns: [/Selected evidence bench/],
+  },
+  {
+    label: "phase 3.7 evidence detail polish marker",
+    patterns: [/Phase 3\.7 renders structured local summaries and mock evidence-detail planning only/],
+  },
+  {
+    label: "phase 3.7 grouped evidence bench marker",
+    patterns: [/Reviewed receipt evidence/, /Manual-review-only evidence/],
+  },
+  {
+    label: "phase 3.7 structured evidence metadata",
+    patterns: [/Structured evidence metadata/],
+  },
+  {
+    label: "phase 3.7 synthetic review context",
+    patterns: [/Synthetic review context/],
+  },
+  {
+    label: "phase 3.7 observed review signals",
+    patterns: [/Observed review signals/],
+  },
+  {
+    label: "phase 3.7 investigation focus",
+    patterns: [/Investigation focus/],
+  },
+  {
+    label: "phase 3.7 cross-reference trail",
+    patterns: [/Cross-reference trail/],
+  },
+  {
+    label: "phase 3.7 next-step cues",
+    patterns: [/Next-step cues/],
   },
   {
     label: "off-white case shell visual direction",

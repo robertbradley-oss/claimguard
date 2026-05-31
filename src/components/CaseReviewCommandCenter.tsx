@@ -11,12 +11,15 @@ import {
   FilePlus2,
   FileSearch,
   History,
+  Link2,
+  ListChecks,
   MessageSquareText,
   NotebookText,
   PanelLeft,
   PenLine,
   ScanLine,
   ShieldCheck,
+  Tags,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -24,7 +27,9 @@ import {
   phase32MockCase,
   type CaseAttentionLevel,
   type CaseCustomerSafeWordingTone,
+  type CaseEvidenceBenchGroup,
   type CaseEvidenceItem,
+  type CaseEvidenceReviewState,
   type CaseManualDecisionTone,
   type CaseTimelineCategory,
   type CaseTimelineSeverity,
@@ -48,6 +53,24 @@ const evidenceIcon: Record<CaseEvidenceItem["type"], LucideIcon> = {
   "Shipping confirmation": ClipboardList,
   "Customer message": MessageSquareText,
   "Product-photo-like unsupported": AlertTriangle,
+};
+
+const evidenceGroupLabels: readonly CaseEvidenceBenchGroup[] = [
+  "Reviewed receipt evidence",
+  "Needs clearer context",
+  "Manual-review-only evidence",
+  "Context for response planning",
+];
+
+const evidenceReviewStateTone: Record<CaseEvidenceReviewState, string> = {
+  "Receipt analysis complete":
+    "border-[rgba(95,143,100,0.34)] bg-[rgba(95,143,100,0.10)] text-[var(--cg-green)]",
+  "Needs clearer copy":
+    "border-[rgba(184,133,24,0.38)] bg-[rgba(184,133,24,0.12)] text-[var(--cg-amber)]",
+  "Context only":
+    "border-[rgba(111,120,134,0.34)] bg-[rgba(111,120,134,0.10)] text-[var(--cg-blue)]",
+  "Unsupported manual review":
+    "border-[rgba(154,87,52,0.40)] bg-[rgba(154,87,52,0.12)] text-[var(--cg-copper)]",
 };
 
 const timelineCategoryIcon: Record<CaseTimelineCategory, LucideIcon> = {
@@ -156,17 +179,96 @@ function EvidenceRow({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium text-[var(--cg-text-muted)]">{item.type}</span>
-            <span className={`rounded-md border px-2 py-0.5 text-[11px] ${attentionTone[item.attentionLevel]}`}>
-              {item.attentionLevel}
+            <span className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.72)] px-2 py-0.5 text-[11px] font-semibold text-[var(--cg-text-muted)]">
+              {item.typeLabel}
+            </span>
+            <span className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${evidenceReviewStateTone[item.reviewState]}`}>
+              {item.reviewState}
             </span>
           </div>
           <p className="mt-1 text-sm font-semibold text-[var(--cg-text)]">{item.title}</p>
           <p className="mt-1 line-clamp-2 text-xs leading-5 text-[var(--cg-text-muted)]">{item.safeSummary}</p>
-          <p className="mt-2 text-xs font-medium text-[var(--cg-amber)]">{item.reviewState}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${attentionTone[item.attentionLevel]}`}>
+              {item.attentionLevel}
+            </span>
+            <span className="text-xs font-medium text-[var(--cg-amber)]">{item.statusLabel}</span>
+          </div>
         </div>
       </div>
     </button>
+  );
+}
+
+function EvidenceSidebar({
+  selectedEvidence,
+  onSelect,
+}: {
+  selectedEvidence: CaseEvidenceItem;
+  onSelect: (key: string) => void;
+}) {
+  const manualReviewCount = phase32MockCase.evidenceItems.filter(
+    (item) => item.attentionLevel === "Manual review recommended" || item.reviewState === "Unsupported manual review",
+  ).length;
+
+  return (
+    <aside className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.58)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.68)]">
+      <SectionLabel icon={PanelLeft} label="Evidence bench" />
+      <p className="mt-2 text-sm leading-6 text-[var(--cg-text-muted)]">
+        Synthetic case evidence only. Rows omit raw filenames, private identifiers, raw OCR, and metadata.
+      </p>
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <FieldTile label="Items" value={String(phase32MockCase.evidenceItems.length)} />
+        <FieldTile label="Needs review" value={String(manualReviewCount)} />
+        <FieldTile label="Live data" value="No" />
+      </div>
+
+      <div className="mt-4 rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.62)] p-3">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--cg-text-subtle)]">
+            Selected
+          </p>
+          <span className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${evidenceReviewStateTone[selectedEvidence.reviewState]}`}>
+            {selectedEvidence.reviewState}
+          </span>
+        </div>
+        <p className="mt-2 text-sm font-semibold text-[var(--cg-text)]">{selectedEvidence.title}</p>
+        <p className="mt-1 text-xs leading-5 text-[var(--cg-text-muted)]">{selectedEvidence.submittedContext}</p>
+      </div>
+
+      <div className="mt-4 space-y-5">
+        {evidenceGroupLabels.map((group) => {
+          const items = phase32MockCase.evidenceItems.filter((item) => item.benchGroup === group);
+
+          if (items.length === 0) {
+            return null;
+          }
+
+          return (
+            <section key={group}>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--cg-text-subtle)]">
+                  {group}
+                </p>
+                <span className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.68)] px-2 py-0.5 text-[11px] font-medium text-[var(--cg-text-muted)]">
+                  {items.length}
+                </span>
+              </div>
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <EvidenceRow
+                    active={item.key === selectedEvidence.key}
+                    item={item}
+                    key={item.key}
+                    onSelect={() => onSelect(item.key)}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </aside>
   );
 }
 
@@ -491,10 +593,21 @@ function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
             <SectionLabel icon={FileSearch} label="Selected evidence bench" />
             <h2 className="mt-2 text-2xl font-semibold tracking-normal text-[var(--cg-text)]">{item.title}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--cg-text-muted)]">{item.safeSummary}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.68)] px-2.5 py-1 text-xs font-medium text-[var(--cg-text-muted)]">
+                {item.typeLabel}
+              </span>
+              <span className={`rounded-md border px-2.5 py-1 text-xs font-medium ${evidenceReviewStateTone[item.reviewState]}`}>
+                {item.reviewState}
+              </span>
+              <span className="rounded-md border border-[rgba(184,133,24,0.30)] bg-[rgba(184,133,24,0.09)] px-2.5 py-1 text-xs font-medium text-[var(--cg-amber)]">
+                {item.statusLabel}
+              </span>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <StatusBadge label={item.type} tone="bronze" />
-            <StatusBadge label={item.reviewState} tone={item.reviewState === "Unsupported manual review" ? "amber" : "slate"} />
+            <StatusBadge label={item.attentionLevel} tone={item.attentionLevel === "Manual review recommended" ? "amber" : "slate"} />
           </div>
         </div>
       </div>
@@ -507,7 +620,7 @@ function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
               <div className="max-w-2xl">
                 <p className="text-xs font-semibold uppercase tracking-wide text-[var(--cg-amber)]">Privacy-safe inspection shell</p>
                 <p className="mt-3 text-sm leading-6 text-[var(--cg-text-muted)]">
-                  Phase 3.6 renders structured local summaries and mock response-prep planning only. No raw evidence preview,
+                  Phase 3.7 renders structured local summaries and mock evidence-detail planning only. No raw evidence preview,
                   file bytes, object URL, OCR text, metadata payload, provider response, storage handle, or integration
                   handle is represented.
                 </p>
@@ -521,6 +634,21 @@ function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
           </div>
 
           <section className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.68)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.70)]">
+            <SectionLabel icon={Tags} label="Structured evidence metadata" />
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {item.metadata.map((field) => (
+                <FieldTile key={field.label} label={field.label} value={field.value} />
+              ))}
+            </div>
+            <p className="mt-3 text-sm leading-6 text-[var(--cg-text-muted)]">{item.submittedContext}</p>
+          </section>
+
+          <section className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.68)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.70)]">
+            <SectionLabel icon={ClipboardList} label="Synthetic review context" />
+            <p className="mt-3 text-sm leading-6 text-[var(--cg-text)]">{item.reviewContext}</p>
+          </section>
+
+          <section className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.68)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.70)]">
             <SectionLabel icon={CheckCircle2} label="Recommended reviewer action" />
             <p className="mt-3 text-sm leading-6 text-[var(--cg-text)]">{item.recommendedReviewerAction}</p>
           </section>
@@ -528,7 +656,7 @@ function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
 
         <aside className="space-y-4">
           <section className="rounded-lg border border-[rgba(26,31,39,0.28)] bg-[var(--cg-bg-panel)] p-4 shadow-[0_18px_42px_rgba(77,62,36,0.14),inset_0_1px_0_rgba(255,255,255,0.06)]">
-            <SectionLabel icon={Activity} label="Review signals" tone="dark" />
+            <SectionLabel icon={Activity} label="Observed review signals" tone="dark" />
             <ul className="mt-3 space-y-2">
               {item.signals.map((signal) => (
                 <li key={signal} className="rounded-md border border-white/10 bg-white/[0.045] px-3 py-2 text-sm leading-6 text-[var(--cg-dark-muted)]">
@@ -544,6 +672,46 @@ function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
               {item.limitations.map((limitation) => (
                 <li key={limitation} className="text-sm leading-6 text-[var(--cg-text-muted)]">
                   {limitation}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.62)] p-4">
+            <SectionLabel icon={ListChecks} label="Investigation focus" />
+            <ul className="mt-3 space-y-2">
+              {item.investigationFocus.map((focus) => (
+                <li key={focus} className="text-sm leading-6 text-[var(--cg-text-muted)]">
+                  {focus}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="rounded-lg border border-[rgba(95,143,100,0.30)] bg-[rgba(95,143,100,0.08)] p-4">
+            <SectionLabel icon={Link2} label="Cross-reference trail" />
+            <dl className="mt-3 space-y-3 text-sm">
+              <div>
+                <dt className="font-semibold text-[var(--cg-text)]">Timeline</dt>
+                <dd className="mt-1 leading-6 text-[var(--cg-text-muted)]">{item.connections.timeline}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-[var(--cg-text)]">Manual review</dt>
+                <dd className="mt-1 leading-6 text-[var(--cg-text-muted)]">{item.connections.manualReview}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-[var(--cg-text)]">Customer-safe wording</dt>
+                <dd className="mt-1 leading-6 text-[var(--cg-text-muted)]">{item.connections.customerSafeWording}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="rounded-lg border border-[rgba(184,133,24,0.30)] bg-[rgba(184,133,24,0.09)] p-4">
+            <SectionLabel icon={CheckCircle2} label="Next-step cues" />
+            <ul className="mt-3 space-y-2">
+              {item.nextStepCues.map((cue) => (
+                <li key={cue} className="text-sm leading-6 text-[var(--cg-text-muted)]">
+                  {cue}
                 </li>
               ))}
             </ul>
@@ -593,7 +761,7 @@ export function CaseReviewCommandCenter() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge label="Phase 3.6 customer-safe wording polish" tone="bronze" />
+                <StatusBadge label="Phase 3.7 evidence detail polish" tone="bronze" />
                 <StatusBadge label={phase32MockCase.workflowStatus} tone="amber" />
                 <StatusBadge label="Mock/local data only" />
               </div>
@@ -614,27 +782,7 @@ export function CaseReviewCommandCenter() {
         </header>
 
         <div className="grid flex-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)_390px]">
-          <aside className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.58)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.68)]">
-            <SectionLabel icon={PanelLeft} label="Evidence bench" />
-            <p className="mt-2 text-sm leading-6 text-[var(--cg-text-muted)]">
-              Synthetic case evidence only. Rows omit raw filenames, private identifiers, raw OCR, and metadata.
-            </p>
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              <FieldTile label="Items" value={String(phase32MockCase.evidenceItems.length)} />
-              <FieldTile label="Selected" value="1" />
-              <FieldTile label="Live data" value="No" />
-            </div>
-            <div className="mt-4 space-y-3">
-              {phase32MockCase.evidenceItems.map((item) => (
-                <EvidenceRow
-                  active={item.key === selectedEvidence.key}
-                  item={item}
-                  key={item.key}
-                  onSelect={() => setSelectedKey(item.key)}
-                />
-              ))}
-            </div>
-          </aside>
+          <EvidenceSidebar selectedEvidence={selectedEvidence} onSelect={setSelectedKey} />
 
           <SelectedEvidencePanel item={selectedEvidence} />
 

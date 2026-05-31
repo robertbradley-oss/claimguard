@@ -20,15 +20,41 @@ export type CaseEvidenceReviewState =
   | "Context only"
   | "Unsupported manual review";
 
+export type CaseEvidenceBenchGroup =
+  | "Reviewed receipt evidence"
+  | "Needs clearer context"
+  | "Manual-review-only evidence"
+  | "Context for response planning";
+
+export type CaseEvidenceMetadata = {
+  label: string;
+  value: string;
+};
+
+export type CaseEvidenceConnections = {
+  timeline: string;
+  manualReview: string;
+  customerSafeWording: string;
+};
+
 export type CaseEvidenceItem = {
   key: string;
   type: CaseEvidenceType;
+  typeLabel: string;
   title: string;
+  benchGroup: CaseEvidenceBenchGroup;
   reviewState: CaseEvidenceReviewState;
+  statusLabel: string;
   attentionLevel: CaseAttentionLevel;
+  submittedContext: string;
   safeSummary: string;
+  reviewContext: string;
+  metadata: readonly CaseEvidenceMetadata[];
   limitations: readonly string[];
   signals: readonly string[];
+  investigationFocus: readonly string[];
+  nextStepCues: readonly string[];
+  connections: CaseEvidenceConnections;
   recommendedReviewerAction: string;
   externalVerification: "Not performed";
   verificationStatus: "Not externally verified";
@@ -140,11 +166,24 @@ export const phase32MockCase: ClaimGuardLocalCase = {
     {
       key: "receipt-summary",
       type: "Receipt",
+      typeLabel: "Eligible receipt summary",
       title: "Receipt review summary",
+      benchGroup: "Reviewed receipt evidence",
       reviewState: "Receipt analysis complete",
+      statusLabel: "Local receipt summary available",
       attentionLevel: "Review signals",
+      submittedContext:
+        "Represented as an eligible receipt evidence summary for local support review.",
       safeSummary:
         "Local receipt analysis summary is represented as a case evidence item without changing the receipt analyzer.",
+      reviewContext:
+        "Use this item as the strongest eligible purchase-context signal, while keeping external verification and final support action separate.",
+      metadata: [
+        { label: "Evidence type", value: "Receipt" },
+        { label: "Review state", value: "Receipt analysis complete" },
+        { label: "Submitted context", value: "Eligible receipt evidence summary" },
+        { label: "External verification", value: "Not performed" },
+      ],
       limitations: [
         "External Verification: Not performed",
         "Verification Status: Not externally verified",
@@ -154,6 +193,19 @@ export const phase32MockCase: ClaimGuardLocalCase = {
         "Review signal: extracted fields are present enough for support review",
         "Review signal: manual policy check still required",
       ],
+      investigationFocus: [
+        "Compare receipt context with screenshot context before requesting more information.",
+        "Treat local score language as evidence reliability only, not a final case outcome.",
+      ],
+      nextStepCues: [
+        "Check whether support policy requires a clearer eligible receipt copy.",
+        "Use customer-safe wording if asking for additional eligible evidence.",
+      ],
+      connections: {
+        timeline: "Linked to receipt summary added and receipt review summary complete events.",
+        manualReview: "Feeds the manual-review comparison between eligible receipt context and other evidence.",
+        customerSafeWording: "Supports a neutral request for clearer eligible receipt evidence if needed.",
+      },
       recommendedReviewerAction:
         "Compare the receipt summary with support policy and other available case evidence.",
       externalVerification: "Not performed",
@@ -162,11 +214,24 @@ export const phase32MockCase: ClaimGuardLocalCase = {
     {
       key: "order-context",
       type: "Order screenshot",
+      typeLabel: "Order context",
       title: "Order context screenshot",
+      benchGroup: "Needs clearer context",
       reviewState: "Needs clearer copy",
+      statusLabel: "Readability needs review",
       attentionLevel: "Review signals",
+      submittedContext:
+        "Represented as a redacted order-context summary for local review only.",
       safeSummary:
         "Screenshot context is included as local reviewer context only and is not treated as external verification.",
+      reviewContext:
+        "Use this item to understand timing and item context, but request a clearer copy if the context is not readable enough for policy review.",
+      metadata: [
+        { label: "Evidence type", value: "Order screenshot" },
+        { label: "Review state", value: "Needs clearer copy" },
+        { label: "Submitted context", value: "Redacted order-context summary" },
+        { label: "External verification", value: "Not performed" },
+      ],
       limitations: [
         "No provider lookup was performed",
         "No raw screenshot or private order details are represented",
@@ -176,6 +241,19 @@ export const phase32MockCase: ClaimGuardLocalCase = {
         "Review signal: screenshot context may help compare dates and item context",
         "Needs clearer evidence if the support team cannot read the submitted copy",
       ],
+      investigationFocus: [
+        "Use screenshot context as supporting context only.",
+        "Keep readability concerns separate from conclusions about the customer or evidence.",
+      ],
+      nextStepCues: [
+        "Ask for a clearer copy only if policy review cannot proceed with the current context.",
+        "Cross-check with the receipt summary before drafting a customer-facing request.",
+      ],
+      connections: {
+        timeline: "Linked to order context added and internal note drafted events.",
+        manualReview: "Guides whether the reviewer asks for clearer context before policy comparison.",
+        customerSafeWording: "Supports careful wording that asks for a clearer copy without implying external checking.",
+      },
       recommendedReviewerAction:
         "Request a clearer copy if the submitted context is not readable enough for policy review.",
       externalVerification: "Not performed",
@@ -184,11 +262,24 @@ export const phase32MockCase: ClaimGuardLocalCase = {
     {
       key: "photo-unsupported",
       type: "Product-photo-like unsupported",
+      typeLabel: "Unsupported evidence",
       title: "Product-photo-like evidence",
+      benchGroup: "Manual-review-only evidence",
       reviewState: "Unsupported manual review",
+      statusLabel: "Stopped before automated analysis",
       attentionLevel: "Manual review recommended",
+      submittedContext:
+        "Represented as product-photo-like evidence that remains unsupported and manual-review-only.",
       safeSummary:
         "This evidence type is represented as unsupported/manual-review-only. No automated analysis result was produced for this evidence item.",
+      reviewContext:
+        "Use this item as a boundary marker: it may matter to the support review, but it does not have an automated finding in this shell.",
+      metadata: [
+        { label: "Evidence type", value: "Product-photo-like unsupported" },
+        { label: "Review state", value: "Unsupported manual review" },
+        { label: "Submitted context", value: "Unsupported manual-review-only evidence" },
+        { label: "External verification", value: "Not performed" },
+      ],
       limitations: [
         "OCR was not run for this evidence item",
         "Metadata processing was not run for this evidence item",
@@ -199,6 +290,19 @@ export const phase32MockCase: ClaimGuardLocalCase = {
         "Manual review recommended before action",
         "Could not be verified from available evidence in this local shell",
       ],
+      investigationFocus: [
+        "Keep this evidence outside automated receipt analysis and outside product-photo runtime.",
+        "Use support policy or request eligible receipt evidence when this item cannot support review by itself.",
+      ],
+      nextStepCues: [
+        "Escalate for policy review if unsupported evidence is central to the case.",
+        "Avoid customer-facing wording that describes an automated product-photo finding.",
+      ],
+      connections: {
+        timeline: "Linked to unsupported evidence marked, status moved to manual review, and senior review may be needed events.",
+        manualReview: "Drives the unsupported/manual-review-only branch of the local review plan.",
+        customerSafeWording: "Requires language that says manual review is in progress, not that automated analysis found an issue.",
+      },
       recommendedReviewerAction:
         "Use support policy and available evidence, or request eligible receipt evidence if needed.",
       externalVerification: "Not performed",
@@ -213,11 +317,24 @@ export const phase32MockCase: ClaimGuardLocalCase = {
     {
       key: "customer-message",
       type: "Customer message",
+      typeLabel: "Customer context",
       title: "Customer context summary",
+      benchGroup: "Context for response planning",
       reviewState: "Context only",
+      statusLabel: "Context only",
       attentionLevel: "Low attention",
+      submittedContext:
+        "Represented as a redacted customer-context summary for response planning only.",
       safeSummary:
         "Message context is summarized for reviewer orientation only and is kept separate from customer-safe response wording.",
+      reviewContext:
+        "Use this item to choose a helpful next question, while keeping internal rationale and private message details out of customer-facing text.",
+      metadata: [
+        { label: "Evidence type", value: "Customer message" },
+        { label: "Review state", value: "Context only" },
+        { label: "Submitted context", value: "Redacted message-context summary" },
+        { label: "External verification", value: "Not performed" },
+      ],
       limitations: [
         "No private message text is stored in the mock case",
         "Context does not replace evidence review",
@@ -226,6 +343,19 @@ export const phase32MockCase: ClaimGuardLocalCase = {
         "Review signal: customer context may explain what additional information to request",
         "Manual decision remains reviewer-entered",
       ],
+      investigationFocus: [
+        "Use context to reduce back-and-forth without exposing internal rationale.",
+        "Do not treat customer context as evidence verification.",
+      ],
+      nextStepCues: [
+        "Select wording that asks for the narrowest missing context.",
+        "Keep reviewer notes separate from any customer-facing draft.",
+      ],
+      connections: {
+        timeline: "Linked to internal note drafted and customer-safe wording ready events.",
+        manualReview: "Helps the reviewer decide which follow-up question is appropriate.",
+        customerSafeWording: "Feeds courteous wording while excluding internal review rationale.",
+      },
       recommendedReviewerAction:
         "Use the context to choose the next support question without copying internal notes to the customer.",
       externalVerification: "Not performed",
