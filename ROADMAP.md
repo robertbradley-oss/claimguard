@@ -88,7 +88,7 @@ Deferred until Robert explicitly opens a later Phase 2 runtime slice:
 
 ## Phase 3: Case Review Workflow
 
-Status: Phase 3.0 planning-only case workflow readiness is documented in `PHASE_3_0_CASE_WORKFLOW_READINESS_PLAN.md`. Phase 3.1 design system/case workflow concept planning is documented in `PHASE_3_1_CASE_WORKFLOW_DESIGN_CONCEPT.md`. Phase 3.2 is implemented locally as a non-persistent Case Review Command Center shell at `/case-command-center` with mock/local case data only, pending review/commit approval.
+Status: Phase 3.0 planning-only case workflow readiness is documented in `PHASE_3_0_CASE_WORKFLOW_READINESS_PLAN.md`. Phase 3.1 design system/case workflow concept planning is documented in `PHASE_3_1_CASE_WORKFLOW_DESIGN_CONCEPT.md`. Phase 3.2 is pushed and reviewed at `a169de4` (`feat: add phase 3.2 local case command center shell`) as a non-persistent Case Review Command Center shell at `/case-command-center` with mock/local case data only.
 
 Meaning:
 
@@ -109,7 +109,8 @@ Current planning boundary:
 - Planned evidence categories include receipt evidence, unsupported/product-photo evidence, order screenshots, shipping confirmations, and customer message/context.
 - Planned UX architecture includes a case review shell, evidence list/sidebar, selected evidence panel, review summary panel, notes/manual decision panel, customer-safe wording panel, and timeline/history area.
 - Planned visual direction is a dark forensic Case Review Command Center with an enterprise evidence-review feel, selected-evidence-first layout, compact operational badges, manual-review indicators, customer-safe wording separated from internal notes, and timeline/audit rows. It should avoid generic SaaS dashboards, centered hero sections, default demo-card layouts, and repeated identical white panels.
-- Phase 3.2 adds the local shell using `src/components/CaseReviewCommandCenter.tsx` and `src/lib/case-command-center/mock-case.ts`. It keeps receipt preservation protected and adds no unsupported-evidence runtime wiring, persistence, integrations, product-photo runtime, OCR/metadata expansion, auth/org/billing work, deployment, or live app navigation.
+- Phase 3.2 adds the local shell using `src/components/CaseReviewCommandCenter.tsx` and `src/lib/case-command-center/mock-case.ts`. Post-push QA passed: `/case-command-center` renders, `/` remains the existing Phase 1 receipt workflow, `/` does not link to `/case-command-center`, and browser console checks reported no warnings/errors. No deployment occurred. It keeps receipt preservation protected and adds no unsupported-evidence runtime wiring, persistence, upload behavior, integrations, product-photo runtime, OCR/metadata expansion, storage/providers, auth/org/billing work, real evidence, deployment, or live app navigation.
+- The narrowest safe Phase 3.3 task is visual hierarchy and selected-evidence structure polish for `/case-command-center` only, still mock/local and synthetic-only. Phase 3.3 should not add persistence or deeper workflow behavior yet.
 
 Deferred until Phase 3 is explicitly opened:
 
