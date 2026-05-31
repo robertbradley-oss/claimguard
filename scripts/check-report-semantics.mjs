@@ -110,6 +110,9 @@ const mockProviderAdapterCorpus = `${mockProviderAdapter}\n${mockProviderAdapter
 const phase49ProviderSelectionPlan = readRequiredFile("PHASE_4_9_OCR_PROVIDER_SELECTION_PLAN.md");
 const phase410ProviderAbstractionPlan = readRequiredFile("PHASE_4_10_PROVIDER_ABSTRACTION_PLAN.md");
 const phase411MockProviderAdapterPlan = readRequiredFile("PHASE_4_11_MOCK_PROVIDER_ADAPTER_PLAN.md");
+const phase413MockProviderSafetyCheckpoint = readRequiredFile(
+  "PHASE_4_13_MOCK_PROVIDER_ADAPTER_SAFETY_READINESS_CHECKPOINT.md",
+);
 
 const requiredSemanticSignals = [
   {
@@ -704,6 +707,67 @@ const forbiddenPhase411MockProviderAdapterPatterns = [
   /automatic (?:deny|approval|rejection|refund|disposition) (?:is|will be|should be) (?:enabled|allowed|performed)/i,
 ];
 
+const requiredPhase413MockProviderSafetySignals = [
+  {
+    label: "Phase 4.13 review-only marker",
+    patterns: [/Phase 4\.13 is a review-only safety and readiness checkpoint/],
+  },
+  {
+    label: "Phase 4.12 adapter status",
+    patterns: [/MOCK_PROVIDER_MODE/, /runMockOcrProvider/, /runMockVisionProvider/, /validateMockProviderAdapterInput/],
+  },
+  {
+    label: "mock-only boundary assessment",
+    patterns: [/Mock-only/, /Synthetic-only/, /Provider-free/, /External-network-free/, /Live-analyzer-free/],
+  },
+  {
+    label: "input validation review",
+    patterns: [/Base64 images/, /Object URLs/, /Provider payloads/, /Non-synthetic provider modes/],
+  },
+  {
+    label: "mock OCR output review",
+    patterns: [/Synthetic text blocks/, /Synthetic structured field candidates/, /Contract compatibility with `ocr-extraction-contract`/],
+  },
+  {
+    label: "mock vision output review",
+    patterns: [/Altered\/AI-generated-image uncertainty placeholder/, /confidence-style `1-100` uncertainty value/],
+  },
+  {
+    label: "failure simulation review",
+    patterns: [/Timeout is operational only/, /Unsupported evidence is an evidence limitation only/, /Internal normalization error is operational only/],
+  },
+  {
+    label: "route and contract relationship",
+    patterns: [/The existing `POST \/api\/analysis\/ocr` route remains exact fixture-key only/, /The existing route is not wired to the mock adapter/, /Mock vision remains separate from receipt scoring/],
+  },
+  {
+    label: "probe and check coverage",
+    patterns: [/MOCK_PROVIDER_ADAPTER_DEVELOPER_PROBE/, /No `LocalAnalysisResult` shape/, /Base64-like rejection/],
+  },
+  {
+    label: "safety language review",
+    patterns: [/OCR confidence is a review signal only/, /Vision confidence is a review signal only/, /Altered\/AI-generated-image confidence is an uncertainty signal only/],
+  },
+  {
+    label: "Phase 4.14 safe options",
+    patterns: [/Option A: Phase 4\.14 mock adapter developer documentation and usage examples/, /Option B: Phase 4\.14 mock adapter route integration planning only/, /Option C: Phase 4\.14 OpenAI Vision sandbox planning only/],
+  },
+];
+
+const forbiddenPhase413MockProviderSafetyPatterns = [
+  /npm\s+(?:install|add)\s+(?:openai|@aws-sdk|@google-cloud)/i,
+  /OPENAI_API_KEY|GOOGLE_APPLICATION_CREDENTIALS|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY/,
+  /process\.env\.(?:OPENAI|GOOGLE|AWS|OCR|VISION)/i,
+  /import\s+.*\s+from\s+["'](?:openai|@aws-sdk|@google-cloud)/i,
+  /multipart\/form-data\s+is\s+accepted/i,
+  /raw provider payloads? (?:will|should) be logged/i,
+  /raw real OCR (?:will|should) be retained/i,
+  /real evidence processing (?:is|will be) enabled/i,
+  /(?:This milestone|Phase 4\.13|The checkpoint) (?:wires|wired|will wire) .*mock adapter/i,
+  /live OpenAI Vision implementation (?:is|was|will be) added/i,
+  /automatic (?:deny|approval|rejection|refund|disposition) (?:is|will be|should be) (?:enabled|allowed|performed)/i,
+];
+
 const forbiddenOcrRouteImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/types",
@@ -800,6 +864,12 @@ for (const signal of requiredMockProviderAdapterSignals) {
   }
 }
 
+for (const signal of requiredPhase413MockProviderSafetySignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(phase413MockProviderSafetyCheckpoint))) {
+    failures.push(`Missing Phase 4.13 mock-provider safety checkpoint signal: ${signal.label}`);
+  }
+}
+
 for (const bannedPhrase of guardedBannedPhrases) {
   if (bannedPhrase.test(corpus)) {
     failures.push(`Unsafe report, fixture, or QA wording found: ${bannedPhrase}`);
@@ -875,6 +945,12 @@ for (const pattern of forbiddenPhase410ProviderAbstractionPatterns) {
 for (const pattern of forbiddenPhase411MockProviderAdapterPatterns) {
   if (pattern.test(phase411MockProviderAdapterPlan)) {
     failures.push(`Phase 4.11 mock-provider-adapter planning check failed: forbidden implementation/privacy pattern ${pattern}`);
+  }
+}
+
+for (const pattern of forbiddenPhase413MockProviderSafetyPatterns) {
+  if (pattern.test(phase413MockProviderSafetyCheckpoint)) {
+    failures.push(`Phase 4.13 mock-provider safety checkpoint failed: forbidden implementation/privacy pattern ${pattern}`);
   }
 }
 
