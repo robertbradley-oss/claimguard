@@ -39,6 +39,8 @@ const filesToCheck = [
   "src/lib/analysis/pre-analysis-evidence-gate-runtime.probe.ts",
   "src/lib/analysis/unsupported-evidence-review-state.ts",
   "src/lib/analysis/unsupported-evidence-review-state.probe.ts",
+  "src/lib/analysis/workflow-pre-analysis-gate-boundary.ts",
+  "src/lib/analysis/workflow-pre-analysis-gate-boundary.probe.ts",
   "src/components/ProductPhotoReviewPanel.tsx",
   "src/components/ProductPhotoReviewPanel.probe.tsx",
   "src/components/AnalysisReport.tsx",
@@ -1954,6 +1956,244 @@ if (
   )
 ) {
   failures.push("Unsupported evidence review-state boundary check failed: mapper is imported by live app/report/UI files.");
+}
+
+const workflowPreAnalysisGateBoundary =
+  fileContents.get("src/lib/analysis/workflow-pre-analysis-gate-boundary.ts") ?? "";
+const workflowPreAnalysisGateBoundaryProbe =
+  fileContents.get("src/lib/analysis/workflow-pre-analysis-gate-boundary.probe.ts") ?? "";
+
+const requiredWorkflowPreAnalysisGateBoundarySignals = [
+  {
+    label: "workflow boundary status marker",
+    patterns: [/WORKFLOW_PRE_ANALYSIS_GATE_BOUNDARY_STATUS/],
+  },
+  {
+    label: "workflow boundary default-off flag",
+    patterns: [/ENABLE_WORKFLOW_PRE_ANALYSIS_GATE_BOUNDARY_GUARD:\s*boolean\s*=\s*false/],
+  },
+  {
+    label: "workflow boundary entrypoint",
+    patterns: [/buildWorkflowPreAnalysisGateBoundaryResult/],
+  },
+  {
+    label: "workflow boundary default-off receipt delegation",
+    patterns: [/resultKind:\s*"receipt-analysis-delegation"/],
+  },
+  {
+    label: "workflow boundary unsupported stopped state",
+    patterns: [/resultKind:\s*"unsupported-evidence-stopped"/],
+  },
+  {
+    label: "workflow boundary mapper usage",
+    patterns: [/mapUnsupportedEvidenceReviewState/],
+  },
+  {
+    label: "workflow boundary probe-only marker",
+    patterns: [/probeOnly:\s*true/],
+  },
+  {
+    label: "workflow boundary runtime non-live marker",
+    patterns: [/runtimeLive:\s*false/],
+  },
+  {
+    label: "workflow boundary product-photo runtime non-live marker",
+    patterns: [/productPhotoRuntimeLive:\s*false/],
+  },
+  {
+    label: "workflow boundary no live caller marker",
+    patterns: [/liveCallerWired:\s*false/],
+  },
+  {
+    label: "workflow boundary no rendered UI marker",
+    patterns: [/renderedUiAdded:\s*false/],
+  },
+  {
+    label: "workflow boundary no receipt-result migration marker",
+    patterns: [/localAnalysisResultProduced:\s*false/],
+  },
+  {
+    label: "workflow boundary unsupported not stored in receipt result marker",
+    patterns: [/unsupportedEvidenceStoredInReceiptResult:\s*false/],
+  },
+  {
+    label: "workflow boundary no report mapping for unsupported marker",
+    patterns: [/receiptReportMappingDelegationIntended:\s*false/],
+  },
+  {
+    label: "workflow boundary no ProductPhotoReviewPanel route marker",
+    patterns: [/productPhotoReviewPanelRouted:\s*false/],
+  },
+];
+
+for (const signal of requiredWorkflowPreAnalysisGateBoundarySignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(workflowPreAnalysisGateBoundary))) {
+    failures.push(`Workflow pre-analysis gate boundary check failed: missing ${signal.label}`);
+  }
+}
+
+const forbiddenWorkflowBoundaryImports = [
+  "@/lib/analysis/analyzer",
+  "@/lib/analysis/analyzer-routing",
+  "@/lib/analysis/report-adapter",
+  "@/lib/analysis/scoring",
+  "@/lib/analysis/receipt-parser",
+  "@/lib/analysis/ocr-service",
+  "@/lib/analysis/metadata-service",
+  "@/lib/analysis/image-heuristics",
+  "@/lib/analysis/product-photo-analyzer",
+  "@/lib/analysis/product-photo-routing-adapter",
+  "@/lib/analysis/product-photo-report-view-model",
+  "@/lib/test-evidence",
+  "@/components/",
+  "@/lib/claim-data",
+];
+
+for (const importPath of forbiddenWorkflowBoundaryImports) {
+  const doubleQuotedImport = `from "${importPath}"`;
+  const singleQuotedImport = `from '${importPath}'`;
+
+  if (
+    workflowPreAnalysisGateBoundary.includes(doubleQuotedImport) ||
+    workflowPreAnalysisGateBoundary.includes(singleQuotedImport)
+  ) {
+    failures.push(`Workflow pre-analysis gate boundary import check failed: helper imports forbidden path ${importPath}`);
+  }
+}
+
+if (
+  /LocalAnalysisResult|MockAnalysisReport|mapLocalAnalysisToReport|analyzeEvidenceFile\s*\(/.test(
+    workflowPreAnalysisGateBoundary,
+  )
+) {
+  failures.push(
+    "Workflow pre-analysis gate boundary check failed: helper references live receipt result, analyzer call, or report mapping.",
+  );
+}
+
+if (
+  /createObjectURL|\bobjectUrl\b|\bimageUrl\b|\bdataUrl\b|\bBlob\b|\bFile\b|rawOcr|ocrText|rawExif|rawMetadata|originalFilename|providerOutput|providerHandle|storageHandle|integrationHandle|caseQueueHandle|credentials|secret/.test(
+    workflowPreAnalysisGateBoundary,
+  )
+) {
+  failures.push("Workflow pre-analysis gate boundary privacy check failed: helper references raw file/private surfaces.");
+}
+
+const requiredWorkflowPreAnalysisGateBoundaryProbeSignals = [
+  {
+    label: "workflow boundary probe export",
+    patterns: [/WORKFLOW_PRE_ANALYSIS_GATE_BOUNDARY_DEVELOPER_PROBE/],
+  },
+  {
+    label: "workflow boundary active type assertions",
+    patterns: [/assertProbeChecksPass\("types", typeChecks\)/],
+  },
+  {
+    label: "workflow boundary active shape assertions",
+    patterns: [/assertProbeChecksPass\("shape", shapeChecks\)/],
+  },
+  {
+    label: "workflow boundary active unsupported review assertions",
+    patterns: [/assertProbeChecksPass\("unsupported review", unsupportedReviewChecks\)/],
+  },
+  {
+    label: "workflow boundary active wording and privacy assertions",
+    patterns: [/assertProbeChecksPass\("wording and privacy", wordingAndPrivacyChecks\)/],
+  },
+  {
+    label: "workflow boundary active source-boundary assertions",
+    patterns: [/assertProbeChecksPass\("source boundaries", sourceBoundaryChecks\)/],
+  },
+  {
+    label: "workflow boundary default-off receipt delegation case",
+    patterns: [/defaultOffReceiptDelegation/],
+  },
+  {
+    label: "workflow boundary default-off unsupported delegation case",
+    patterns: [/defaultOffUnsupportedDelegation/],
+  },
+  {
+    label: "workflow boundary product-photo stop case",
+    patterns: [/enabledProductPhotoStop/],
+  },
+  {
+    label: "workflow boundary legacy stop case",
+    patterns: [/enabledLegacyStop/],
+  },
+  {
+    label: "workflow boundary unknown stop case",
+    patterns: [/enabledUnknownStop/],
+  },
+  {
+    label: "workflow boundary unsupported image stop case",
+    patterns: [/enabledUnsupportedImageStop/],
+  },
+  {
+    label: "workflow boundary forbidden visible phrase helper",
+    patterns: [/visibleOutputOmitsForbiddenPhrases/],
+  },
+  {
+    label: "workflow boundary safe concept helper",
+    patterns: [/displayHasRequiredSafeConcepts/],
+  },
+  {
+    label: "workflow boundary private-field omission helper",
+    patterns: [/serializedOutputOmitsPrivateFields/],
+  },
+  {
+    label: "workflow boundary live-file isolation helper",
+    patterns: [/liveFilesDoNotImportWorkflowBoundary/],
+  },
+];
+
+for (const signal of requiredWorkflowPreAnalysisGateBoundaryProbeSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(workflowPreAnalysisGateBoundaryProbe))) {
+    failures.push(`Workflow pre-analysis gate boundary probe check failed: missing ${signal.label}`);
+  }
+}
+
+const forbiddenWorkflowBoundaryProbeImports = [
+  "@/lib/analysis/analyzer",
+  "@/lib/analysis/analyzer-routing",
+  "@/lib/analysis/report-adapter",
+  "@/lib/analysis/scoring",
+  "@/lib/analysis/receipt-parser",
+  "@/lib/analysis/ocr-service",
+  "@/lib/analysis/metadata-service",
+  "@/lib/analysis/image-heuristics",
+  "@/lib/analysis/product-photo-analyzer",
+  "@/lib/analysis/product-photo-routing-adapter",
+  "@/lib/analysis/product-photo-report-view-model",
+  "@/lib/test-evidence",
+  "@/components/ClaimReviewWorkflow",
+  "@/components/UploadPanel",
+  "@/components/ProductPhotoReviewPanel",
+];
+
+for (const importPath of forbiddenWorkflowBoundaryProbeImports) {
+  const doubleQuotedImport = `from "${importPath}"`;
+  const singleQuotedImport = `from '${importPath}'`;
+
+  if (
+    workflowPreAnalysisGateBoundaryProbe.includes(doubleQuotedImport) ||
+    workflowPreAnalysisGateBoundaryProbe.includes(singleQuotedImport)
+  ) {
+    failures.push(
+      `Workflow pre-analysis gate boundary probe check failed: probe imports forbidden path ${importPath}`,
+    );
+  }
+}
+
+if (!productPhotoProbeRunner.includes("workflow-pre-analysis-gate-boundary.probe.ts")) {
+  failures.push("Product-photo probe runner check failed: workflow pre-analysis gate boundary probe is not registered.");
+}
+
+if (
+  [appPage, appLayout, testEvidenceHarness, claimReviewWorkflow, reportAdapter, productPhotoReviewPanel, analyzer].some(
+    (source) => source.includes("workflow-pre-analysis-gate-boundary"),
+  )
+) {
+  failures.push("Workflow pre-analysis gate boundary check failed: helper is imported by live app/report/analyzer/UI files.");
 }
 
 const preAnalysisGateHostPage = fileContents.get("src/app/dev/pre-analysis-evidence-gate/page.tsx") ?? "";
