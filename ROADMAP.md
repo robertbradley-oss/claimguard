@@ -88,7 +88,7 @@ Deferred until Robert explicitly opens a later Phase 2 runtime slice:
 
 ## Phase 3: Case Review Workflow
 
-Status: Phase 3.0 planning-only case workflow readiness is documented in `PHASE_3_0_CASE_WORKFLOW_READINESS_PLAN.md`. Phase 3 implementation is not approved until Robert explicitly opens a named implementation slice.
+Status: Phase 3.0 planning-only case workflow readiness is documented in `PHASE_3_0_CASE_WORKFLOW_READINESS_PLAN.md`. Phase 3.1 design system/case workflow concept planning is documented in `PHASE_3_1_CASE_WORKFLOW_DESIGN_CONCEPT.md`. Phase 3 implementation is not approved until Robert explicitly opens a named implementation slice.
 
 Meaning:
 
@@ -108,6 +108,8 @@ Current planning boundary:
 - The planned case concept includes case id, status, customer claim summary, evidence items, review notes, manual decision, recommended support action, customer-safe wording, and timeline/audit trail.
 - Planned evidence categories include receipt evidence, unsupported/product-photo evidence, order screenshots, shipping confirmations, and customer message/context.
 - Planned UX architecture includes a case review shell, evidence list/sidebar, selected evidence panel, review summary panel, notes/manual decision panel, customer-safe wording panel, and timeline/history area.
+- Planned visual direction is a dark forensic Case Review Command Center with an enterprise evidence-review feel, selected-evidence-first layout, compact operational badges, manual-review indicators, customer-safe wording separated from internal notes, and timeline/audit rows. It should avoid generic SaaS dashboards, centered hero sections, default demo-card layouts, and repeated identical white panels.
+- The recommended Phase 3.2 first-build target is a non-persistent local case shell using mock/local case data only, with receipt preservation protected and no unsupported-evidence runtime wiring, persistence, integrations, product-photo runtime, OCR/metadata expansion, auth/org/billing work, deployment, or route/component work unless Robert explicitly approves that named implementation slice.
 
 Deferred until Phase 3 is explicitly opened:
 

@@ -98,3 +98,20 @@ ClaimGuard should look like a fraud-risk evidence review command center for supp
 - Red flags list: "Detected signals" or "Review signals," not accusations; dense signal rows with severity, confidence, evidence source, and manual review recommendation.
 - Recent cases table: small operational queue with case ID, customer, risk, status, and updated time. Avoid analytics-table density.
 - Empty/loading/error states: dark forensic surfaces that explain the next safe action without sounding accusatory.
+
+## Phase 3 Case Review Command Center Direction
+
+Phase 3.1 is documented in `PHASE_3_1_CASE_WORKFLOW_DESIGN_CONCEPT.md`. This is product/design planning only and does not authorize implementation.
+
+The future Case Review Command Center should extend the current evidence workspace into a multi-evidence case file:
+
+- Keep the case header/status strip calm, dense, and operational.
+- Make the selected evidence viewer the dominant center of the screen.
+- Use an evidence list/sidebar for receipt evidence, order screenshots, shipping confirmations, customer context, and unsupported/product-photo-like evidence.
+- Use a compact case-level action rail for review summary, recommended support action, notes/manual decision, and customer-safe wording.
+- Put timeline/audit history in a lower band, drawer, or secondary section so it supports review without competing with selected evidence.
+- Preserve dark forensic surfaces, scan-frame cues, fine borders, left rails, and restrained blue/green/amber/red state accents.
+- Avoid generic SaaS stat cards, centered hero sections, default demo-card layouts, and repeated identical white panels.
+- Keep manual-review-only and external-verification-not-performed states visible wherever unsupported or uncertain evidence appears.
+
+Planned Phase 3 primitives include case status badges, evidence type badges, attention badges, manual-review indicators, dense evidence rows, selected evidence shells, review summary blocks, timeline event rows, customer-safe wording cards, and support-action recommendation panels. These primitives should be implemented only after Robert explicitly opens a Phase 3 implementation slice.
