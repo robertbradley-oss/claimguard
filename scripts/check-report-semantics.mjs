@@ -314,8 +314,8 @@ const requiredCaseCommandCenterSignals = [
     patterns: [/import \{ CaseReviewCommandCenter \} from "@\/components\/CaseReviewCommandCenter";/],
   },
   {
-    label: "phase 3.2 shell label",
-    patterns: [/Phase 3\.2 local shell/],
+    label: "phase 3.3 local polish shell label",
+    patterns: [/Phase 3\.3 local shell polish/],
   },
   {
     label: "mock local data only label",
@@ -324,6 +324,14 @@ const requiredCaseCommandCenterSignals = [
   {
     label: "case review command center heading",
     patterns: [/Case Review Command Center/],
+  },
+  {
+    label: "selected evidence bench structure",
+    patterns: [/Selected evidence bench/],
+  },
+  {
+    label: "off-white case shell visual direction",
+    patterns: [/bg-\[var\(--cg-bg\)\]/],
   },
   {
     label: "manual review recommended wording",
