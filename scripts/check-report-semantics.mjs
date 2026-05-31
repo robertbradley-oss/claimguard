@@ -314,8 +314,8 @@ const requiredCaseCommandCenterSignals = [
     patterns: [/import \{ CaseReviewCommandCenter \} from "@\/components\/CaseReviewCommandCenter";/],
   },
   {
-    label: "phase 3.5 manual review polish shell label",
-    patterns: [/Phase 3\.5 manual review polish/],
+    label: "phase 3.6 customer-safe wording polish shell label",
+    patterns: [/Phase 3\.6 customer-safe wording polish/],
   },
   {
     label: "mock local data only label",
@@ -400,6 +400,38 @@ const requiredCaseCommandCenterSignals = [
   {
     label: "phase 3.5 policy safety reminders",
     patterns: [/Policy and safety reminders/],
+  },
+  {
+    label: "phase 3.6 customer-safe wording module label",
+    patterns: [/Customer-safe wording module/],
+  },
+  {
+    label: "phase 3.6 mock local response prep marker",
+    patterns: [/Mock local response prep/],
+  },
+  {
+    label: "phase 3.6 not sent not saved boundary",
+    patterns: [/not sent, not saved, and not connected to any ticket, message, or external system/],
+  },
+  {
+    label: "phase 3.6 selected evidence wording rationale",
+    patterns: [/Internal-only rationale link/],
+  },
+  {
+    label: "phase 3.6 support-safe guardrails",
+    patterns: [/Support-safe guardrails/],
+  },
+  {
+    label: "phase 3.6 rep review checklist",
+    patterns: [/Rep review checklist/],
+  },
+  {
+    label: "phase 3.6 no accusation guardrail",
+    patterns: [/No accusation or wrongdoing confirmation/],
+  },
+  {
+    label: "phase 3.6 no automated outcome guardrail",
+    patterns: [/No automated denial, refund, or final decision language/],
   },
   {
     label: "external verification not performed",

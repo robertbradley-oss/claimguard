@@ -85,6 +85,30 @@ export type CaseManualReviewWorkspace = {
   timelineConnection: string;
 };
 
+export type CaseCustomerSafeWordingTone = "Neutral" | "Information request" | "Manual review" | "Policy review";
+
+export type CaseCustomerSafeWordingVariant = {
+  key: string;
+  label: string;
+  intent: string;
+  tone: CaseCustomerSafeWordingTone;
+  draft: string;
+  whenToUse: string;
+  avoids: readonly string[];
+};
+
+export type CaseCustomerSafeWordingModule = {
+  status: string;
+  summary: string;
+  notSentBoundary: string;
+  selectedEvidenceRationale: Record<string, string>;
+  variants: readonly CaseCustomerSafeWordingVariant[];
+  guardrails: readonly string[];
+  repReviewChecklist: readonly string[];
+  internalRationaleBoundary: string;
+  timelineConnection: string;
+};
+
 export type CaseReviewSummary = {
   evidenceReviewed: string;
   missingInformation: readonly string[];
@@ -101,7 +125,7 @@ export type ClaimGuardLocalCase = {
   evidenceItems: readonly CaseEvidenceItem[];
   reviewSummary: CaseReviewSummary;
   manualReviewWorkspace: CaseManualReviewWorkspace;
-  customerSafeWordingDraft: string;
+  customerSafeWordingModule: CaseCustomerSafeWordingModule;
   timeline: readonly CaseTimelineEvent[];
 };
 
@@ -288,8 +312,101 @@ export const phase32MockCase: ClaimGuardLocalCase = {
     timelineConnection:
       "Timeline entries show when notes, wording, manual review, and escalation markers were staged as mock events.",
   },
-  customerSafeWordingDraft:
-    "Thanks for sending the information. We are reviewing the available evidence and may ask for a clearer receipt or additional context if it is needed to complete the support review.",
+  customerSafeWordingModule: {
+    status: "Mock local response prep",
+    summary:
+      "Static response-prep guidance helps the reviewer choose careful customer-facing language while the case remains in manual review.",
+    notSentBoundary:
+      "Mock local wording only. These suggested responses are not sent, not saved, and not connected to any ticket, message, or external system.",
+    selectedEvidenceRationale: {
+      "receipt-summary":
+        "Receipt context can support a clearer information request, but it is not externally verified and should not be described as a final result.",
+      "order-context":
+        "Screenshot context may justify asking for a clearer copy or additional context without implying the screenshot was externally checked.",
+      "photo-unsupported":
+        "Unsupported product-photo-like evidence should be described as needing manual review, not as an automated finding.",
+      "customer-message":
+        "Customer context can shape a courteous follow-up while keeping internal review rationale out of the customer-facing wording.",
+    },
+    variants: [
+      {
+        key: "request-clearer-receipt",
+        label: "Request clearer receipt",
+        intent: "Request more information",
+        tone: "Information request",
+        draft:
+          "Thanks for sending the information. To continue the support review, please share a clearer eligible receipt or any additional context requested by the support team.",
+        whenToUse:
+          "Use when eligible receipt context is incomplete or not readable enough for policy review.",
+        avoids: [
+          "Does not accuse the customer",
+          "Does not describe a final support outcome",
+          "Does not claim external verification happened",
+        ],
+      },
+      {
+        key: "manual-review-needed",
+        label: "Manual review still in progress",
+        intent: "Manual review needed",
+        tone: "Manual review",
+        draft:
+          "We are still reviewing the available information. If more detail is needed, the support team may ask for another eligible document or clarification.",
+        whenToUse:
+          "Use when the case has mixed evidence and the reviewer has not chosen a support action.",
+        avoids: [
+          "Does not present ClaimGuard as the decision maker",
+          "Does not state that submitted evidence proved or disproved the claim",
+          "Does not promise a specific result",
+        ],
+      },
+      {
+        key: "policy-review",
+        label: "Policy review handoff",
+        intent: "Policy review",
+        tone: "Policy review",
+        draft:
+          "The support team is comparing the available information with the applicable review policy. We may follow up if another eligible document is needed.",
+        whenToUse:
+          "Use when the next step is policy comparison rather than a direct evidence request.",
+        avoids: [
+          "Does not expose internal notes",
+          "Does not mention unsupported analysis details",
+          "Does not imply automated denial or refund handling",
+        ],
+      },
+      {
+        key: "escalation-or-courtesy",
+        label: "Escalation or courtesy review pending",
+        intent: "Escalation / courtesy exception pending",
+        tone: "Neutral",
+        draft:
+          "We are checking the next available support path for this case. We will use the information provided and may request more context if needed.",
+        whenToUse:
+          "Use when a senior reviewer or courtesy-path review may be considered, but no outcome has been chosen.",
+        avoids: [
+          "Does not promise an exception",
+          "Does not describe an escalation as a conclusion",
+          "Does not disclose internal review rationale",
+        ],
+      },
+    ],
+    guardrails: [
+      "No accusation or wrongdoing confirmation",
+      "No statement that evidence is proven genuine or not genuine",
+      "No automated denial, refund, or final decision language",
+      "No private evidence details, raw OCR, metadata, or internal notes",
+    ],
+    repReviewChecklist: [
+      "Confirm the selected wording matches the current manual review state.",
+      "Keep internal rationale separate from the customer-facing message.",
+      "Ask only for eligible evidence or context the support policy allows.",
+      "Do not present local review signals as external verification.",
+    ],
+    internalRationaleBoundary:
+      "Customer-safe wording is separate from internal notes. Selected-evidence rationale is for reviewer orientation only and should not be copied into customer-facing wording.",
+    timelineConnection:
+      "The timeline marks wording as prepared in the mock shell, not delivered or recorded in a live system.",
+  },
   timeline: [
     {
       key: "case-opened",

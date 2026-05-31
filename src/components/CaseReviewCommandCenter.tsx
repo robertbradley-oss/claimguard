@@ -23,6 +23,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   phase32MockCase,
   type CaseAttentionLevel,
+  type CaseCustomerSafeWordingTone,
   type CaseEvidenceItem,
   type CaseManualDecisionTone,
   type CaseTimelineCategory,
@@ -78,6 +79,13 @@ const manualDecisionTone: Record<CaseManualDecisionTone, string> = {
   "Escalation path": "border-[rgba(154,87,52,0.40)] bg-[rgba(154,87,52,0.12)] text-[var(--cg-copper)]",
   "Info needed": "border-[rgba(111,120,134,0.34)] bg-[rgba(111,120,134,0.10)] text-[var(--cg-blue)]",
   "Safety hold": "border-[rgba(95,143,100,0.34)] bg-[rgba(95,143,100,0.10)] text-[var(--cg-green)]",
+};
+
+const wordingTone: Record<CaseCustomerSafeWordingTone, string> = {
+  Neutral: "border-[rgba(111,120,134,0.34)] bg-[rgba(111,120,134,0.10)] text-[var(--cg-blue)]",
+  "Information request": "border-[rgba(184,133,24,0.38)] bg-[rgba(184,133,24,0.11)] text-[var(--cg-amber)]",
+  "Manual review": "border-[rgba(95,143,100,0.34)] bg-[rgba(95,143,100,0.10)] text-[var(--cg-green)]",
+  "Policy review": "border-[rgba(154,87,52,0.36)] bg-[rgba(154,87,52,0.10)] text-[var(--cg-copper)]",
 };
 
 function StatusBadge({
@@ -376,6 +384,104 @@ function ManualReviewWorkspace({ selectedEvidence }: { selectedEvidence: CaseEvi
   );
 }
 
+function CustomerSafeWordingModule({ selectedEvidence }: { selectedEvidence: CaseEvidenceItem }) {
+  const wording = phase32MockCase.customerSafeWordingModule;
+  const selectedRationale =
+    wording.selectedEvidenceRationale[selectedEvidence.key] ??
+    "Use the selected evidence summary to keep customer-facing wording neutral and support-safe.";
+
+  return (
+    <section className="rounded-lg border border-[rgba(95,143,100,0.30)] bg-[rgba(255,253,247,0.70)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.70)]">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <SectionLabel icon={MessageSquareText} label="Customer-safe wording module" />
+          <p className="mt-2 text-sm leading-6 text-[var(--cg-text-muted)]">{wording.summary}</p>
+        </div>
+        <StatusBadge label={wording.status} tone="green" />
+      </div>
+
+      <div className="mt-4 rounded-md border border-[rgba(95,143,100,0.32)] bg-[rgba(95,143,100,0.09)] p-3 text-sm leading-6 text-[var(--cg-text)]">
+        {wording.notSentBoundary}
+      </div>
+
+      <div className="mt-4 rounded-lg border border-[rgba(26,31,39,0.28)] bg-[var(--cg-bg-panel)] p-4 shadow-[0_14px_34px_rgba(77,62,36,0.12),inset_0_1px_0_rgba(255,255,255,0.06)]">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <SectionLabel icon={FileSearch} label="Internal-only rationale link" tone="dark" />
+            <p className="mt-3 text-sm font-semibold text-[var(--cg-dark-text)]">{selectedEvidence.title}</p>
+          </div>
+          <StatusBadge label={selectedEvidence.reviewState} tone="dark" />
+        </div>
+        <p className="mt-3 text-sm leading-6 text-[var(--cg-dark-muted)]">{selectedRationale}</p>
+        <p className="mt-3 rounded-md border border-white/10 bg-white/[0.045] px-3 py-2 text-xs leading-5 text-[var(--cg-dark-subtle)]">
+          {wording.internalRationaleBoundary}
+        </p>
+      </div>
+
+      <div className="mt-4 space-y-3">
+        {wording.variants.map((variant) => (
+          <article
+            className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.76)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.70)]"
+            key={variant.key}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-[var(--cg-text)]">{variant.label}</p>
+                <p className="mt-1 text-xs font-medium text-[var(--cg-text-subtle)]">{variant.intent}</p>
+              </div>
+              <span className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${wordingTone[variant.tone]}`}>
+                {variant.tone}
+              </span>
+            </div>
+            <p className="mt-3 rounded-md border border-[rgba(125,103,64,0.16)] bg-[rgba(246,241,232,0.62)] p-3 text-sm leading-6 text-[var(--cg-text)]">
+              {variant.draft}
+            </p>
+            <p className="mt-3 text-xs leading-5 text-[var(--cg-text-muted)]">{variant.whenToUse}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {variant.avoids.map((item) => (
+                <span
+                  className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.62)] px-2 py-1 text-[11px] font-medium text-[var(--cg-text-muted)]"
+                  key={item}
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <section className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.58)] p-3">
+          <SectionLabel icon={ShieldCheck} label="Support-safe guardrails" />
+          <ul className="mt-3 space-y-2">
+            {wording.guardrails.map((item) => (
+              <li key={item} className="text-sm leading-6 text-[var(--cg-text-muted)]">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.58)] p-3">
+          <SectionLabel icon={CheckCircle2} label="Rep review checklist" />
+          <ul className="mt-3 space-y-2">
+            {wording.repReviewChecklist.map((item) => (
+              <li key={item} className="text-sm leading-6 text-[var(--cg-text-muted)]">
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      <p className="mt-4 rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.70)] p-3 text-xs leading-5 text-[var(--cg-text-subtle)]">
+        {wording.timelineConnection}
+      </p>
+    </section>
+  );
+}
+
 function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
   return (
     <section className="cg-forensic-panel min-h-[560px] rounded-lg">
@@ -401,7 +507,7 @@ function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
               <div className="max-w-2xl">
                 <p className="text-xs font-semibold uppercase tracking-wide text-[var(--cg-amber)]">Privacy-safe inspection shell</p>
                 <p className="mt-3 text-sm leading-6 text-[var(--cg-text-muted)]">
-                  Phase 3.5 renders structured local summaries and mock review planning only. No raw evidence preview,
+                  Phase 3.6 renders structured local summaries and mock response-prep planning only. No raw evidence preview,
                   file bytes, object URL, OCR text, metadata payload, provider response, storage handle, or integration
                   handle is represented.
                 </p>
@@ -487,7 +593,7 @@ export function CaseReviewCommandCenter() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge label="Phase 3.5 manual review polish" tone="bronze" />
+                <StatusBadge label="Phase 3.6 customer-safe wording polish" tone="bronze" />
                 <StatusBadge label={phase32MockCase.workflowStatus} tone="amber" />
                 <StatusBadge label="Mock/local data only" />
               </div>
@@ -570,13 +676,7 @@ export function CaseReviewCommandCenter() {
 
             <ManualReviewWorkspace selectedEvidence={selectedEvidence} />
 
-            <section className="rounded-lg border border-[rgba(95,143,100,0.30)] bg-[rgba(95,143,100,0.08)] p-4">
-              <SectionLabel icon={MessageSquareText} label="Customer-safe wording" />
-              <p className="mt-3 text-sm leading-6 text-[var(--cg-text)]">{phase32MockCase.customerSafeWordingDraft}</p>
-              <p className="mt-3 text-xs leading-5 text-[var(--cg-text-muted)]">
-                Customer-safe wording is separate from internal notes and does not present a support outcome.
-              </p>
-            </section>
+            <CustomerSafeWordingModule selectedEvidence={selectedEvidence} />
           </aside>
         </div>
 
