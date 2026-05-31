@@ -6,6 +6,7 @@ const repoRoot = process.cwd();
 const filesToCheck = [
   "src/app/page.tsx",
   "src/app/layout.tsx",
+  "src/app/case-command-center/page.tsx",
   "src/app/dev/product-photo-review-panel/page.tsx",
   "src/app/dev/product-photo-review-panel/render-cases.ts",
   "src/app/dev/pre-analysis-evidence-gate/page.tsx",
@@ -45,12 +46,14 @@ const filesToCheck = [
   "src/lib/analysis/workflow-pre-analysis-gate-boundary.probe.ts",
   "src/components/ProductPhotoReviewPanel.tsx",
   "src/components/ProductPhotoReviewPanel.probe.tsx",
+  "src/components/CaseReviewCommandCenter.tsx",
   "src/components/AnalysisReport.tsx",
   "src/components/AuthenticityResultCard.tsx",
   "src/components/ClaimReviewWorkflow.tsx",
   "src/components/RiskScoreCard.tsx",
   "src/components/TestEvidenceHarness.tsx",
   "src/app/test-evidence/page.tsx",
+  "src/lib/case-command-center/mock-case.ts",
   "src/lib/test-evidence/fixtures.ts",
   "src/lib/test-evidence/tuning-thresholds.ts",
   "scripts/run-product-photo-probes.cjs",
@@ -301,6 +304,140 @@ const claimReviewWorkflow = fileContents.get("src/components/ClaimReviewWorkflow
 const reportAdapter = fileContents.get("src/lib/analysis/report-adapter.ts") ?? "";
 const appPage = fileContents.get("src/app/page.tsx") ?? "";
 const appLayout = fileContents.get("src/app/layout.tsx") ?? "";
+const caseCommandCenterPage = fileContents.get("src/app/case-command-center/page.tsx") ?? "";
+const caseCommandCenterComponent = fileContents.get("src/components/CaseReviewCommandCenter.tsx") ?? "";
+const caseCommandCenterMockCase = fileContents.get("src/lib/case-command-center/mock-case.ts") ?? "";
+const caseCommandCenterCorpus = `${caseCommandCenterPage}\n${caseCommandCenterComponent}\n${caseCommandCenterMockCase}`;
+const requiredCaseCommandCenterSignals = [
+  {
+    label: "phase 3.2 route imports local shell",
+    patterns: [/import \{ CaseReviewCommandCenter \} from "@\/components\/CaseReviewCommandCenter";/],
+  },
+  {
+    label: "phase 3.2 shell label",
+    patterns: [/Phase 3\.2 local shell/],
+  },
+  {
+    label: "mock local data only label",
+    patterns: [/Mock\/local data only/],
+  },
+  {
+    label: "case review command center heading",
+    patterns: [/Case Review Command Center/],
+  },
+  {
+    label: "manual review recommended wording",
+    patterns: [/Manual review recommended/],
+  },
+  {
+    label: "customer-safe wording separation",
+    patterns: [/Customer-safe wording is separate from internal notes/],
+  },
+  {
+    label: "external verification not performed",
+    patterns: [/External Verification: Not performed/, /externalVerification: "Not performed"/],
+  },
+  {
+    label: "verification status not externally verified",
+    patterns: [/Verification Status: Not externally verified/, /verificationStatus: "Not externally verified"/],
+  },
+  {
+    label: "unsupported no automated analysis result",
+    patterns: [/No automated analysis result was produced for this evidence item/],
+  },
+  {
+    label: "product-photo runtime non-live marker",
+    patterns: [/productPhotoRuntimeLive: false/, /Product-photo runtime live/],
+  },
+  {
+    label: "product-photo panel not routed marker",
+    patterns: [/productPhotoReviewPanelRouted: false/, /ProductPhotoReviewPanel routed/],
+  },
+  {
+    label: "no persistence or storage wording",
+    patterns: [/No customer evidence is stored by this shell/],
+  },
+];
+
+const forbiddenCaseCommandCenterImports = [
+  "@/components/ClaimReviewWorkflow",
+  "@/components/TestEvidenceHarness",
+  "@/components/UploadPanel",
+  "@/components/AnalysisReport",
+  "@/components/AuthenticityResultCard",
+  "@/components/ProductPhotoReviewPanel",
+  "@/lib/analysis/analyzer",
+  "@/lib/analysis/analyzer-routing",
+  "@/lib/analysis/report-adapter",
+  "@/lib/analysis/scoring",
+  "@/lib/analysis/receipt-parser",
+  "@/lib/analysis/pre-analysis-evidence-gate-runtime",
+  "@/lib/analysis/workflow-pre-analysis-gate-boundary",
+  "@/lib/analysis/product-photo-analyzer",
+  "@/lib/analysis/product-photo-routing-adapter",
+  "@/lib/test-evidence",
+  "@/lib/claim-data",
+  "next/image",
+];
+
+const forbiddenCaseCommandCenterPatterns = [
+  /analyzeEvidenceFile\s*\(/,
+  /mapLocalAnalysisToReport/,
+  /LocalAnalysisResult/,
+  /MockAnalysisReport/,
+  /<input[^>]*type=["']file["']/i,
+  /createObjectURL/,
+  /\bobjectUrl\b/,
+  /\bimageUrl\b/,
+  /\bdataUrl\b/,
+  /\bBlob\b/,
+  /\bfetch\s*\(/,
+  /localStorage/,
+  /sessionStorage/,
+  /rawOcr|ocrText/,
+  /rawExif/,
+  /rawMetadata/,
+  /originalFilename/,
+  /rawLabelValue/,
+  /providerOutput|providerHandle|storageHandle|integrationHandle|caseQueueHandle/,
+  /database|db\./i,
+  /auth|billing|organization|tenant/i,
+  /automatic\s+(?:adverse\s+)?(?:decision|outcome|disposition)/i,
+  /deny this claim/i,
+  /customer is lying/i,
+];
+
+for (const signal of requiredCaseCommandCenterSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(caseCommandCenterCorpus))) {
+    failures.push(`Case command center check failed: missing ${signal.label}`);
+  }
+}
+
+for (const importPath of forbiddenCaseCommandCenterImports) {
+  if (caseCommandCenterCorpus.includes(importPath)) {
+    failures.push(`Case command center boundary check failed: shell imports forbidden path ${importPath}`);
+  }
+}
+
+for (const pattern of forbiddenCaseCommandCenterPatterns) {
+  if (pattern.test(caseCommandCenterCorpus)) {
+    failures.push(`Case command center privacy/import check failed: shell uses forbidden pattern ${pattern}`);
+  }
+}
+
+if (
+  [
+    appPage,
+    appLayout,
+    testEvidenceHarness,
+    claimReviewWorkflow,
+    reportAdapter,
+    analyzer,
+    productPhotoReviewPanel,
+  ].some((source) => source.includes("/case-command-center"))
+) {
+  failures.push("Case command center boundary check failed: route is linked from protected live files.");
+}
 const forbiddenProductPhotoMapperImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/analyzer-routing",
