@@ -130,7 +130,7 @@ Deferred after Phase 3 closure until explicitly reopened or approved in a future
 
 ## Phase 4: Stronger OCR and AI Integrations
 
-Status: Next recommended milestone is Phase 4.0 planning-only real AI/OCR/photo intelligence readiness. Phase 4 implementation has not started, and no real AI/OCR/photo analysis should be implemented until Phase 4 planning explicitly approves scope.
+Status: Phase 4.0 planning-only real AI/OCR/photo intelligence readiness is documented in `PHASE_4_0_AI_OCR_PHOTO_INTELLIGENCE_READINESS.md`. Phase 4 implementation has not started, and no real AI/OCR/photo analysis should be implemented until a later explicitly approved implementation slice.
 
 Meaning:
 
@@ -138,13 +138,25 @@ Meaning:
 - External OCR or AI analysis behind explicit approval and privacy controls.
 - Confidence, cost, latency, and fallback planning.
 - Safety filters for generated model output.
+- AI/OCR/photo outputs as review signals, not final verdicts.
+- Manual-review and customer-safe wording discipline for model-assisted workflows.
 
-Deferred until Phase 4 is explicitly opened:
+Phase 4.0 planning decision:
+
+- Stronger OCR should improve receipt text extraction, field parsing, merchant/order/date/total confidence, and Amazon receipt structure validation without changing receipt behavior until a named implementation slice is approved.
+- Real AI or vision output should be structured as observable evidence signals with confidence, uncertainty, limitations, and no-decision markers.
+- Product-photo intelligence should remain careful signal planning for damage visibility, context completeness, possible reuse/duplicate signals, compression/editing/artifact uncertainty, metadata context, and AI-generated-image uncertainty without "fake photo" or fraud-confirmation wording.
+- Real evidence handling requires a privacy/data-flow, retention, deletion, provider logging, metadata, and storage plan before implementation.
+- The current off-white/parchment evidence workspace direction remains the product direction; Phase 4 is intelligence readiness, not another Command Center redesign.
+
+Deferred until a later Phase 4 implementation slice is explicitly opened:
 
 - Real OCR provider connections.
 - Real AI vision or language model calls.
 - Sending real evidence to third-party services.
 - Provider-specific commitments.
+- Provider SDKs, credentials, environment variables, routes, storage, persistence, and deployment changes.
+- `ClaimReviewWorkflow` wiring, `ProductPhotoReviewPanel` routing, `LocalAnalysisResult` migration, and receipt behavior changes.
 
 ## Phase 5: Customer and Ticket Integrations
 
