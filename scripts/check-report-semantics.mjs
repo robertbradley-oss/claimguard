@@ -48,6 +48,8 @@ const filesToCheck = [
   "src/lib/analysis/ocr-fixture-harness.probe.ts",
   "src/lib/analysis/ocr-extraction-contract.ts",
   "src/lib/analysis/ocr-extraction-contract.probe.ts",
+  "src/app/api/analysis/ocr/route.ts",
+  "src/app/api/analysis/ocr/route.probe.ts",
   "src/components/ProductPhotoReviewPanel.tsx",
   "src/components/ProductPhotoReviewPanel.probe.tsx",
   "src/components/CaseReviewCommandCenter.tsx",
@@ -96,6 +98,9 @@ const ocrFixtureCorpus = `${ocrFixtureHarness}\n${ocrFixtureProbe}`;
 const ocrExtractionContract = fileContents.get("src/lib/analysis/ocr-extraction-contract.ts") ?? "";
 const ocrExtractionContractProbe = fileContents.get("src/lib/analysis/ocr-extraction-contract.probe.ts") ?? "";
 const ocrExtractionContractCorpus = `${ocrExtractionContract}\n${ocrExtractionContractProbe}`;
+const ocrRoute = fileContents.get("src/app/api/analysis/ocr/route.ts") ?? "";
+const ocrRouteProbe = fileContents.get("src/app/api/analysis/ocr/route.probe.ts") ?? "";
+const ocrRouteCorpus = `${ocrRoute}\n${ocrRouteProbe}`;
 
 const requiredSemanticSignals = [
   {
@@ -400,6 +405,83 @@ const forbiddenOcrExtractionContractPatterns = [
   /claimOutcome|automaticDisposition|externalDecision/,
 ];
 
+const requiredOcrRouteSignals = [
+  {
+    label: "Phase 4.6 synthetic OCR route marker",
+    patterns: [/synthetic-ocr-route-skeleton/],
+  },
+  {
+    label: "OCR route fixture harness import",
+    patterns: [/@\/lib\/analysis\/ocr-fixture-harness/],
+  },
+  {
+    label: "OCR route extraction contract import",
+    patterns: [/@\/lib\/analysis\/ocr-extraction-contract/],
+  },
+  {
+    label: "OCR route JSON-only content-type guard",
+    patterns: [/application\/json/, /UNSUPPORTED_CONTENT_TYPE/],
+  },
+  {
+    label: "OCR route exact fixture-key request boundary",
+    patterns: [/allowedRequestKeys/, /fixtureKey/],
+  },
+  {
+    label: "OCR route rejects unexpected fields",
+    patterns: [/unexpectedFieldFails/],
+  },
+  {
+    label: "OCR route rejects multipart",
+    patterns: [/multipart\/form-data/, /multipartFails/],
+  },
+  {
+    label: "OCR route rejects URL-like payloads",
+    patterns: [/objectUrlFails/, /dataUrlFails/, /imageUrlFails/, /fileUrlFails/],
+  },
+  {
+    label: "OCR route rejects customer identifier fields",
+    patterns: [/customerIdentifierFails/],
+  },
+  {
+    label: "OCR route no-retention markers",
+    patterns: [/fileRetained: false/, /rawOcrRetained: false/, /providerPayloadRetained: false/],
+  },
+  {
+    label: "OCR route probe export",
+    patterns: [/OCR_ROUTE_DEVELOPER_PROBE/],
+  },
+];
+
+const forbiddenOcrRouteImports = [
+  "@/lib/analysis/analyzer",
+  "@/lib/analysis/types",
+  "@/lib/analysis/report-adapter",
+  "@/lib/analysis/receipt-parser",
+  "@/lib/analysis/scoring",
+  "@/components/ClaimReviewWorkflow",
+  "@/components/ProductPhotoReviewPanel",
+  "@/components/UploadPanel",
+  "@/lib/test-evidence",
+  "openai",
+  "@aws-sdk",
+  "@google-cloud",
+  "tesseract.js",
+  "pdfjs-dist",
+];
+
+const forbiddenOcrRouteBehaviorPatterns = [
+  /\bfetch\s*\(/,
+  /console\.(?:log|warn|error|info)/,
+  /process\.env/,
+  /createObjectURL\s*\(/,
+  /revokeObjectURL\s*\(/,
+  /new\s+File\b/,
+  /new\s+Blob\b/,
+  /localStorage/,
+  /sessionStorage/,
+  /type=["']file["']/i,
+];
+
 const unsafeHighScoreProofPattern = /High score(?![^.]*does not prove)[^.]*\b(?:proves?|confirms?|verifies?|authentic|real)\b/i;
 const unsafeExternalVerificationPatterns = [
   /externalVerification\s*:\s*["'`](?!Not performed)/i,
@@ -436,6 +518,12 @@ for (const signal of requiredOcrExtractionContractSignals) {
   }
 }
 
+for (const signal of requiredOcrRouteSignals) {
+  if (!signal.patterns.some((pattern) => pattern.test(ocrRouteCorpus))) {
+    failures.push(`Missing synthetic OCR route signal: ${signal.label}`);
+  }
+}
+
 for (const bannedPhrase of guardedBannedPhrases) {
   if (bannedPhrase.test(corpus)) {
     failures.push(`Unsafe report, fixture, or QA wording found: ${bannedPhrase}`);
@@ -469,6 +557,18 @@ for (const importPath of forbiddenOcrExtractionContractImports) {
 for (const pattern of forbiddenOcrExtractionContractPatterns) {
   if (pattern.test(ocrExtractionContract)) {
     failures.push(`OCR extraction contract privacy/import check failed: contract uses forbidden pattern ${pattern}`);
+  }
+}
+
+for (const importPath of forbiddenOcrRouteImports) {
+  if (ocrRoute.includes(importPath)) {
+    failures.push(`Synthetic OCR route boundary check failed: route imports forbidden path ${importPath}`);
+  }
+}
+
+for (const pattern of forbiddenOcrRouteBehaviorPatterns) {
+  if (pattern.test(ocrRoute)) {
+    failures.push(`Synthetic OCR route behavior check failed: route uses forbidden pattern ${pattern}`);
   }
 }
 

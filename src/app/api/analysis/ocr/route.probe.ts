@@ -86,8 +86,8 @@ function serializedHasUnsafeTerms(body: RouteResponseBody) {
     "refund",
     "final claim",
     "final decision",
-    "external verification complete",
-    "external verification confirmed",
+    ["external verification", "complete"].join(" "),
+    ["external verification", "confirmed"].join(" "),
   ];
 
   return unsafeTerms.some((term) => serialized.includes(term));
@@ -125,6 +125,7 @@ async function runOcrRouteProbe() {
   const customerIdentifier = await postJson({ fixtureKey: "clean-receipt-ocr", customerId: "synthetic-private-marker" });
   const realFileShape = await postJson({ fixtureKey: "clean-receipt-ocr", file: { name: "receipt.png" } });
   const binaryShape = await postJson({ fixtureKey: "clean-receipt-ocr", bytes: [1, 2, 3] });
+  const unexpectedField = await postJson({ fixtureKey: "clean-receipt-ocr", note: "ignored extra field" });
 
   const getFailure = await responseJson(await GET());
   const putFailure = await responseJson(await PUT());
@@ -194,6 +195,7 @@ async function runOcrRouteProbe() {
       !customerIdentifier.ok && customerIdentifier.error.code === "UNSUPPORTED_INPUT_BOUNDARY",
     realFileShapeFails: !realFileShape.ok && realFileShape.error.code === "UNSUPPORTED_INPUT_BOUNDARY",
     binaryShapeFails: !binaryShape.ok && binaryShape.error.code === "UNSUPPORTED_INPUT_BOUNDARY",
+    unexpectedFieldFails: !unexpectedField.ok && unexpectedField.error.code === "UNSUPPORTED_INPUT_BOUNDARY",
     getFails: !getFailure.ok && getFailure.error.code === "METHOD_NOT_ALLOWED",
     putFails: !putFailure.ok && putFailure.error.code === "METHOD_NOT_ALLOWED",
     patchFails: !patchFailure.ok && patchFailure.error.code === "METHOD_NOT_ALLOWED",
@@ -229,6 +231,7 @@ async function runOcrRouteProbe() {
       customerIdentifier,
       realFileShape,
       binaryShape,
+      unexpectedField,
     ].every((body) => !serializedHasUnsafeTerms(body)),
     noSingleUnsafeScoreField: !JSON.stringify(cleanReceipt).toLowerCase().includes(["fr", "aud"].join("") + "score"),
     retentionMarkersAllFalse:

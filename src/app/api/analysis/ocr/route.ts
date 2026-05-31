@@ -70,6 +70,7 @@ type OcrRouteSuccessResponse = {
 const fixtureByKey = new Map<string, SyntheticOcrFixtureCase>(
   SYNTHETIC_OCR_FIXTURE_CASES.map((fixture) => [fixture.key, fixture]),
 );
+const allowedRequestKeys = new Set(["fixtureKey"]);
 
 const unsupportedKeyNames = new Set([
   "file",
@@ -308,6 +309,16 @@ export async function POST(request: Request) {
     return failureResponse(
       "INVALID_SYNTHETIC_REQUEST",
       "This route expects a JSON object containing a synthetic fixture key.",
+      400,
+    );
+  }
+
+  const requestKeys = Object.keys(body);
+
+  if (requestKeys.some((key) => !allowedRequestKeys.has(key))) {
+    return failureResponse(
+      "UNSUPPORTED_INPUT_BOUNDARY",
+      "This route currently accepts only a synthetic fixture key.",
       400,
     );
   }
