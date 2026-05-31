@@ -314,8 +314,8 @@ const requiredCaseCommandCenterSignals = [
     patterns: [/import \{ CaseReviewCommandCenter \} from "@\/components\/CaseReviewCommandCenter";/],
   },
   {
-    label: "phase 3.8 case header polish shell label",
-    patterns: [/Phase 3\.8 case header polish/],
+    label: "phase 3.10 final shell polish label",
+    patterns: [/Phase 3\.10 final shell polish/],
   },
   {
     label: "mock local data only label",

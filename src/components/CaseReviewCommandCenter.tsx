@@ -123,7 +123,11 @@ function StatusBadge({
             ? "border-white/15 bg-white/[0.06] text-[var(--cg-dark-muted)]"
             : "border-[rgba(125,103,64,0.22)] bg-[rgba(255,253,247,0.72)] text-[var(--cg-text-muted)]";
 
-  return <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium ${toneClass}`}>{label}</span>;
+  return (
+    <span className={`inline-flex max-w-full items-center rounded-md border px-2.5 py-1 text-xs font-medium leading-5 ${toneClass}`}>
+      {label}
+    </span>
+  );
 }
 
 function SectionLabel({
@@ -139,9 +143,9 @@ function SectionLabel({
   const iconClass = "text-[var(--cg-amber)]";
 
   return (
-    <div className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-wide ${textClass}`}>
-      <Icon className={`size-3.5 ${iconClass}`} aria-hidden="true" />
-      <span>{label}</span>
+    <div className={`flex min-w-0 items-center gap-2 text-xs font-semibold uppercase tracking-wide ${textClass}`}>
+      <Icon className={`size-3.5 shrink-0 ${iconClass}`} aria-hidden="true" />
+      <span className="min-w-0">{label}</span>
     </div>
   );
 }
@@ -159,7 +163,7 @@ function EvidenceRow({
 
   return (
     <button
-      className={`w-full rounded-md border px-3 py-3 text-left transition ${
+      className={`w-full rounded-md border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(184,133,24,0.42)] ${
         active
           ? "border-[rgba(184,133,24,0.66)] bg-[rgba(255,253,247,0.92)] shadow-[inset_3px_0_0_rgba(184,133,24,0.86),0_12px_28px_rgba(77,62,36,0.10)]"
           : "border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.58)] hover:border-[rgba(184,133,24,0.42)] hover:bg-[rgba(255,253,247,0.82)]"
@@ -180,7 +184,7 @@ function EvidenceRow({
               {item.reviewState}
             </span>
           </div>
-          <p className="mt-1 text-sm font-semibold text-[var(--cg-text)]">{item.title}</p>
+          <p className="mt-1 break-words text-sm font-semibold text-[var(--cg-text)]">{item.title}</p>
           <p className="mt-1 line-clamp-2 text-xs leading-5 text-[var(--cg-text-muted)]">{item.safeSummary}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${attentionTone[item.attentionLevel]}`}>
@@ -206,7 +210,7 @@ function EvidenceSidebar({
   ).length;
 
   return (
-    <aside className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.58)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.68)]">
+    <aside className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.58)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.68)] xl:sticky xl:top-4 xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto">
       <SectionLabel icon={PanelLeft} label="Evidence bench" />
       <p className="mt-2 text-sm leading-6 text-[var(--cg-text-muted)]">
         Synthetic case evidence only. Rows omit raw filenames, private identifiers, raw OCR, and metadata.
@@ -226,11 +230,11 @@ function EvidenceSidebar({
             {selectedEvidence.reviewState}
           </span>
         </div>
-        <p className="mt-2 text-sm font-semibold text-[var(--cg-text)]">{selectedEvidence.title}</p>
+        <p className="mt-2 break-words text-sm font-semibold text-[var(--cg-text)]">{selectedEvidence.title}</p>
         <p className="mt-1 text-xs leading-5 text-[var(--cg-text-muted)]">{selectedEvidence.submittedContext}</p>
       </div>
 
-      <div className="mt-4 space-y-5">
+      <div className="mt-4 space-y-5 xl:space-y-4">
         {evidenceGroupLabels.map((group) => {
           const items = phase32MockCase.evidenceItems.filter((item) => item.benchGroup === group);
 
@@ -268,9 +272,9 @@ function EvidenceSidebar({
 
 function FieldTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.72)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+    <div className="min-w-0 rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.72)] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
       <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--cg-text-subtle)]">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-[var(--cg-text)]">{value}</p>
+      <p className="mt-1 break-words text-sm font-semibold text-[var(--cg-text)]">{value}</p>
     </div>
   );
 }
@@ -289,11 +293,11 @@ function CaseHeaderOrientation() {
   const header = phase32MockCase.headerContext;
 
   return (
-    <header className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.74)] p-4 shadow-[0_18px_42px_rgba(77,62,36,0.08),inset_0_1px_0_rgba(255,255,255,0.72)]">
+    <header className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.74)] p-4 shadow-[0_18px_42px_rgba(77,62,36,0.08),inset_0_1px_0_rgba(255,255,255,0.72)] sm:p-5">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge label="Phase 3.8 case header polish" tone="bronze" />
+            <StatusBadge label="Phase 3.10 final shell polish" tone="bronze" />
             <StatusBadge label={phase32MockCase.workflowStatus} tone="amber" />
             <StatusBadge label="Mock/local data only" />
             <StatusBadge label={header.priorityLabel} tone="amber" />
@@ -307,7 +311,7 @@ function CaseHeaderOrientation() {
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--cg-text-muted)]">
             {phase32MockCase.caseRef}. {phase32MockCase.customerClaimSummary}
           </p>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <FieldTile label="Mock status" value={phase32MockCase.workflowStatus} />
             <FieldTile label="Queue context" value={header.queueContext} />
             <FieldTile label="Review priority" value={header.priorityLabel} />
@@ -343,7 +347,7 @@ function CaseHeaderOrientation() {
 
       <section className="mt-4">
         <SectionLabel icon={ListChecks} label="Evidence and review summary chips" />
-        <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
           {header.summaryChips.map((chip) => (
             <HeaderSummaryChip key={chip.label} label={chip.label} value={chip.value} detail={chip.detail} />
           ))}
@@ -355,7 +359,7 @@ function CaseHeaderOrientation() {
           <SectionLabel icon={CircleDot} label="Static command/status bar" />
           <StatusBadge label="Orientation labels only" />
         </div>
-        <div className="mt-3 grid gap-2 lg:grid-cols-5">
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           {header.commandBarItems.map((item) => (
             <div
               className="min-h-[112px] rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.58)] p-3"
@@ -380,7 +384,7 @@ function TimelineAuditTrail({ selectedEvidence }: { selectedEvidence: CaseEviden
   );
 
   return (
-    <section className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.62)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.70)]">
+    <section className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.62)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.70)] sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <SectionLabel icon={History} label="Timeline and audit trail" />
@@ -401,7 +405,7 @@ function TimelineAuditTrail({ selectedEvidence }: { selectedEvidence: CaseEviden
         <FieldTile label="Current case status" value={phase32MockCase.workflowStatus} />
       </div>
 
-      <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-3">
           {phase32MockCase.timeline.map((event) => {
             const Icon = timelineCategoryIcon[event.category];
@@ -425,7 +429,7 @@ function TimelineAuditTrail({ selectedEvidence }: { selectedEvidence: CaseEviden
                     </div>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-semibold text-[var(--cg-text)]">{event.statusLabel}</span>
+                        <span className="break-words text-sm font-semibold text-[var(--cg-text)]">{event.statusLabel}</span>
                         {isSelectedEvidenceEvent ? <StatusBadge label="Selected evidence" tone="bronze" /> : null}
                       </div>
                       <p className="mt-1 text-xs font-medium text-[var(--cg-text-subtle)]">
@@ -470,7 +474,7 @@ function TimelineAuditTrail({ selectedEvidence }: { selectedEvidence: CaseEviden
           })}
         </div>
 
-        <aside className="space-y-3">
+        <aside className="space-y-3 xl:sticky xl:top-4 xl:self-start">
           <section className="rounded-lg border border-[rgba(26,31,39,0.28)] bg-[var(--cg-bg-panel)] p-4 shadow-[0_18px_42px_rgba(77,62,36,0.14),inset_0_1px_0_rgba(255,255,255,0.06)]">
             <SectionLabel icon={FileSearch} label="Selected evidence trail" tone="dark" />
             <p className="mt-3 text-sm leading-6 text-[var(--cg-dark-muted)]">
@@ -518,7 +522,7 @@ function ManualReviewWorkspace({ selectedEvidence }: { selectedEvidence: CaseEvi
         {workspace.notSavedBoundary}
       </div>
 
-      <div className="mt-4 grid gap-2">
+      <div className="mt-4 grid gap-2 lg:grid-cols-2 2xl:grid-cols-1">
         {workspace.decisionStates.map((state) => (
           <article
             className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.72)] p-3"
@@ -547,7 +551,7 @@ function ManualReviewWorkspace({ selectedEvidence }: { selectedEvidence: CaseEvi
         </ul>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
+      <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-1">
         <section className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.58)] p-3">
           <SectionLabel icon={PenLine} label="Internal note structure" />
           <ul className="mt-3 space-y-2">
@@ -613,7 +617,7 @@ function CustomerSafeWordingModule({ selectedEvidence }: { selectedEvidence: Cas
         </p>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 grid gap-3 xl:grid-cols-3 2xl:grid-cols-1">
         {wording.variants.map((variant) => (
           <article
             className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.76)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.70)]"
@@ -646,7 +650,7 @@ function CustomerSafeWordingModule({ selectedEvidence }: { selectedEvidence: Cas
         ))}
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
+      <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-1">
         <section className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.58)] p-3">
           <SectionLabel icon={ShieldCheck} label="Support-safe guardrails" />
           <ul className="mt-3 space-y-2">
@@ -679,12 +683,12 @@ function CustomerSafeWordingModule({ selectedEvidence }: { selectedEvidence: Cas
 
 function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
   return (
-    <section className="cg-forensic-panel min-h-[560px] rounded-lg">
-      <div className="border-b border-[rgba(125,103,64,0.16)] px-5 py-4">
+    <section className="cg-forensic-panel rounded-lg">
+      <div className="border-b border-[rgba(125,103,64,0.16)] px-4 py-4 sm:px-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <SectionLabel icon={FileSearch} label="Selected evidence bench" />
-            <h2 className="mt-2 text-2xl font-semibold tracking-normal text-[var(--cg-text)]">{item.title}</h2>
+            <h2 className="mt-2 break-words text-xl font-semibold tracking-normal text-[var(--cg-text)] sm:text-2xl">{item.title}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--cg-text-muted)]">{item.safeSummary}</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.68)] px-2.5 py-1 text-xs font-medium text-[var(--cg-text-muted)]">
@@ -705,11 +709,11 @@ function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
         </div>
       </div>
 
-      <div className="grid gap-5 p-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+      <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] 2xl:gap-5">
         <div className="space-y-4">
-          <div className="cg-evidence-surface min-h-[330px] rounded-lg p-5">
+          <div className="cg-evidence-surface min-h-[300px] rounded-lg p-4 sm:min-h-[330px] sm:p-5">
             <div className="cg-scan-corners" aria-hidden="true" />
-            <div className="flex min-h-[286px] flex-col justify-between gap-8">
+            <div className="flex min-h-[252px] flex-col justify-between gap-6 sm:min-h-[286px] sm:gap-8">
               <div className="max-w-2xl">
                 <p className="text-xs font-semibold uppercase tracking-wide text-[var(--cg-amber)]">Privacy-safe inspection shell</p>
                 <p className="mt-3 text-sm leading-6 text-[var(--cg-text-muted)]">
@@ -718,7 +722,7 @@ function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
                   handle is represented.
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-3 lg:grid-cols-3">
                 <FieldTile label="External Verification" value={item.externalVerification} />
                 <FieldTile label="Verification Status" value={item.verificationStatus} />
                 <FieldTile label="Manual Decision" value="Reviewer-entered only" />
@@ -814,19 +818,19 @@ function SelectedEvidencePanel({ item }: { item: CaseEvidenceItem }) {
             <section className="rounded-lg border border-[rgba(184,133,24,0.36)] bg-[rgba(184,133,24,0.10)] p-4">
               <SectionLabel icon={ShieldCheck} label="No-live markers" />
               <dl className="mt-3 grid gap-2 text-sm">
-                <div className="flex justify-between gap-3">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
                   <dt className="text-[var(--cg-text-muted)]">OCR invoked</dt>
                   <dd className="font-semibold text-[var(--cg-text)]">{item.noLiveAnalysis.ocrInvoked ? "Yes" : "No"}</dd>
                 </div>
-                <div className="flex justify-between gap-3">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
                   <dt className="text-[var(--cg-text-muted)]">Metadata invoked</dt>
                   <dd className="font-semibold text-[var(--cg-text)]">{item.noLiveAnalysis.metadataInvoked ? "Yes" : "No"}</dd>
                 </div>
-                <div className="flex justify-between gap-3">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
                   <dt className="text-[var(--cg-text-muted)]">Product-photo runtime live</dt>
                   <dd className="font-semibold text-[var(--cg-text)]">{item.noLiveAnalysis.productPhotoRuntimeLive ? "Yes" : "No"}</dd>
                 </div>
-                <div className="flex justify-between gap-3">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3">
                   <dt className="text-[var(--cg-text-muted)]">ProductPhotoReviewPanel routed</dt>
                   <dd className="font-semibold text-[var(--cg-text)]">{item.noLiveAnalysis.productPhotoReviewPanelRouted ? "Yes" : "No"}</dd>
                 </div>
@@ -848,7 +852,7 @@ function ReviewSummaryIntelligencePanel({ selectedEvidence }: { selectedEvidence
   return (
     <section className="rounded-lg border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.72)] p-4 shadow-[0_18px_42px_rgba(77,62,36,0.10),inset_0_1px_0_rgba(255,255,255,0.70)]">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <SectionLabel icon={ClipboardList} label="Case review synthesis" />
           <h2 className="mt-2 text-xl font-semibold tracking-normal text-[var(--cg-text)]">
             Static case-level intelligence layout
@@ -866,7 +870,7 @@ function ReviewSummaryIntelligencePanel({ selectedEvidence }: { selectedEvidence
         <p className="mt-2 text-sm leading-6 text-[var(--cg-text-muted)]">{summary.synthesisBoundary}</p>
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {summary.evidenceReviewedGroups.map((group) => (
           <div
             className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(246,241,232,0.62)] p-3"
@@ -879,7 +883,7 @@ function ReviewSummaryIntelligencePanel({ selectedEvidence }: { selectedEvidence
         ))}
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+      <div className="mt-4 grid gap-3 lg:grid-cols-2 2xl:grid-cols-1">
         <section className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.70)] p-3">
           <SectionLabel icon={AlertTriangle} label="Missing information checklist" />
           <ul className="mt-3 space-y-2">
@@ -903,7 +907,7 @@ function ReviewSummaryIntelligencePanel({ selectedEvidence }: { selectedEvidence
         </section>
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-1">
         <section className="rounded-lg border border-[rgba(26,31,39,0.28)] bg-[var(--cg-bg-panel)] p-4 shadow-[0_14px_34px_rgba(77,62,36,0.12),inset_0_1px_0_rgba(255,255,255,0.06)]">
           <SectionLabel icon={FileSearch} label="Selected-evidence synthesis link" tone="dark" />
           <p className="mt-3 text-sm font-semibold text-[var(--cg-dark-text)]">{selectedEvidence.title}</p>
@@ -927,7 +931,7 @@ function ReviewSummaryIntelligencePanel({ selectedEvidence }: { selectedEvidence
         </ul>
       </section>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
+      <div className="mt-4 grid gap-3 lg:grid-cols-3 2xl:grid-cols-1">
         <div className="rounded-md border border-[rgba(125,103,64,0.18)] bg-[rgba(255,253,247,0.70)] p-3">
           <SectionLabel icon={History} label="Timeline link" />
           <p className="mt-2 text-xs leading-5 text-[var(--cg-text-muted)]">{summary.timelineConnection}</p>
@@ -959,15 +963,15 @@ export function CaseReviewCommandCenter() {
 
   return (
     <main className="min-h-screen bg-[var(--cg-bg)] text-[var(--cg-text)]">
-      <div className="mx-auto flex min-h-screen max-w-[1540px] flex-col gap-4 px-4 py-4 sm:px-6">
+      <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col gap-4 px-3 py-3 sm:px-5 sm:py-5 2xl:px-6">
         <CaseHeaderOrientation />
 
-        <div className="grid flex-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)_390px]">
+        <div className="grid flex-1 gap-4 xl:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[320px_minmax(0,1fr)_390px]">
           <EvidenceSidebar selectedEvidence={selectedEvidence} onSelect={setSelectedKey} />
 
           <SelectedEvidencePanel item={selectedEvidence} />
 
-          <aside className="space-y-4">
+          <aside className="space-y-4 xl:col-span-2 2xl:col-span-1 2xl:sticky 2xl:top-4 2xl:max-h-[calc(100vh-2rem)] 2xl:overflow-y-auto">
             <ReviewSummaryIntelligencePanel selectedEvidence={selectedEvidence} />
 
             <ManualReviewWorkspace selectedEvidence={selectedEvidence} />
