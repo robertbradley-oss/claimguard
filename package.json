@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "check:report-semantics": "node scripts/check-report-semantics.mjs",
+    "check:vision-sandbox-boundaries": "node scripts/check-vision-sandbox-boundaries.mjs",
     "check:product-photo-probes": "node scripts/run-product-photo-probes.cjs"
   },
   "dependencies": {

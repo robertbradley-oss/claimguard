@@ -149,6 +149,8 @@ const phase424SyntheticFixtureMetadataSchemaPlan = readRequiredFile(
 const phase425ValidationProbeImplementationPlan = readRequiredFile(
   "PHASE_4_25_VALIDATION_PROBE_IMPLEMENTATION_PLAN.md",
 );
+const phase426SandboxValidationProbes = readRequiredFile("PHASE_4_26_SANDBOX_VALIDATION_PROBES.md");
+const visionSandboxBoundaryChecker = readRequiredFile("scripts/check-vision-sandbox-boundaries.mjs");
 
 const requiredSemanticSignals = [
   {
@@ -2508,6 +2510,93 @@ const forbiddenPhase425ValidationProbeImplementationPlanPatterns = [
   /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/,
 ];
 
+const requiredPhase426SandboxValidationProbeSignals = [
+  {
+    label: "Phase 4.26 local-only scope",
+    patterns: [
+      /Phase 4\.26 implements local static OpenAI Vision sandbox boundary validation only/,
+      /does not add OpenAI SDKs, provider SDKs, provider calls/,
+      /does not add.*fixture metadata files, fixture image\/files/,
+      /does not add.*runtime schema\/types/,
+    ],
+  },
+  {
+    label: "implemented files and script",
+    patterns: [
+      /`scripts\/check-vision-sandbox-boundaries\.mjs`/,
+      /`check:vision-sandbox-boundaries`/,
+      /`scripts\/check-report-semantics\.mjs`/,
+    ],
+  },
+  {
+    label: "implemented check categories",
+    patterns: [
+      /Package dependency guard/,
+      /Provider SDK import guard/,
+      /Provider credential environment variable guard/,
+      /Provider endpoint\/call guard/,
+      /Protected runtime diff guard/,
+      /Fixture metadata policy guard/,
+      /Package artifact path guard/,
+    ],
+  },
+  {
+    label: "false-positive controls",
+    patterns: [
+      /safety-rule documentation/,
+      /Provider call and endpoint regex definitions are allowed inside checker scripts/,
+      /Hard provider payload\/raw OCR/,
+      /Existing `tesseract\.js` and `exifr` dependencies/,
+    ],
+  },
+  {
+    label: "commit and package blocking behavior",
+    patterns: [
+      /Commit-Blocking Behavior/,
+      /Provider SDK dependencies or lockfile entries/,
+      /Protected runtime\/source\/route\/component\/package-lock diffs/,
+      /Package-Blocking Behavior/,
+      /Package-safe sandbox content must remain synthetic/,
+    ],
+  },
+  {
+    label: "deferred checks",
+    patterns: [
+      /Strict enum validation for Phase 4\.27 metadata values/,
+      /Fixture binary\/EXIF inspection for Phase 4\.29 image assets/,
+      /Per-fixture metadata-to-asset matching/,
+      /Runtime schema\/output validation, because runtime schema\/types remain blocked/,
+    ],
+  },
+  {
+    label: "route runtime relationship",
+    patterns: [
+      /Existing `POST \/api\/analysis\/ocr` remains exact `fixtureKey` JSON-only/,
+      /Existing `POST \/api\/analysis\/mock-provider` remains synthetic\/mock-only and adapter-only/,
+      /`analyzeEvidenceFile` remains unchanged/,
+      /`LocalAnalysisResult` remains unchanged/,
+      /The new checker is a local script only/,
+    ],
+  },
+];
+
+const requiredVisionSandboxBoundaryCheckerSignals = [
+  /blockedProviderDependencies/,
+  /Provider SDK import guard/,
+  /Provider env guard/,
+  /Provider call guard/,
+  /Protected runtime\/package file changed/,
+  /OCR route exact fixture boundary/,
+  /Mock provider route synthetic boundary/,
+  /Private identifier guard/,
+  /Provider payload\/raw OCR guard/,
+  /Evidence URL\/storage guard/,
+  /Fixture metadata policy/,
+  /Altered\/AI uncertainty wording/,
+  /Unsafe outcome wording guard/,
+  /Package artifact path is blocked/,
+];
+
 const forbiddenOcrRouteImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/types",
@@ -2679,6 +2768,18 @@ for (const signal of requiredPhase424SyntheticFixtureMetadataSchemaPlanSignals) 
 for (const signal of requiredPhase425ValidationProbeImplementationPlanSignals) {
   if (!signal.patterns.every((pattern) => pattern.test(phase425ValidationProbeImplementationPlan))) {
     failures.push(`Missing Phase 4.25 validation/probe implementation planning signal: ${signal.label}`);
+  }
+}
+
+for (const signal of requiredPhase426SandboxValidationProbeSignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(phase426SandboxValidationProbes))) {
+    failures.push(`Missing Phase 4.26 sandbox validation probe signal: ${signal.label}`);
+  }
+}
+
+for (const pattern of requiredVisionSandboxBoundaryCheckerSignals) {
+  if (!pattern.test(visionSandboxBoundaryChecker)) {
+    failures.push(`Missing Phase 4.26 boundary checker implementation signal: ${pattern}`);
   }
 }
 
