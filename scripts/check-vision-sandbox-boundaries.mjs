@@ -142,8 +142,15 @@ if (/"(?:openai|@openai\/agents|@google-cloud\/vision|@google-cloud\/documentai|
 const sourceFiles = allTextFiles.filter((file) => file.path.startsWith("src/"));
 const scriptFiles = allTextFiles.filter((file) => file.path.startsWith("scripts/"));
 const docsFiles = allTextFiles.filter((file) => file.path.endsWith(".md"));
-const sandboxDocs = docsFiles.filter((file) => /PHASE_4_(?:19|20|21|22|23|24|25|26|27|28|29|30)_/.test(file.path));
+const sandboxDocs = docsFiles.filter((file) => /PHASE_4_(?:19|20|21|22|23|24|25|26|27|28|29|30|31)_/.test(file.path));
 const sourceAndScriptFiles = [...sourceFiles, ...scriptFiles];
+const sandboxSkeletonSourcePrefix = "src/lib/analysis/vision-sandbox/";
+const sandboxSkeletonFiles = allTextFiles.filter(
+  (file) => file.path.startsWith(sandboxSkeletonSourcePrefix) || file.path === "scripts/check-vision-sandbox-skeleton.cjs",
+);
+const sandboxSkeletonImplementationFiles = sandboxSkeletonFiles.filter(
+  (file) => file.path !== "src/lib/analysis/vision-sandbox/vision-sandbox.probe.ts",
+);
 
 addPatternFailures("Provider SDK import guard", sourceAndScriptFiles, [
   /from\s+["'](?:openai|@openai\/agents|@google-cloud\/vision|@google-cloud\/documentai|@aws-sdk\/client-textract|aws-sdk)["']/i,
@@ -198,20 +205,22 @@ const allowedChangedFiles = new Set([
   "package.json",
   "scripts/check-report-semantics.mjs",
   "scripts/check-vision-sandbox-boundaries.mjs",
+  "scripts/check-vision-sandbox-skeleton.cjs",
 ]);
 
 for (const changedFile of changedFiles) {
   if (
     protectedRuntimeFiles.includes(changedFile) ||
     changedFile === "package-lock.json" ||
-    changedFile.startsWith("src/")
+    (changedFile.startsWith("src/") && !changedFile.startsWith(sandboxSkeletonSourcePrefix))
   ) {
     failures.push(`Protected runtime/package file changed during sandbox boundary phase: ${changedFile}`);
   }
 
   if (
     !allowedChangedFiles.has(changedFile) &&
-    !/^PHASE_4_(?:26|27|28|29|30)_/.test(changedFile) &&
+    !changedFile.startsWith(sandboxSkeletonSourcePrefix) &&
+    !/^PHASE_4_(?:26|27|28|29|30|31)_/.test(changedFile) &&
     !changedFile.startsWith("sandbox-fixtures/") &&
     !changedFile.startsWith("synthetic-fixtures/") &&
     !changedFile.startsWith("fixtures/vision-sandbox/")
@@ -231,6 +240,44 @@ addPatternFailures("Sandbox runtime wiring guard", protectedRuntimeCorpus, [
   /fixtureMetadata/i,
   /alteredAiUncertainty/i,
 ]);
+
+addPatternFailures("Vision sandbox skeleton forbidden import guard", sandboxSkeletonImplementationFiles, [
+  /from\s+["']@\/lib\/analysis\/(?:analyzer|types|report-adapter|scoring|receipt-parser|providers\/mock-provider-adapter)["']/i,
+  /from\s+["']@\/components\/(?:ClaimReviewWorkflow|ProductPhotoReviewPanel|UploadPanel)["']/i,
+  /from\s+["'](?:openai|@openai\/agents|@google-cloud\/vision|@google-cloud\/documentai|@aws-sdk\/client-textract|aws-sdk)["']/i,
+  /require\(\s*["'](?:openai|@openai\/agents|@google-cloud\/vision|@google-cloud\/documentai|@aws-sdk\/client-textract|aws-sdk)["']\s*\)/i,
+]);
+
+addPatternFailures("Vision sandbox skeleton runtime boundary guard", sandboxSkeletonImplementationFiles, [
+  /analyzeEvidenceFile/,
+  /LocalAnalysisResult/,
+  /\bfetch\s*\(/,
+  /process\.env/,
+  /createObjectURL|revokeObjectURL/,
+  /\bFile\b/,
+  /\bBlob\b/,
+  /localStorage|sessionStorage/,
+  /multipart\/form-data/i,
+]);
+
+if (sandboxSkeletonFiles.length > 0) {
+  const sandboxSkeletonCorpus = sandboxSkeletonFiles.map((file) => file.contents).join("\n");
+  ensurePatterns("Vision sandbox skeleton phase and isolation markers", sandboxSkeletonCorpus, [
+    /VISION_SANDBOX_PHASE\s*=\s*"4\.31"/,
+    /providerMode:\s*typeof VISION_SANDBOX_PROVIDER_MODE/,
+    /providerFamily:\s*typeof VISION_SANDBOX_PROVIDER_FAMILY/,
+    /routeImplemented:\s*false/,
+    /providerCallsAllowed:\s*false/,
+    /uploadHandlingAllowed:\s*false/,
+    /storageAllowed:\s*false/,
+    /persistenceAllowed:\s*false/,
+    /receiptRuntimeChanged:\s*false/,
+    /altered-or-AI-generated-image uncertainty/,
+    /review signal only/,
+    /not proof/,
+    /not (?:a )?final decision/,
+  ]);
+}
 
 const ocrRoute = findFile("src/app/api/analysis/ocr/route.ts");
 ensurePatterns("OCR route exact fixture boundary", ocrRoute, [

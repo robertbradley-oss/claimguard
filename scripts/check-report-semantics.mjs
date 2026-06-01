@@ -48,6 +48,12 @@ const filesToCheck = [
   "src/lib/analysis/ocr-fixture-harness.probe.ts",
   "src/lib/analysis/ocr-extraction-contract.ts",
   "src/lib/analysis/ocr-extraction-contract.probe.ts",
+  "src/lib/analysis/vision-sandbox/types.ts",
+  "src/lib/analysis/vision-sandbox/fixture-registry.ts",
+  "src/lib/analysis/vision-sandbox/fixture-resolver.ts",
+  "src/lib/analysis/vision-sandbox/sandbox-output.ts",
+  "src/lib/analysis/vision-sandbox/index.ts",
+  "src/lib/analysis/vision-sandbox/vision-sandbox.probe.ts",
   "src/app/api/analysis/ocr/route.ts",
   "src/app/api/analysis/ocr/route.probe.ts",
   "src/lib/analysis/providers/mock-provider-adapter.ts",
@@ -67,6 +73,7 @@ const filesToCheck = [
   "src/lib/test-evidence/fixtures.ts",
   "src/lib/test-evidence/tuning-thresholds.ts",
   "scripts/run-product-photo-probes.cjs",
+  "scripts/check-vision-sandbox-skeleton.cjs",
   "package.json",
   "TEST_EVIDENCE.md",
 ];
@@ -160,6 +167,15 @@ const phase429SyntheticVisionFixtures = readRequiredFile("PHASE_4_29_SYNTHETIC_V
 const phase430OpenAiVisionSandboxSkeletonPlan = readRequiredFile(
   "PHASE_4_30_OPENAI_VISION_SANDBOX_SKELETON_PLAN.md",
 );
+const visionSandboxSkeletonCorpus = [
+  "src/lib/analysis/vision-sandbox/types.ts",
+  "src/lib/analysis/vision-sandbox/fixture-registry.ts",
+  "src/lib/analysis/vision-sandbox/fixture-resolver.ts",
+  "src/lib/analysis/vision-sandbox/sandbox-output.ts",
+  "src/lib/analysis/vision-sandbox/index.ts",
+  "src/lib/analysis/vision-sandbox/vision-sandbox.probe.ts",
+  "scripts/check-vision-sandbox-skeleton.cjs",
+].map((filePath) => fileContents.get(filePath) ?? readRequiredFile(filePath)).join("\n");
 const phase429FixtureAssetCorpus = [
   "fixtures/vision-sandbox/assets/synthetic-clean-receipt-baseline.svg",
   "fixtures/vision-sandbox/assets/synthetic-suspicious-layout-receipt.svg",
@@ -2927,6 +2943,76 @@ const requiredPhase430OpenAiVisionSandboxSkeletonPlanSignals = [
   },
 ];
 
+const requiredPhase431VisionSandboxSkeletonSignals = [
+  {
+    label: "Phase 4.31 skeleton identity",
+    patterns: [
+      /VISION_SANDBOX_PHASE\s*=\s*"4\.31"/,
+      /VISION_SANDBOX_SCHEMA_VERSION\s*=\s*"openai-vision-sandbox-skeleton\/v1"/,
+      /VISION_SANDBOX_PROVIDER_MODE\s*=\s*"sandbox"/,
+      /VISION_SANDBOX_PROVIDER_FAMILY\s*=\s*"openai-vision-style"/,
+    ],
+  },
+  {
+    label: "fixture registry and resolver boundary",
+    patterns: [
+      /synthetic-fixture-registry\.json/,
+      /listApprovedVisionSandboxFixtureKeys/,
+      /getVisionSandboxFixtureMetadata/,
+      /resolveVisionSandboxFixtureReference/,
+      /fixtures\/vision-sandbox\/assets/,
+      /fixtures\/vision-sandbox\/simulations/,
+    ],
+  },
+  {
+    label: "stub output and guard boundary",
+    patterns: [
+      /buildVisionSandboxStubOutput/,
+      /schemaShapeGuard/,
+      /privacyGuard/,
+      /packageSafetyGuard/,
+      /providerCallsAllowed:\s*false/,
+      /routeImplemented:\s*false/,
+      /uploadHandlingAllowed:\s*false/,
+      /receiptRuntimeChanged:\s*false/,
+    ],
+  },
+  {
+    label: "unsupported and failure simulations",
+    patterns: [
+      /provider-timeout/,
+      /provider-rate-limited/,
+      /provider-unavailable/,
+      /cost-limit-reached/,
+      /schema-validation-failed/,
+      /internal-sandbox-error/,
+      /refused/,
+    ],
+  },
+  {
+    label: "altered AI uncertainty safety",
+    patterns: [
+      /altered-or-AI-generated-image uncertainty/,
+      /review signal only/,
+      /manual-review driver/,
+      /not proof/,
+      /not a final decision/,
+      /not a fraud score/,
+      /A low value does not confirm authenticity/,
+      /A high value does not confirm alteration or AI generation/,
+    ],
+  },
+  {
+    label: "developer check script",
+    patterns: [
+      /VISION_SANDBOX_SKELETON_DEVELOPER_PROBE/,
+      /ClaimGuard OpenAI Vision sandbox skeleton check passed/,
+      /synthetic fixture resolution/,
+      /failure simulations/,
+    ],
+  },
+];
+
 const forbiddenOcrRouteImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/types",
@@ -3146,6 +3232,12 @@ for (const pattern of requiredPhase429FixtureAssetSignals) {
 for (const signal of requiredPhase430OpenAiVisionSandboxSkeletonPlanSignals) {
   if (!signal.patterns.every((pattern) => pattern.test(phase430OpenAiVisionSandboxSkeletonPlan))) {
     failures.push(`Missing Phase 4.30 OpenAI Vision sandbox skeleton planning signal: ${signal.label}`);
+  }
+}
+
+for (const signal of requiredPhase431VisionSandboxSkeletonSignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(visionSandboxSkeletonCorpus))) {
+    failures.push(`Missing Phase 4.31 OpenAI Vision sandbox skeleton signal: ${signal.label}`);
   }
 }
 
