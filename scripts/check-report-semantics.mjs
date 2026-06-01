@@ -130,6 +130,7 @@ const phase417MockProviderRouteSafetyCheckpoint = readRequiredFile(
 const phase418MockProviderRouteDeveloperUsage = readRequiredFile(
   "PHASE_4_18_MOCK_PROVIDER_ROUTE_DEVELOPER_USAGE.md",
 );
+const phase419OpenAiVisionSandboxPlan = readRequiredFile("PHASE_4_19_OPENAI_VISION_SANDBOX_PLAN.md");
 
 const requiredSemanticSignals = [
   {
@@ -1163,6 +1164,156 @@ const forbiddenPhase418MockProviderRouteDeveloperUsagePatterns = [
   /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/,
 ];
 
+const requiredPhase419OpenAiVisionSandboxPlanSignals = [
+  {
+    label: "Phase 4.19 planning-only marker",
+    patterns: [/Phase 4\.19 is an OpenAI Vision sandbox planning-only milestone/, /This is not live AI/],
+  },
+  {
+    label: "no implementation scope",
+    patterns: [
+      /does not add OpenAI SDKs, provider SDKs, environment variables, provider calls/,
+      /does not wire `ClaimReviewWorkflow`/,
+      /does not change `analyzeEvidenceFile`/,
+      /does not change `LocalAnalysisResult`/,
+    ],
+  },
+  {
+    label: "future sandbox purpose",
+    patterns: [
+      /Screenshot and layout reasoning/,
+      /Receipt layout and context observations/,
+      /Product photo context observations/,
+      /Altered-or-AI-generated-image uncertainty signals/,
+      /Manual-review driver generation/,
+    ],
+  },
+  {
+    label: "allowed and disallowed evidence categories",
+    patterns: [
+      /Synthetic receipt images/,
+      /Synthetic order screenshots/,
+      /Synthetic product-photo fixtures/,
+      /Real customer receipts/,
+      /Raw unredacted OCR text/,
+      /Production upload flow objects/,
+    ],
+  },
+  {
+    label: "future OpenAI Vision role",
+    patterns: [
+      /OpenAI Vision-style analysis should be a future reasoning layer, not a decision maker/,
+      /Confidence-style 1-100 uncertainty output only if carefully framed/,
+      /It must not produce:/,
+      /Single fraud score/,
+      /`LocalAnalysisResult`/,
+    ],
+  },
+  {
+    label: "future prompt strategy",
+    patterns: [
+      /Ask for uncertainty and review signals only/,
+      /Forbid fraud conclusions/,
+      /Require limitations/,
+      /Separate observations from conclusions/,
+      /Request structured output only/,
+    ],
+  },
+  {
+    label: "future output contract",
+    patterns: [
+      /Provider mode: sandbox/,
+      /Altered-or-AI-generated-image uncertainty value, 1-100/,
+      /Privacy flags/,
+      /Retention flags/,
+      /Provider failure reason when applicable/,
+    ],
+  },
+  {
+    label: "privacy and retention plan",
+    patterns: [
+      /No real evidence by default/,
+      /No raw provider payload logging/,
+      /No raw OCR retention/,
+      /No customer identifiers/,
+      /Explicit deletion and retention policy before real evidence is considered/,
+    ],
+  },
+  {
+    label: "cost and timeout plan",
+    patterns: [
+      /Strict timeout ceiling/,
+      /No automatic retry by default/,
+      /Small image and page limits/,
+      /Cost metadata required/,
+      /No customer-risk conclusion from provider failure/,
+    ],
+  },
+  {
+    label: "relationship to existing routes",
+    patterns: [
+      /Existing `POST \/api\/analysis\/ocr` remains exact fixture-key only/,
+      /Existing `POST \/api\/analysis\/mock-provider` remains synthetic\/mock-only/,
+      /The mock provider adapter remains the test boundary before live provider behavior/,
+      /`analyzeEvidenceFile` and `LocalAnalysisResult` remain unchanged/,
+    ],
+  },
+  {
+    label: "future QA and probe requirements",
+    patterns: [
+      /No SDK, environment variable, or package change until approved/,
+      /Prompt safety scan/,
+      /Output schema safety scan/,
+      /Retention and privacy flag probe/,
+      /No route or UI wiring scan/,
+    ],
+  },
+  {
+    label: "safety language rules",
+    patterns: [
+      /Vision confidence is review signal only/,
+      /Altered-or-AI-generated-image confidence is uncertainty signal only/,
+      /Provider failures are operational limitations only/,
+      /No proof language/,
+      /No single fraud score/,
+    ],
+  },
+  {
+    label: "Phase 4.20 safe options",
+    patterns: [
+      /Option A: Phase 4\.20 OpenAI Vision sandbox prompt\/output contract planning/,
+      /Option B: Phase 4\.20 OpenAI Vision sandbox implementation plan/,
+      /Option C: Phase 4\.20 OpenAI Vision sandbox skeleton/,
+    ],
+  },
+];
+
+const forbiddenPhase419OpenAiVisionSandboxPlanPatterns = [
+  /npm\s+(?:install|add)\s+(?:openai|@aws-sdk|@google-cloud)/i,
+  /OPENAI_API_KEY|GOOGLE_APPLICATION_CREDENTIALS|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY/,
+  /process\.env\.(?:OPENAI|GOOGLE|AWS|OCR|VISION)/i,
+  /import\s+.*\s+from\s+["'](?:openai|@aws-sdk|@google-cloud)/i,
+  /curl\s+/i,
+  /\bfetch\s*\(/,
+  /multipart\/form-data\s+is\s+accepted/i,
+  /raw provider payloads? (?:will|should) be logged/i,
+  /raw OCR (?:will|should) be retained/i,
+  /real evidence processing (?:is|will be) enabled/i,
+  /live OpenAI Vision implementation (?:is|was|will be) added/i,
+  /(?:This milestone|Phase 4\.19) (?:adds|added|implements|implemented|wires|wired) (?:live|real|provider|upload|storage)/i,
+  /(?:ClaimReviewWorkflow|ProductPhotoReviewPanel) (?:is|was|will be) (?:wired|routed)/i,
+  /(?:analyzeEvidenceFile|LocalAnalysisResult) (?:is|was|will be) (?:changed|migrated|updated)/i,
+  /automatic (?:deny|approval|rejection|refund|disposition) (?:is|will be|should be) (?:enabled|allowed|performed)/i,
+  /confidence (?:proves|confirms|verifies)/i,
+  /uncertainty (?:proves|confirms|verifies)/i,
+  /https?:\/\//i,
+  /blob:|data:|file:/i,
+  /[A-Za-z]:\\/,
+  /\b[A-Z]{2,}-\d{3,}\b/,
+  /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i,
+  /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/,
+];
+
 const forbiddenOcrRouteImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/types",
@@ -1295,6 +1446,12 @@ for (const signal of requiredPhase418MockProviderRouteDeveloperUsageSignals) {
   }
 }
 
+for (const signal of requiredPhase419OpenAiVisionSandboxPlanSignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(phase419OpenAiVisionSandboxPlan))) {
+    failures.push(`Missing Phase 4.19 OpenAI Vision sandbox planning signal: ${signal.label}`);
+  }
+}
+
 for (const bannedPhrase of guardedBannedPhrases) {
   if (bannedPhrase.test(corpus)) {
     failures.push(`Unsafe report, fixture, or QA wording found: ${bannedPhrase}`);
@@ -1412,6 +1569,12 @@ for (const pattern of forbiddenPhase417MockProviderRouteSafetyPatterns) {
 for (const pattern of forbiddenPhase418MockProviderRouteDeveloperUsagePatterns) {
   if (pattern.test(phase418MockProviderRouteDeveloperUsage)) {
     failures.push(`Phase 4.18 mock-provider route developer usage failed: forbidden implementation/privacy pattern ${pattern}`);
+  }
+}
+
+for (const pattern of forbiddenPhase419OpenAiVisionSandboxPlanPatterns) {
+  if (pattern.test(phase419OpenAiVisionSandboxPlan)) {
+    failures.push(`Phase 4.19 OpenAI Vision sandbox plan failed: forbidden implementation/privacy pattern ${pattern}`);
   }
 }
 
