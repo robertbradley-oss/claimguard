@@ -345,7 +345,10 @@ Phase 4.2 synthetic OCR fixture harness decision:
 - Phase 4.31 OpenAI Vision sandbox skeleton implementation decision:
 - Phase 4.31 adds a script/module-only developer sandbox under `src/lib/analysis/vision-sandbox/` plus `check:vision-sandbox-skeleton`. It can resolve approved synthetic fixture metadata/assets, choose sandbox analysis modes, produce deterministic sandbox-shaped stub outputs, simulate unsupported and provider/validation failure shapes, and expose privacy, retention, schema-shape, and package-safety guard status.
 - Phase 4.31 remains sandbox-only and local. It adds no API route, no existing route behavior change, no OpenAI/provider SDK, no env var, no provider call, no upload/storage/persistence, no real evidence, no fixture asset/metadata change, no package artifact, no UI wiring, no receipt scoring/report change, no `analyzeEvidenceFile` change, and no `LocalAnalysisResult` change.
-- The recommended next safe task is Phase 4.32 OpenAI Vision sandbox skeleton hardening and fixture-runner validation, still with no SDK/env/provider calls and no route behavior.
+- Phase 4.32 OpenAI Vision sandbox fixture-runner validation decision:
+- Phase 4.32 adds script/module-only hardening for the existing sandbox skeleton. `src/lib/analysis/vision-sandbox/fixture-runner.ts`, `scripts/check-vision-sandbox-fixture-runner.cjs`, and `check:vision-sandbox-fixture-runner` validate all approved synthetic fixture references, expected statuses, analysis-mode fallback behavior, unsupported/failure simulations, guard states, privacy/retention markers, and package-safety markers.
+- Phase 4.32 remains sandbox-only and local. It adds no API route, no existing route behavior change, no OpenAI/provider SDK, no env var, no provider call, no upload/storage/persistence, no real evidence, no fixture asset/metadata change, no package artifact, no UI wiring, no receipt scoring/report change, no `analyzeEvidenceFile` change, and no `LocalAnalysisResult` change.
+- The recommended next safe task is a separate OpenAI Vision sandbox developer usage and readiness checkpoint documentation pass, still with no SDK/env/provider calls and no route behavior.
 
 Deferred until a later Phase 4 implementation slice is explicitly opened:
 

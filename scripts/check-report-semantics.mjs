@@ -51,6 +51,7 @@ const filesToCheck = [
   "src/lib/analysis/vision-sandbox/types.ts",
   "src/lib/analysis/vision-sandbox/fixture-registry.ts",
   "src/lib/analysis/vision-sandbox/fixture-resolver.ts",
+  "src/lib/analysis/vision-sandbox/fixture-runner.ts",
   "src/lib/analysis/vision-sandbox/sandbox-output.ts",
   "src/lib/analysis/vision-sandbox/index.ts",
   "src/lib/analysis/vision-sandbox/vision-sandbox.probe.ts",
@@ -73,6 +74,7 @@ const filesToCheck = [
   "src/lib/test-evidence/fixtures.ts",
   "src/lib/test-evidence/tuning-thresholds.ts",
   "scripts/run-product-photo-probes.cjs",
+  "scripts/check-vision-sandbox-fixture-runner.cjs",
   "scripts/check-vision-sandbox-skeleton.cjs",
   "package.json",
   "TEST_EVIDENCE.md",
@@ -167,14 +169,20 @@ const phase429SyntheticVisionFixtures = readRequiredFile("PHASE_4_29_SYNTHETIC_V
 const phase430OpenAiVisionSandboxSkeletonPlan = readRequiredFile(
   "PHASE_4_30_OPENAI_VISION_SANDBOX_SKELETON_PLAN.md",
 );
+const phase432VisionSandboxFixtureRunnerValidation = readRequiredFile(
+  "PHASE_4_32_VISION_SANDBOX_FIXTURE_RUNNER_VALIDATION.md",
+);
 const visionSandboxSkeletonCorpus = [
   "src/lib/analysis/vision-sandbox/types.ts",
   "src/lib/analysis/vision-sandbox/fixture-registry.ts",
   "src/lib/analysis/vision-sandbox/fixture-resolver.ts",
+  "src/lib/analysis/vision-sandbox/fixture-runner.ts",
   "src/lib/analysis/vision-sandbox/sandbox-output.ts",
   "src/lib/analysis/vision-sandbox/index.ts",
   "src/lib/analysis/vision-sandbox/vision-sandbox.probe.ts",
+  "scripts/check-vision-sandbox-fixture-runner.cjs",
   "scripts/check-vision-sandbox-skeleton.cjs",
+  "package.json",
 ].map((filePath) => fileContents.get(filePath) ?? readRequiredFile(filePath)).join("\n");
 const phase429FixtureAssetCorpus = [
   "fixtures/vision-sandbox/assets/synthetic-clean-receipt-baseline.svg",
@@ -3013,6 +3021,76 @@ const requiredPhase431VisionSandboxSkeletonSignals = [
   },
 ];
 
+const requiredPhase432VisionSandboxFixtureRunnerSignals = [
+  {
+    label: "Phase 4.32 fixture-runner implementation",
+    patterns: [
+      /runVisionSandboxFixtureRunner/,
+      /runnerPhase:\s*"4\.32"/,
+      /VisionSandboxFixtureRunnerReport/,
+      /fixtureRuns/,
+      /failureSimulationRuns/,
+    ],
+  },
+  {
+    label: "fixture reference and mode validation",
+    patterns: [
+      /referenceExists/,
+      /defaultModeMatchesMetadata/,
+      /requestedModeAccepted/,
+      /modeFallbackMatchesMetadata/,
+      /resolveVisionSandboxFixtureReference/,
+    ],
+  },
+  {
+    label: "fixture-runner privacy and package boundaries",
+    patterns: [
+      /privacyBoundaryValid/,
+      /packageSafetyValid/,
+      /providerPayloadReturned/,
+      /rawOcrReturned/,
+      /requiresProviderAccess/,
+      /packageArtifactCreated/,
+    ],
+  },
+  {
+    label: "fixture-runner developer check",
+    patterns: [
+      /check:vision-sandbox-fixture-runner/,
+      /ClaimGuard OpenAI Vision sandbox fixture-runner check passed/,
+      /mode fallback behavior/,
+      /failure simulations/,
+    ],
+  },
+];
+
+const requiredPhase432VisionSandboxDocSignals = [
+  {
+    label: "Phase 4.32 scope",
+    patterns: [
+      /Phase 4\.32/,
+      /skeleton hardening and fixture-runner validation/i,
+      /script\/module-only/i,
+      /synthetic fixture/i,
+    ],
+  },
+  {
+    label: "Phase 4.32 blocked scope",
+    patterns: [
+      /no SDK/i,
+      /no env var/i,
+      /no provider call/i,
+      /no route behavior/i,
+      /no upload/i,
+      /no storage/i,
+      /no persistence/i,
+      /no real evidence/i,
+      /no `analyzeEvidenceFile` change/i,
+      /no `LocalAnalysisResult` change/i,
+    ],
+  },
+];
+
 const forbiddenOcrRouteImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/types",
@@ -3238,6 +3316,18 @@ for (const signal of requiredPhase430OpenAiVisionSandboxSkeletonPlanSignals) {
 for (const signal of requiredPhase431VisionSandboxSkeletonSignals) {
   if (!signal.patterns.every((pattern) => pattern.test(visionSandboxSkeletonCorpus))) {
     failures.push(`Missing Phase 4.31 OpenAI Vision sandbox skeleton signal: ${signal.label}`);
+  }
+}
+
+for (const signal of requiredPhase432VisionSandboxFixtureRunnerSignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(visionSandboxSkeletonCorpus))) {
+    failures.push(`Missing Phase 4.32 OpenAI Vision sandbox fixture-runner signal: ${signal.label}`);
+  }
+}
+
+for (const signal of requiredPhase432VisionSandboxDocSignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(phase432VisionSandboxFixtureRunnerValidation))) {
+    failures.push(`Missing Phase 4.32 OpenAI Vision sandbox fixture-runner documentation signal: ${signal.label}`);
   }
 }
 

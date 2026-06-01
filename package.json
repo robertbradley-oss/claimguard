@@ -9,6 +9,7 @@
     "lint": "eslint",
     "check:report-semantics": "node scripts/check-report-semantics.mjs",
     "check:vision-sandbox-skeleton": "node scripts/check-vision-sandbox-skeleton.cjs",
+    "check:vision-sandbox-fixture-runner": "node scripts/check-vision-sandbox-fixture-runner.cjs",
     "check:vision-sandbox-boundaries": "node scripts/check-vision-sandbox-boundaries.mjs",
     "check:product-photo-probes": "node scripts/run-product-photo-probes.cjs"
   },

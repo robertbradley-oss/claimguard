@@ -5,6 +5,7 @@ import {
   buildVisionSandboxStubOutput,
   listApprovedVisionSandboxFixtureKeys,
   resolveVisionSandboxFixtureReference,
+  runVisionSandboxFixtureRunner,
 } from "./index";
 
 const repoRoot = process.cwd();
@@ -12,6 +13,7 @@ const sandboxSources = [
   "src/lib/analysis/vision-sandbox/types.ts",
   "src/lib/analysis/vision-sandbox/fixture-registry.ts",
   "src/lib/analysis/vision-sandbox/fixture-resolver.ts",
+  "src/lib/analysis/vision-sandbox/fixture-runner.ts",
   "src/lib/analysis/vision-sandbox/sandbox-output.ts",
   "src/lib/analysis/vision-sandbox/index.ts",
 ].map((repoPath) => readFileSync(join(repoRoot, repoPath), "utf8"));
@@ -42,6 +44,7 @@ function serializedHasUnsafeTerms(value: unknown) {
 
 function runVisionSandboxSkeletonProbe() {
   const fixtureKeys = listApprovedVisionSandboxFixtureKeys();
+  const fixtureRunnerReport = runVisionSandboxFixtureRunner(repoRoot);
   const outputs = fixtureKeys.map((fixtureKey) => buildVisionSandboxStubOutput({ fixtureKey }));
   const alteredLow = buildVisionSandboxStubOutput({ fixtureKey: "synthetic-altered-ai-low-concern" });
   const alteredMedium = buildVisionSandboxStubOutput({ fixtureKey: "synthetic-altered-ai-medium-concern" });
@@ -77,6 +80,8 @@ function runVisionSandboxSkeletonProbe() {
   const moduleChecks = {
     allRegistryKeysLoaded: fixtureKeys.length === 12,
     everyFixtureHasReference: fixtureKeys.every((fixtureKey) => Boolean(resolveVisionSandboxFixtureReference(fixtureKey))),
+    fixtureRunnerCoversRegistry: fixtureRunnerReport.fixtureCount === fixtureKeys.length,
+    fixtureRunnerPassed: fixtureRunnerReport.passed,
     completedSvgReferences:
       resolveVisionSandboxFixtureReference("synthetic-clean-receipt-baseline")?.repoPath ===
       "fixtures/vision-sandbox/assets/synthetic-clean-receipt-baseline.svg",
@@ -146,6 +151,7 @@ function runVisionSandboxSkeletonProbe() {
       invalidInput.resultStatus === "internal-sandbox-error" &&
       invalidInput.fixture === null &&
       invalidInput.packageSafety.safeForDownloadablePackage === false,
+    fixtureRunnerFailureSimulationsPassed: fixtureRunnerReport.failureSimulationRuns.every((run) => run.passed),
   };
 
   const alteredAiChecks = {
@@ -218,6 +224,7 @@ function runVisionSandboxSkeletonProbe() {
     alteredAiChecks,
     safetyChecks,
     isolationChecks,
+    fixtureRunnerReport,
     fixtureCount: fixtureKeys.length,
   } as const;
 }

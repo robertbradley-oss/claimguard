@@ -26,6 +26,15 @@ import {
 } from "./types";
 
 const allowedInputKeys = new Set(["fixtureKey", "analysisMode", "simulationStatus"]);
+const allowedAnalysisModes = new Set<VisionSandboxAnalysisMode>([
+  "receipt-visual-review",
+  "order-screenshot-review",
+  "product-photo-review",
+  "damaged-product-review",
+  "altered-ai-uncertainty-review",
+  "unsupported-evidence-review",
+  "provider-failure-review",
+]);
 const unsupportedInputKeyPattern =
   /(?:file|blob|byte|binary|multipart|formdata|url|href|storage|provider|payload|rawocr|customer|ticket|order|tracking|case|claim|evidence|upload|persist|metadata)/i;
 const urlLikeValuePattern = /(?:https?:\/\/|blob:|data:|file:|s3:\/\/|gs:\/\/)/i;
@@ -96,9 +105,14 @@ function validateSandboxInput(input: unknown): { ok: true; input: VisionSandboxI
       reasons.push(`Unsupported sandbox input key: ${key}`);
     }
 
+    const isApprovedEnumValue =
+      (key === "analysisMode" && allowedAnalysisModes.has(value as VisionSandboxAnalysisMode)) ||
+      (key === "simulationStatus" && failureSimulationStatuses.has(value as VisionSandboxInput["simulationStatus"]));
+
     if (
       key !== "fixtureKey" &&
       typeof value === "string" &&
+      !isApprovedEnumValue &&
       (urlLikeValuePattern.test(value) || privateIdentifierValuePatterns.some((pattern) => pattern.test(value)))
     ) {
       reasons.push(`Unsupported sandbox input value for key: ${key}`);
@@ -116,6 +130,12 @@ function validateSandboxInput(input: unknown): { ok: true; input: VisionSandboxI
   }
 
   const simulationStatus = (input as VisionSandboxInput).simulationStatus;
+
+  const analysisMode = (input as VisionSandboxInput).analysisMode;
+
+  if (analysisMode !== undefined && !allowedAnalysisModes.has(analysisMode)) {
+    reasons.push("Analysis mode must be an approved sandbox mode.");
+  }
 
   if (simulationStatus !== undefined && !failureSimulationStatuses.has(simulationStatus)) {
     reasons.push("Simulation status must be a safe sandbox failure status.");

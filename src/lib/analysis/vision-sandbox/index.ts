@@ -5,6 +5,12 @@ export {
   summarizeVisionSandboxFixture,
 } from "./fixture-registry";
 export { resolveVisionSandboxFixtureReference } from "./fixture-resolver";
+export {
+  runVisionSandboxFixtureRunner,
+  type VisionSandboxFailureSimulationRun,
+  type VisionSandboxFixtureRunnerCase,
+  type VisionSandboxFixtureRunnerReport,
+} from "./fixture-runner";
 export { buildVisionSandboxStubOutput } from "./sandbox-output";
 export {
   VISION_SANDBOX_PHASE,
