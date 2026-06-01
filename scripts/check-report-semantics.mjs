@@ -146,6 +146,9 @@ const phase423OpenAiVisionSandboxValidationProbePlan = readRequiredFile(
 const phase424SyntheticFixtureMetadataSchemaPlan = readRequiredFile(
   "PHASE_4_24_SYNTHETIC_FIXTURE_METADATA_SCHEMA_PLAN.md",
 );
+const phase425ValidationProbeImplementationPlan = readRequiredFile(
+  "PHASE_4_25_VALIDATION_PROBE_IMPLEMENTATION_PLAN.md",
+);
 
 const requiredSemanticSignals = [
   {
@@ -2369,6 +2372,142 @@ const forbiddenPhase424SyntheticFixtureMetadataSchemaPlanPatterns = [
   /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/,
 ];
 
+const requiredPhase425ValidationProbeImplementationPlanSignals = [
+  {
+    label: "Phase 4.25 planning-only marker",
+    patterns: [
+      /Phase 4\.25 is an OpenAI Vision sandbox validation\/probe implementation planning-only milestone/,
+      /No new validation\/probe implementation is added/,
+      /It is a plan for the local static checks that Phase 4\.26 may implement/,
+    ],
+  },
+  {
+    label: "Phase 4.26 implementation set",
+    patterns: [
+      /No OpenAI\/provider SDK imports or dependencies/,
+      /No provider credential environment variable additions/,
+      /No provider call patterns or provider endpoint execution/,
+      /No protected runtime import or wiring changes/,
+      /No `analyzeEvidenceFile` or `LocalAnalysisResult` changes/,
+      /No real evidence fixture additions/,
+      /No provider payload dumps/,
+    ],
+  },
+  {
+    label: "files to inspect",
+    patterns: [
+      /`package\.json`/,
+      /`PHASE_4_19_OPENAI_VISION_SANDBOX_PLAN\.md`/,
+      /`PHASE_4_24_SYNTHETIC_FIXTURE_METADATA_SCHEMA_PLAN\.md`/,
+      /`src\/app\/api\/analysis\/ocr\/route\.ts`/,
+      /`src\/app\/api\/analysis\/mock-provider\/route\.ts`/,
+      /`src\/lib\/analysis\/providers\/mock-provider-adapter\.ts`/,
+      /`src\/lib\/analysis\/ocr-extraction-contract\.ts`/,
+    ],
+  },
+  {
+    label: "planning-only exceptions",
+    patterns: [
+      /Allowed planning-only exceptions/,
+      /explicit safety-rule, stop-condition, disallowed-output-pattern/,
+      /Existing mock provider route and adapter code may remain/,
+      /Existing Tesseract and EXIF-related dependencies may remain/,
+    ],
+  },
+  {
+    label: "provider and upload guards",
+    patterns: [
+      /No-SDK\/Env\/Provider-Call Checks/,
+      /No-Upload\/Storage\/Object-URL Checks/,
+      /Provider request\/response logging/,
+      /Multipart parsing/,
+      /`createObjectURL`/,
+      /storage handles/,
+    ],
+  },
+  {
+    label: "runtime and route boundaries",
+    patterns: [
+      /`POST \/api\/analysis\/ocr` remains exact `fixtureKey` JSON-only/,
+      /`POST \/api\/analysis\/mock-provider` remains synthetic\/mock-only and adapter-only/,
+      /Sandbox planning, metadata, and future fixture assets are not imported into runtime routes or UI/,
+    ],
+  },
+  {
+    label: "privacy and provider payload checks",
+    patterns: [
+      /No-Real-Evidence And No-Private-Identifier Checks/,
+      /No-Provider-Payload Logging Checks/,
+      /Raw OCR dumps/,
+      /EXIF\/location metadata/,
+      /Provider failure is operational only/,
+    ],
+  },
+  {
+    label: "altered AI uncertainty and observation separation",
+    patterns: [
+      /"altered-or-AI-generated-image uncertainty"/,
+      /Review signal only/,
+      /Not proof/,
+      /Observation-Vs-Signal Separation Checks/,
+      /Direct observations/,
+      /Manual-review drivers/,
+    ],
+  },
+  {
+    label: "failure shapes and fixture metadata",
+    patterns: [
+      /Unsupported\/Failure Shape Planning Checks/,
+      /Provider timeout/,
+      /Schema validation failed/,
+      /Fixture Metadata Policy Checks/,
+      /Package distribution status is explicit/,
+      /Metadata validation should fail closed/,
+    ],
+  },
+  {
+    label: "package safety and script names",
+    patterns: [
+      /Package\/Distribution Safety Checks/,
+      /Commit-Blocking Vs Package-Blocking Behavior/,
+      /`scripts\/check-vision-sandbox-boundaries\.mjs`/,
+      /`check:vision-sandbox-boundaries`/,
+      /Package-safety guard/,
+    ],
+  },
+  {
+    label: "approval gates and next recommendation",
+    patterns: [
+      /Phase 4\.26 may begin only if/,
+      /Phase 4\.25 is committed and pushed/,
+      /Recommended Phase 4\.26 task/,
+      /Implement local static validation probes only/,
+    ],
+  },
+];
+
+const forbiddenPhase425ValidationProbeImplementationPlanPatterns = [
+  /npm\s+(?:install|add)\s+(?:openai|@aws-sdk|@google-cloud)/i,
+  /process\.env\.(?:OPENAI|GOOGLE|AWS|OCR|VISION)/i,
+  /import\s+.*\s+from\s+["'](?:openai|@aws-sdk|@google-cloud)/i,
+  /\bfetch\s*\(/,
+  /multipart\/form-data\s+is\s+accepted/i,
+  /raw provider payloads? (?:will|should) be logged/i,
+  /raw OCR (?:will|should) be retained/i,
+  /real evidence processing (?:is|will be) enabled/i,
+  /live OpenAI Vision implementation (?:is|was|will be) added/i,
+  /(?:This milestone|Phase 4\.25) (?:adds|added|implements|implemented|wires|wired) (?:live|real|provider|upload|storage|runtime|fixture files|fixture images|validation|probe|metadata file|package artifacts)/i,
+  /(?:ClaimReviewWorkflow|ProductPhotoReviewPanel) (?:is|was|will be) (?:wired|routed)/i,
+  /(?:analyzeEvidenceFile|LocalAnalysisResult) (?:is|was|will be) (?:changed|migrated|updated)/i,
+  /automatic (?:deny|approval|rejection|refund|disposition) (?:is|will be|should be) (?:enabled|allowed|performed)/i,
+  /confidence (?:proves|confirms|verifies)/i,
+  /uncertainty (?:proves|confirms|verifies)/i,
+  /blob:|data:|file:/i,
+  /\b[A-Z]{2,}-\d{3,}\b/,
+  /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i,
+  /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/,
+];
+
 const forbiddenOcrRouteImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/types",
@@ -2537,6 +2676,12 @@ for (const signal of requiredPhase424SyntheticFixtureMetadataSchemaPlanSignals) 
   }
 }
 
+for (const signal of requiredPhase425ValidationProbeImplementationPlanSignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(phase425ValidationProbeImplementationPlan))) {
+    failures.push(`Missing Phase 4.25 validation/probe implementation planning signal: ${signal.label}`);
+  }
+}
+
 for (const bannedPhrase of guardedBannedPhrases) {
   if (bannedPhrase.test(corpus)) {
     failures.push(`Unsafe report, fixture, or QA wording found: ${bannedPhrase}`);
@@ -2690,6 +2835,12 @@ for (const pattern of forbiddenPhase423OpenAiVisionSandboxValidationProbePlanPat
 for (const pattern of forbiddenPhase424SyntheticFixtureMetadataSchemaPlanPatterns) {
   if (pattern.test(phase424SyntheticFixtureMetadataSchemaPlan)) {
     failures.push(`Phase 4.24 synthetic fixture metadata schema plan failed: forbidden implementation/privacy pattern ${pattern}`);
+  }
+}
+
+for (const pattern of forbiddenPhase425ValidationProbeImplementationPlanPatterns) {
+  if (pattern.test(phase425ValidationProbeImplementationPlan)) {
+    failures.push(`Phase 4.25 validation/probe implementation plan failed: forbidden implementation/privacy pattern ${pattern}`);
   }
 }
 
