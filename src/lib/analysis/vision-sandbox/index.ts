@@ -6,6 +6,18 @@ export {
 } from "./fixture-registry";
 export { resolveVisionSandboxFixtureReference } from "./fixture-resolver";
 export {
+  resolveVisionSandboxProviderConfig,
+  VISION_SANDBOX_PROVIDER_CONFIG_DEFAULTS,
+  VISION_SANDBOX_PROVIDER_CONFIG_DEFAULT_TIMEOUT_MS,
+  VISION_SANDBOX_PROVIDER_CONFIG_MAX_FIXTURE_BATCH_SIZE,
+  VISION_SANDBOX_PROVIDER_CONFIG_PHASE,
+  VISION_SANDBOX_PROVIDER_CONFIG_TIMEOUT_CEILING_MS,
+  type VisionSandboxProviderConfig,
+  type VisionSandboxProviderConfigCandidate,
+  type VisionSandboxProviderConfigResolution,
+  type VisionSandboxProviderRetryPolicy,
+} from "./provider-config";
+export {
   runVisionSandboxFixtureRunner,
   type VisionSandboxFailureSimulationRun,
   type VisionSandboxFixtureRunnerCase,

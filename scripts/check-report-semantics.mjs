@@ -51,6 +51,7 @@ const filesToCheck = [
   "src/lib/analysis/vision-sandbox/types.ts",
   "src/lib/analysis/vision-sandbox/fixture-registry.ts",
   "src/lib/analysis/vision-sandbox/fixture-resolver.ts",
+  "src/lib/analysis/vision-sandbox/provider-config.ts",
   "src/lib/analysis/vision-sandbox/fixture-runner.ts",
   "src/lib/analysis/vision-sandbox/sandbox-output.ts",
   "src/lib/analysis/vision-sandbox/index.ts",
@@ -184,10 +185,14 @@ const phase435OpenAiVisionSandboxImplementationPlan = readRequiredFile(
 const phase436OpenAiVisionSandboxApprovalCheckpoint = readRequiredFile(
   "PHASE_4_36_OPENAI_VISION_SANDBOX_APPROVAL_CHECKPOINT.md",
 );
+const phase437OpenAiVisionProviderConfigSkeleton = readRequiredFile(
+  "PHASE_4_37_OPENAI_VISION_PROVIDER_CONFIG_SKELETON.md",
+);
 const visionSandboxSkeletonCorpus = [
   "src/lib/analysis/vision-sandbox/types.ts",
   "src/lib/analysis/vision-sandbox/fixture-registry.ts",
   "src/lib/analysis/vision-sandbox/fixture-resolver.ts",
+  "src/lib/analysis/vision-sandbox/provider-config.ts",
   "src/lib/analysis/vision-sandbox/fixture-runner.ts",
   "src/lib/analysis/vision-sandbox/sandbox-output.ts",
   "src/lib/analysis/vision-sandbox/index.ts",
@@ -3458,6 +3463,87 @@ const requiredPhase436OpenAiVisionSandboxApprovalCheckpointSignals = [
   },
 ];
 
+const requiredPhase437OpenAiVisionProviderConfigSkeletonSignals = [
+  {
+    label: "Phase 4.37 config-skeleton-only scope",
+    patterns: [
+      /Phase 4\.37 implements the OpenAI Vision provider configuration skeleton/,
+      /provider configuration skeleton implementation only/i,
+      /does not authorize API-credit usage/i,
+      /does not implement a provider client/i,
+      /This is not live AI/i,
+    ],
+  },
+  {
+    label: "Phase 4.37 implementation summary",
+    patterns: [
+      /src\/lib\/analysis\/vision-sandbox\/provider-config\.ts/,
+      /resolveVisionSandboxProviderConfig/,
+      /always returns the disabled defaults/i,
+      /No `?\.env\.example`? is added in Phase 4\.37/i,
+    ],
+  },
+  {
+    label: "Phase 4.37 disabled defaults",
+    patterns: [
+      /providerEnabled:\s*false/,
+      /providerCallsAllowed:\s*false/,
+      /requestExecutionAllowed:\s*false/,
+      /apiCreditUsageAllowed:\s*false/,
+      /secretsRequired:\s*false/,
+      /envConfigRequired:\s*false/,
+    ],
+  },
+  {
+    label: "Phase 4.37 config shape safety",
+    patterns: [
+      /evidenceScope.*synthetic-fixture-only/is,
+      /payloadLoggingPolicy.*disabled/is,
+      /rawOcrRetentionPolicy.*disabled/is,
+      /retryPolicy\.automaticRetriesEnabled.*false/is,
+      /maxFixtureBatchSize.*1/is,
+      /No field contains a real secret/i,
+    ],
+  },
+  {
+    label: "Phase 4.37 boundary coverage",
+    patterns: [
+      /Boundary And Validation Coverage/,
+      /Real env files/i,
+      /Provider SDK imports/i,
+      /Provider network call patterns/i,
+      /Provider enabled by default/i,
+      /Payload logging enabled by default/i,
+      /Evidence scope broader than synthetic fixtures/i,
+      /Route\/runtime\/receipt integration drift/i,
+    ],
+  },
+  {
+    label: "Phase 4.37 relationship and recommendation",
+    patterns: [
+      /Relationship To Current Sandbox/,
+      /does not change routes/i,
+      /does not change uploads/i,
+      /does not change receipt scoring/i,
+      /does not use `LocalAnalysisResult`/,
+      /does not change `analyzeEvidenceFile`/,
+      /Phase 4\.38 provider configuration skeleton hardening and `?\.env\.example`?\/package-safety review/,
+      /only if Robert explicitly approves Choice B/i,
+    ],
+  },
+  {
+    label: "Phase 4.37 safety language",
+    patterns: [
+      /altered-or-AI-generated-image uncertainty/i,
+      /review signal only/i,
+      /not proof/i,
+      /not a final claim decision/i,
+      /not a customer accusation/i,
+      /manual-review/i,
+    ],
+  },
+];
+
 const forbiddenOcrRouteImports = [
   "@/lib/analysis/analyzer",
   "@/lib/analysis/types",
@@ -3719,6 +3805,12 @@ for (const signal of requiredPhase435OpenAiVisionSandboxImplementationPlanSignal
 for (const signal of requiredPhase436OpenAiVisionSandboxApprovalCheckpointSignals) {
   if (!signal.patterns.every((pattern) => pattern.test(phase436OpenAiVisionSandboxApprovalCheckpoint))) {
     failures.push(`Missing Phase 4.36 OpenAI Vision sandbox approval checkpoint signal: ${signal.label}`);
+  }
+}
+
+for (const signal of requiredPhase437OpenAiVisionProviderConfigSkeletonSignals) {
+  if (!signal.patterns.every((pattern) => pattern.test(phase437OpenAiVisionProviderConfigSkeleton))) {
+    failures.push(`Missing Phase 4.37 OpenAI Vision provider config skeleton signal: ${signal.label}`);
   }
 }
 

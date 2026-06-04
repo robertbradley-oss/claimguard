@@ -5,7 +5,9 @@ import {
   buildVisionSandboxStubOutput,
   listApprovedVisionSandboxFixtureKeys,
   resolveVisionSandboxFixtureReference,
+  resolveVisionSandboxProviderConfig,
   runVisionSandboxFixtureRunner,
+  VISION_SANDBOX_PROVIDER_CONFIG_TIMEOUT_CEILING_MS,
 } from "./index";
 
 const repoRoot = process.cwd();
@@ -13,6 +15,7 @@ const sandboxSources = [
   "src/lib/analysis/vision-sandbox/types.ts",
   "src/lib/analysis/vision-sandbox/fixture-registry.ts",
   "src/lib/analysis/vision-sandbox/fixture-resolver.ts",
+  "src/lib/analysis/vision-sandbox/provider-config.ts",
   "src/lib/analysis/vision-sandbox/fixture-runner.ts",
   "src/lib/analysis/vision-sandbox/sandbox-output.ts",
   "src/lib/analysis/vision-sandbox/index.ts",
@@ -75,6 +78,17 @@ function runVisionSandboxSkeletonProbe() {
   const invalidInput = buildVisionSandboxStubOutput({
     fixtureKey: "not-approved",
     imageUrl: "blocked",
+  });
+  const defaultProviderConfig = resolveVisionSandboxProviderConfig();
+  const unsafeProviderConfig = resolveVisionSandboxProviderConfig({
+    providerEnabled: true,
+    timeoutMs: VISION_SANDBOX_PROVIDER_CONFIG_TIMEOUT_CEILING_MS + 1,
+    retryPolicy: { automaticRetriesEnabled: true, maxAttempts: 2 },
+    maxFixtureBatchSize: 2,
+    payloadLoggingPolicy: "enabled",
+    rawOcrRetentionPolicy: "enabled",
+    evidenceScope: "real-evidence",
+    packageSafetyMode: "provider-enabled",
   });
 
   const moduleChecks = {
@@ -188,6 +202,32 @@ function runVisionSandboxSkeletonProbe() {
       !JSON.stringify(outputs).includes("scoreBreakdown") && !JSON.stringify(outputs).includes("claimDisposition"),
   };
 
+  const providerConfigChecks = {
+    defaultProviderDisabled:
+      !defaultProviderConfig.config.providerEnabled &&
+      !defaultProviderConfig.config.providerCallsAllowed &&
+      !defaultProviderConfig.config.requestExecutionAllowed &&
+      !defaultProviderConfig.config.apiCreditUsageAllowed,
+    defaultProviderSafety:
+      defaultProviderConfig.config.evidenceScope === "synthetic-fixture-only" &&
+      defaultProviderConfig.config.payloadLoggingPolicy === "disabled" &&
+      defaultProviderConfig.config.rawOcrRetentionPolicy === "disabled" &&
+      defaultProviderConfig.config.retryPolicy.automaticRetriesEnabled === false &&
+      defaultProviderConfig.config.retryPolicy.maxAttempts === 1 &&
+      defaultProviderConfig.config.timeoutMs <= defaultProviderConfig.config.timeoutCeilingMs &&
+      defaultProviderConfig.config.maxFixtureBatchSize === 1,
+    defaultPackageSafe:
+      defaultProviderConfig.config.packageSafetyMode === "downloadable-safe-disabled" &&
+      !defaultProviderConfig.config.secretsRequired &&
+      !defaultProviderConfig.config.envConfigRequired &&
+      defaultProviderConfig.futureApprovalRequired,
+    unsafeCandidateBlocked:
+      !unsafeProviderConfig.guard.passed &&
+      !unsafeProviderConfig.config.providerEnabled &&
+      !unsafeProviderConfig.config.providerCallsAllowed &&
+      unsafeProviderConfig.config.evidenceScope === "synthetic-fixture-only",
+  };
+
   const forbiddenImportPatterns = [
     /from\s+["']@\/lib\/analysis\/(?:analyzer|types|report-adapter|scoring|receipt-parser|providers\/mock-provider-adapter)["']/,
     /from\s+["']@\/components\/(?:ClaimReviewWorkflow|ProductPhotoReviewPanel|UploadPanel)["']/,
@@ -215,6 +255,7 @@ function runVisionSandboxSkeletonProbe() {
   assertProbeChecksPass("failure shapes", failureShapeChecks);
   assertProbeChecksPass("altered AI uncertainty", alteredAiChecks);
   assertProbeChecksPass("safety", safetyChecks);
+  assertProbeChecksPass("provider config", providerConfigChecks);
   assertProbeChecksPass("isolation", isolationChecks);
 
   return {
@@ -223,6 +264,7 @@ function runVisionSandboxSkeletonProbe() {
     failureShapeChecks,
     alteredAiChecks,
     safetyChecks,
+    providerConfigChecks,
     isolationChecks,
     fixtureRunnerReport,
     fixtureCount: fixtureKeys.length,

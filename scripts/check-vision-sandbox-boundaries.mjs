@@ -34,6 +34,12 @@ const readRequiredFile = (repoPath) => {
   return readFileSync(absolutePath, "utf8");
 };
 
+for (const realEnvFile of [".env", ".env.local"]) {
+  if (existsSync(join(repoRoot, realEnvFile))) {
+    failures.push(`Real env file is blocked during sandbox provider configuration phases: ${realEnvFile}`);
+  }
+}
+
 const walkTextFiles = (directory) => {
   if (!existsSync(directory)) {
     return [];
@@ -142,7 +148,7 @@ if (/"(?:openai|@openai\/agents|@google-cloud\/vision|@google-cloud\/documentai|
 const sourceFiles = allTextFiles.filter((file) => file.path.startsWith("src/"));
 const scriptFiles = allTextFiles.filter((file) => file.path.startsWith("scripts/"));
 const docsFiles = allTextFiles.filter((file) => file.path.endsWith(".md"));
-const sandboxDocs = docsFiles.filter((file) => /PHASE_4_(?:19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36)_/.test(file.path));
+const sandboxDocs = docsFiles.filter((file) => /PHASE_4_(?:19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37)_/.test(file.path));
 const sourceAndScriptFiles = [...sourceFiles, ...scriptFiles];
 const sandboxSkeletonSourcePrefix = "src/lib/analysis/vision-sandbox/";
 const sandboxSkeletonFiles = allTextFiles.filter(
@@ -154,6 +160,7 @@ const sandboxSkeletonFiles = allTextFiles.filter(
 const sandboxSkeletonImplementationFiles = sandboxSkeletonFiles.filter(
   (file) => file.path !== "src/lib/analysis/vision-sandbox/vision-sandbox.probe.ts",
 );
+const providerConfigSkeleton = findFile("src/lib/analysis/vision-sandbox/provider-config.ts");
 
 addPatternFailures("Provider SDK import guard", sourceAndScriptFiles, [
   /from\s+["'](?:openai|@openai\/agents|@google-cloud\/vision|@google-cloud\/documentai|@aws-sdk\/client-textract|aws-sdk)["']/i,
@@ -164,6 +171,11 @@ addPatternFailures("Provider SDK import guard", sourceAndScriptFiles, [
 
 addPatternFailures("Provider env guard", sourceAndScriptFiles, [
   /process\.env\.(?:OPENAI|GOOGLE|AWS|ANTHROPIC|OCR|VISION|TEXTRACT|DOCUMENT_AI)[A-Z0-9_]*/i,
+]);
+
+addPatternFailures("Provider secret guard", allTextFiles, [
+  /sk-[A-Za-z0-9_-]{20,}/,
+  /\b(?:OPENAI|GOOGLE|AWS|ANTHROPIC|OCR|VISION|TEXTRACT|DOCUMENT_AI)[A-Z0-9_]*(?:API_KEY|SECRET|TOKEN|CREDENTIAL|PRIVATE_KEY)\s*=\s*["']?[A-Za-z0-9_./+=-]{12,}/i,
 ]);
 
 const checkScriptAllowlist = new Set([
@@ -224,7 +236,7 @@ for (const changedFile of changedFiles) {
   if (
     !allowedChangedFiles.has(changedFile) &&
     !changedFile.startsWith(sandboxSkeletonSourcePrefix) &&
-    !/^PHASE_4_(?:26|27|28|29|30|31|32|33|34|35|36)_/.test(changedFile) &&
+    !/^PHASE_4_(?:26|27|28|29|30|31|32|33|34|35|36|37)_/.test(changedFile) &&
     !changedFile.startsWith("sandbox-fixtures/") &&
     !changedFile.startsWith("synthetic-fixtures/") &&
     !changedFile.startsWith("fixtures/vision-sandbox/")
@@ -232,6 +244,36 @@ for (const changedFile of changedFiles) {
     failures.push(`Unexpected changed file for current sandbox boundary package: ${changedFile}`);
   }
 }
+
+ensurePatterns("Phase 4.37 provider config disabled defaults", providerConfigSkeleton, [
+  /VISION_SANDBOX_PROVIDER_CONFIG_PHASE\s*=\s*"4\.37"/,
+  /providerEnabled:\s*false/,
+  /providerCallsAllowed:\s*false/,
+  /requestExecutionAllowed:\s*false/,
+  /apiCreditUsageAllowed:\s*false/,
+  /payloadLoggingPolicy:\s*"disabled"/,
+  /rawOcrRetentionPolicy:\s*"disabled"/,
+  /evidenceScope:\s*"synthetic-fixture-only"/,
+  /packageSafetyMode:\s*"downloadable-safe-disabled"/,
+  /automaticRetriesEnabled:\s*false/,
+  /maxAttempts:\s*1/,
+  /futureApprovalRequired:\s*true/,
+]);
+
+addPatternFailures(
+  "Phase 4.37 provider config unsafe default guard",
+  providerConfigSkeleton ? [{ path: "src/lib/analysis/vision-sandbox/provider-config.ts", contents: providerConfigSkeleton }] : [],
+  [
+    /VISION_SANDBOX_PROVIDER_CONFIG_DEFAULTS[\s\S]*providerEnabled:\s*true/,
+    /VISION_SANDBOX_PROVIDER_CONFIG_DEFAULTS[\s\S]*providerCallsAllowed:\s*true/,
+    /VISION_SANDBOX_PROVIDER_CONFIG_DEFAULTS[\s\S]*requestExecutionAllowed:\s*true/,
+    /VISION_SANDBOX_PROVIDER_CONFIG_DEFAULTS[\s\S]*apiCreditUsageAllowed:\s*true/,
+    /VISION_SANDBOX_PROVIDER_CONFIG_DEFAULTS[\s\S]*payloadLoggingPolicy:\s*"enabled"/,
+    /VISION_SANDBOX_PROVIDER_CONFIG_DEFAULTS[\s\S]*rawOcrRetentionPolicy:\s*"enabled"/,
+    /VISION_SANDBOX_PROVIDER_CONFIG_DEFAULTS[\s\S]*evidenceScope:\s*"(?:real-evidence|mixed-evidence)"/,
+    /VISION_SANDBOX_PROVIDER_CONFIG_DEFAULTS[\s\S]*packageSafetyMode:\s*"provider-enabled"/,
+  ],
+);
 
 const protectedRuntimeCorpus = protectedRuntimeFiles
   .map((repoPath) => ({ path: repoPath, contents: findFile(repoPath) }))
