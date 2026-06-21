@@ -509,7 +509,7 @@ export function ClaimReviewWorkflow() {
       <header className="-mx-4 flex min-h-[76px] items-center border-b border-[rgba(125,103,64,0.16)] px-4 sm:-mx-6 sm:px-6">
         <div className="flex flex-col">
           <Image className="h-11 w-auto" src="/brand/repguard-logo-full.png" alt="RepGuard" width={1252} height={340} priority />
-          <p className="mt-1.5 pl-12 text-[13px] font-medium leading-none tracking-[0.01em] text-[#8a7656]">Authenticity, in focus.</p>
+          <p className="mt-0.5 pl-12 text-[13px] font-medium leading-none tracking-[0.01em] text-[#8a7656]">Authenticity, in focus.</p>
         </div>
       </header>
 
