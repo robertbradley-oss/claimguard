@@ -507,7 +507,7 @@ export function ClaimReviewWorkflow() {
   return (
     <div className="mx-auto grid min-h-screen max-w-[1344px] content-start gap-3 px-4 pb-6 sm:px-6">
       <header className="-mx-4 flex min-h-[60px] items-center border-b border-[rgba(125,103,64,0.16)] px-4 sm:-mx-6 sm:px-6">
-        <Image className="h-9 w-auto" src="/brand/repguard-logo-full.png" alt="RepGuard" width={1252} height={340} priority />
+        <Image className="h-11 w-auto" src="/brand/repguard-logo-full.png" alt="RepGuard" width={1252} height={340} priority />
       </header>
 
       <section className="pt-5">
