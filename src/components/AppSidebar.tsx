@@ -49,7 +49,7 @@ export function AppSidebar() {
       <div className="relative h-12 w-44 overflow-hidden lg:w-full">
         <Image
           className="object-contain object-left"
-          src="/brand/repguard-logo-full.svg"
+          src="/brand/repguard-logo-full.png"
           alt="RepGuard logo"
           fill
           priority

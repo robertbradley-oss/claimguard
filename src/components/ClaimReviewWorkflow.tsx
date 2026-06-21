@@ -506,14 +506,8 @@ export function ClaimReviewWorkflow() {
 
   return (
     <div className="mx-auto grid min-h-screen max-w-[1344px] content-start gap-3 px-4 pb-6 sm:px-6">
-      <header className="-mx-4 flex min-h-[60px] items-center gap-3 border-b border-[rgba(125,103,64,0.16)] px-4 sm:-mx-6 sm:px-6">
-        <div className="relative size-11 shrink-0">
-          <Image className="object-contain" src="/brand/repguard-logo-mark.svg" alt="RepGuard" fill priority unoptimized sizes="44px" />
-        </div>
-        <p className="text-[28px] font-bold leading-none tracking-[-0.015em]">
-          <span className="text-[var(--cg-text)]">Rep</span>
-          <span className="bg-clip-text text-transparent" style={{ backgroundImage: "linear-gradient(180deg, #c08f31, #92502f)" }}>Guard</span>
-        </p>
+      <header className="-mx-4 flex min-h-[60px] items-center border-b border-[rgba(125,103,64,0.16)] px-4 sm:-mx-6 sm:px-6">
+        <Image className="h-9 w-auto" src="/brand/repguard-logo-full.png" alt="RepGuard" width={1252} height={340} priority />
       </header>
 
       <section className="pt-5">
